@@ -57,6 +57,7 @@ export interface IRecipe extends Document {
   author: mongoose.Types.ObjectId;
   averageRating?: number;
   totalReviews?: number;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -165,6 +166,11 @@ const RecipeSchema = new Schema<IRecipe>(
       type: Number,
       default: 0,
     },
+    isActive: {
+      type: Boolean,
+      default: true,
+      index: true,
+    },
   },
   {
     timestamps: true,
@@ -173,11 +179,12 @@ const RecipeSchema = new Schema<IRecipe>(
 
 // Indexes for better query performance
 RecipeSchema.index({ 'basicInfo.recipeName': 'text' });
-RecipeSchema.index({ author: 1, createdAt: -1 });
-RecipeSchema.index({ 'basicInfo.categories.value': 1 });
-RecipeSchema.index({ 'basicInfo.tags.value': 1 });
-RecipeSchema.index({ averageRating: -1 });
-RecipeSchema.index({ createdAt: -1 });
+RecipeSchema.index({ author: 1, isActive: 1, createdAt: -1 });
+RecipeSchema.index({ 'basicInfo.categories.value': 1, isActive: 1 });
+RecipeSchema.index({ 'basicInfo.tags.value': 1, isActive: 1 });
+RecipeSchema.index({ averageRating: -1, isActive: 1 });
+RecipeSchema.index({ createdAt: -1, isActive: 1 });
+RecipeSchema.index({ isActive: 1 });
 
 const Recipe = mongoose.model<IRecipe>('Recipes', RecipeSchema);
 

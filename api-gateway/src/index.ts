@@ -9,6 +9,7 @@ import corsMiddleware from './middleware/cors';
 import { requestId } from './middleware/requestId';
 import { errorHandler } from './middleware/errorHandler';
 import { defaultRateLimit } from './middleware/rateLimit';
+import { optionalAuth } from './middleware/auth';
 
 // Proxy routes
 import authRoutes from './routes/auth';
@@ -33,6 +34,9 @@ app.use(helmet());
 app.use(corsMiddleware);
 app.use(requestId);
 app.use(defaultRateLimit);
+
+// --- Extract user from JWT token (optional) ---
+app.use(optionalAuth);
 
 // --- Proxy microservice routes BEFORE body parsers ---
 app.use('/api/auth', authRoutes);

@@ -4,6 +4,7 @@ import {
   listRecipes,
   queryRecipes,
   getRecipesByUser,
+  getMyRecipes,
   getRecipeById,
   updateRecipe,
   deleteRecipe,
@@ -24,6 +25,9 @@ router.post('/query', validate(queryRecipesSchema), queryRecipes);
 
 // POST /api/recipe/user/:userId - Get user's recipes
 router.post('/user/:userId', getRecipesByUser);
+
+// GET /api/recipe/my-recipes - Get current user's recipes (must be before /:id)
+router.get('/my-recipes', getMyRecipes);
 
 // GET /api/recipe/:id - Get recipe by ID
 router.get('/:id', getRecipeById);

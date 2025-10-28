@@ -100,6 +100,29 @@ export const getRecipesByUser = async (req: Request, res: Response, next: NextFu
 };
 
 /**
+ * Get current user's recipes (authenticated)
+ * Extracts user ID from JWT token
+ */
+export const getMyRecipes = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = (req as any).user?.userId;
+
+    if (!userId) {
+      fail(res, 'Unauthorized', 401);
+      return;
+    }
+
+    // Get all recipes without pagination for dashboard
+    const { recipes } = await RecipeService.getRecipesByUser(userId, 1, 1000);
+
+    success(res, recipes, 'My recipes retrieved successfully');
+  } catch (error) {
+    logger.error('Get my recipes error', { error });
+    next(error);
+  }
+};
+
+/**
  * Get recipe by ID
  */
 export const getRecipeById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {

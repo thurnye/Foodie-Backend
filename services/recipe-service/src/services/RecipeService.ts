@@ -42,7 +42,7 @@ export class RecipeService {
    * Get recipe by ID
    */
   async getRecipeById(recipeId: string): Promise<IRecipe> {
-    const recipe = await Recipe.findById(recipeId).lean();
+    const recipe = await Recipe.findOne({ _id: recipeId, isActive: true }).lean();
 
     if (!recipe) {
       throw Errors.notFound('Recipe not found');
@@ -66,7 +66,7 @@ export class RecipeService {
     
     console.log('♦️ Pagination - Page:', page, 'Limit:', limit, 'Skip:', skip);
 
-    const filter = buildRecipeFilter(queryParams);
+    const filter = { ...buildRecipeFilter(queryParams), isActive: true };
     const sort = buildSortOptions(queryParams.sortBy, queryParams.sortOrder);
     console.log('♦️ Filter:', filter);
 
@@ -98,12 +98,12 @@ export class RecipeService {
     const skip = (page - 1) * limit;
 
     const [recipes, total] = await Promise.all([
-      Recipe.find({ author: userId })
+      Recipe.find({ author: userId, isActive: true })
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
-      Recipe.countDocuments({ author: userId }),
+      Recipe.countDocuments({ author: userId, isActive: true }),
     ]);
 
     // Populate author data
@@ -116,7 +116,7 @@ export class RecipeService {
    * Update recipe
    */
   async updateRecipe(recipeId: string, userId: string, updates: Partial<IRecipe>): Promise<IRecipe> {
-    const recipe = await Recipe.findById(recipeId);
+    const recipe = await Recipe.findOne({ _id: recipeId, isActive: true });
 
     if (!recipe) {
       throw Errors.notFound('Recipe not found');
@@ -135,10 +135,10 @@ export class RecipeService {
   }
 
   /**
-   * Delete recipe
+   * Delete recipe (soft delete)
    */
   async deleteRecipe(recipeId: string, userId: string): Promise<void> {
-    const recipe = await Recipe.findById(recipeId);
+    const recipe = await Recipe.findOne({ _id: recipeId, isActive: true });
 
     if (!recipe) {
       throw Errors.notFound('Recipe not found');
@@ -149,26 +149,29 @@ export class RecipeService {
       throw Errors.forbidden('You can only delete your own recipes');
     }
 
-    await Recipe.findByIdAndDelete(recipeId);
+    // Soft delete: set isActive to false
+    recipe.isActive = false;
+    await recipe.save();
   }
 
   /**
    * Add review reference to recipe
    */
   async addReviewToRecipe(recipeId: string, reviewId: string): Promise<void> {
-    await Recipe.findByIdAndUpdate(recipeId, {
-      $push: { reviews: { review: reviewId } },
-    });
+    await Recipe.findOneAndUpdate(
+      { _id: recipeId, isActive: true },
+      { $push: { reviews: { review: reviewId } } }
+    );
   }
 
   /**
    * Update recipe average rating
    */
   async updateRecipeRating(recipeId: string, averageRating: number, totalReviews: number): Promise<void> {
-    await Recipe.findByIdAndUpdate(recipeId, {
-      averageRating,
-      totalReviews,
-    });
+    await Recipe.findOneAndUpdate(
+      { _id: recipeId, isActive: true },
+      { averageRating, totalReviews }
+    );
   }
 
   /**
