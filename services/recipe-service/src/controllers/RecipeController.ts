@@ -4,36 +4,63 @@ import { success, fail, logger } from '@foodie/libs';
 import { getPaginationMeta } from '../utils/filters';
 
 /**
- * Add new recipe
+ * Add or update recipe (unified endpoint)
+ * User ID is extracted from JWT token
+ * If _id is provided in body, updates existing recipe
+ * If _id is not provided, creates new recipe
  */
 export const addRecipe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { userId } = req.params;
     const recipeData = req.body;
 
-    // Optionally verify authenticated user matches userId
-    const authenticatedUserId = (req as any).user?.userId;
-    if (authenticatedUserId && authenticatedUserId !== userId) {
-      fail(res, 'You can only create recipes for your own account', 403);
+    // Get userId from authenticated user (JWT token)
+    const userId = (req as any).user?.userId;
+    if (!userId) {
+      fail(res, 'Authentication required. Please log in to create or update a recipe.', 401);
       return;
     }
 
-    const recipe = await RecipeService.createRecipe(userId, recipeData);
+    // Check if this is an update (has _id) or create (no _id)
+    const isUpdate = !!recipeData._id;
 
-    logger.info('Recipe created', { recipeId: recipe._id, userId });
+    if (isUpdate) {
+      // Update existing recipe
+      const recipeId = recipeData._id;
+      const { _id, ...updates } = recipeData; // Remove _id from updates
 
-    success(
-      res,
-      {
-        recipeId: recipe._id,
-        recipeName: recipe.basicInfo.recipeName,
-      },
-      'Recipe created successfully',
-      undefined,
-      201
-    );
+      const recipe = await RecipeService.updateRecipe(recipeId, userId, updates);
+
+      logger.info('Recipe updated', { recipeId: recipe._id, userId });
+
+      success(
+        res,
+        {
+          recipeId: recipe._id,
+          recipeName: recipe.basicInfo.recipeName,
+        },
+        'Recipe updated successfully',
+        undefined,
+        200
+      );
+    } else {
+      // Create new recipe
+      const recipe = await RecipeService.createRecipe(userId, recipeData);
+
+      logger.info('Recipe created', { recipeId: recipe._id, userId });
+
+      success(
+        res,
+        {
+          recipeId: recipe._id,
+          recipeName: recipe.basicInfo.recipeName,
+        },
+        'Recipe created successfully',
+        undefined,
+        201
+      );
+    }
   } catch (error) {
-    logger.error('Add recipe error', { error });
+    logger.error('Add/Update recipe error', { error });
     next(error);
   }
 };

@@ -98,7 +98,7 @@ const RecipeSchema = new Schema<IRecipe>(
           type: {
             type: String,
             required: true,
-            enum: ['text', 'image', 'video'],
+            enum: ['text', 'image', 'video', 'title'],
           },
           value: { type: Schema.Types.Mixed, required: true },
           isUnsplash: { type: Boolean },

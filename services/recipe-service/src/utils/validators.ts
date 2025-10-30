@@ -33,9 +33,12 @@ const methodSchema = Joi.object({
 });
 
 /**
- * Add recipe validation schema
+ * Add/Update recipe validation schema (unified)
+ * If _id is provided, it's an update; otherwise, it's a create
  */
 export const addRecipeSchema = Joi.object({
+  _id: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).optional(), // Optional MongoDB ObjectId for updates
+
   basicInfo: Joi.object({
     recipeName: Joi.string().required().trim(),
     duration: valueLabelSchema.required(),

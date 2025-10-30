@@ -14,8 +14,11 @@ import { addRecipeSchema, updateRecipeSchema, queryRecipesSchema } from '../util
 
 const router = Router();
 
-// POST /api/recipe/add/:userId - Add new recipe
-router.post('/add/:userId', validate(addRecipeSchema), addRecipe);
+// POST /api/recipe/add - Add new recipe (userId from JWT token) - MUST BE BEFORE /:id
+router.post('/add', validate(addRecipeSchema), addRecipe);
+
+// GET /api/recipe/my-recipes - Get current user's recipes - MUST BE BEFORE /:id
+router.get('/my-recipes', getMyRecipes);
 
 // POST /api/recipe - List recipes with filters/pagination
 router.post('/', validate(queryRecipesSchema), listRecipes);
@@ -25,9 +28,6 @@ router.post('/query', validate(queryRecipesSchema), queryRecipes);
 
 // POST /api/recipe/user/:userId - Get user's recipes
 router.post('/user/:userId', getRecipesByUser);
-
-// GET /api/recipe/my-recipes - Get current user's recipes (must be before /:id)
-router.get('/my-recipes', getMyRecipes);
 
 // GET /api/recipe/:id - Get recipe by ID
 router.get('/:id', getRecipeById);
