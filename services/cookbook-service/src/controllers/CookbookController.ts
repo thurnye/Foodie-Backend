@@ -17,8 +17,6 @@ export const createCookbook = async (
       return;
     }
 
-    console.log("CREATING COOKBOOK:::", req.body)
-
     const cookbookData = req.body;
     const cookbook = await CookbookService.createCookbook(userId, cookbookData);
 
@@ -54,9 +52,16 @@ export const getCookbookById = async (
     const { id } = req.params;
     const userId = (req as any).user?.userId;
 
-    const cookbook = await CookbookService.getCookbookById(id, userId);
+    logger.info('Getting cookbook by ID', {
+      cookbookId: id,
+      userId: userId || 'not authenticated',
+      headers: {
+        'x-user-id': req.headers['x-user-id'],
+        'x-user-email': req.headers['x-user-email']
+      }
+    });
 
-    console.log('COOKBOOK 🤩', cookbook)
+    const cookbook = await CookbookService.getCookbookById(id, userId);
 
     success(res, cookbook, 'Cookbook retrieved successfully');
   } catch (error) {

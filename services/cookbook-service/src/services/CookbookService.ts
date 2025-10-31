@@ -1,7 +1,8 @@
-import Cookbook, { ICookbook, CookbookStatus, CookbookTheme, CookbookLayout } from '../db/Cookbook';
+import { ICookbook, ICookbookPopulated, CookbookStatus, CookbookTheme, CookbookLayout } from '../Types/cookbook.types';
 import { Types } from 'mongoose';
 import { Errors, logger } from '@foodie/libs';
 import axios from 'axios';
+import Cookbook from '../db/Cookbook';
 
 const RECIPE_SERVICE_URL = process.env.RECIPE_SERVICE_URL || 'http://localhost:3003';
 
@@ -57,23 +58,64 @@ class CookbookService {
       return [];
     }
 
+    logger.info('fetchRecipeDetails called::::::--------------------------', {
+      recipeCount: recipeIds.length,
+      recipeServiceUrl: RECIPE_SERVICE_URL,
+      userId
+    });
+
     try {
       const recipePromises = recipeIds.map(async (recipeId) => {
         try {
-          const response = await axios.get(`${RECIPE_SERVICE_URL}/api/recipe/${recipeId}`, {
+          const url = `${RECIPE_SERVICE_URL}/api/recipe/${recipeId}`;
+          logger.info('Fetching recipe :::-----------------------------------', { recipeId, url, userId });
+
+          const response = await axios.get(url, {
             headers: {
               'x-user-id': userId,
             },
           });
-          return response.data;
+
+          logger.info('Recipe fetch response', {
+            recipeId,
+            status: response.status,
+            hasData: !!response.data,
+            dataKeys: response.data ? Object.keys(response.data) : []
+          });
+
+          // Extract the actual recipe data from the API response wrapper
+          // Response format: { success: true, data: <recipe>, message: "..." }
+          // console.log('RESPONSE:::========================', response.data)
+          const recipeData = response.data?.data || null;
+
+          if (!recipeData) {
+            logger.warn('Recipe data is null after extraction', {
+              recipeId,
+              responseData: response.data
+            });
+          }
+
+          return recipeData;
         } catch (error: any) {
-          logger.warn(`Failed to fetch recipe ${recipeId}`, { error: error.message });
+          logger.warn(`Failed to fetch recipe ${recipeId}`, {
+            error: error.message,
+            status: error.response?.status,
+            statusText: error.response?.statusText
+          });
           return null;
         }
       });
 
       const recipes = await Promise.all(recipePromises);
-      return recipes.filter((recipe) => recipe !== null);
+      const validRecipes = recipes.filter((recipe) => recipe !== null);
+
+      logger.info('Recipe fetch complete', {
+        totalRequested: recipeIds.length,
+        successfullyFetched: validRecipes.length,
+        failed: recipeIds.length - validRecipes.length
+      });
+
+      return validRecipes;
     } catch (error) {
       logger.error('Error fetching recipe details', { error });
       return [];
@@ -168,7 +210,7 @@ class CookbookService {
   /**
    * Get cookbook by ID
    */
-  async getCookbookById(cookbookId: string, userId?: string): Promise<ICookbook> {
+  async getCookbookById(cookbookId: string, userId?: string): Promise<ICookbook | ICookbookPopulated> {
     try {
       const cookbook = await Cookbook.findOne({
         _id: cookbookId,
@@ -190,11 +232,39 @@ class CookbookService {
       }
 
       // Populate recipes from recipe service
-      if (cookbook.recipes && cookbook.recipes.length > 0 && userId) {
+      if (cookbook.recipes && cookbook.recipes.length > 0) {
         const recipeIds = cookbook.recipes.map((id) => id.toString());
-        const recipes = await this.fetchRecipeDetails(recipeIds, userId);
-        (cookbook as any).recipes = recipes;
+        // Use authenticated userId if available, otherwise use cookbook author's ID
+        // The author must have access to these recipes since they added them
+        const fetchUserId = userId || cookbook.author.toString();
+
+        logger.info('Fetching recipe details for cookbook', {
+          cookbookId: cookbook._id,
+          recipeCount: recipeIds.length,
+          fetchUserId,
+          isAuthenticated: !!userId
+        });
+
+        console.log('USERID:::', fetchUserId);
+        const recipes = await this.fetchRecipeDetails(recipeIds, fetchUserId);
+        console.log('RECIPES FETCHED:::======================', recipes.length, 'recipes')
+
+        logger.info('Fetched recipes', {
+          cookbookId: cookbook._id,
+          fetchedCount: recipes.length,
+          expectedCount: recipeIds.length
+        });
+
+        // Convert Mongoose document to plain object to allow recipe population
+        const cookbookObject = cookbook.toObject();
+        cookbookObject.recipes = recipes;
+
+        console.log("cookbook with recipes==============", cookbookObject.recipes.length)
+
+        return cookbookObject as ICookbookPopulated;
       }
+
+      console.log("cookbook (no recipes)==============", cookbook)
 
       return cookbook;
     } catch (error) {
@@ -207,7 +277,7 @@ class CookbookService {
    * Get user's cookbooks
    */
   async getMyCookbooks(userId: string, query: ListCookbooksQuery = {}): Promise<{
-    cookbooks: ICookbook[];
+    cookbooks: (ICookbook | ICookbookPopulated)[];
     pagination: {
       page: number;
       limit: number;
@@ -279,7 +349,7 @@ class CookbookService {
    * Get public cookbooks
    */
   async getPublicCookbooks(query: ListCookbooksQuery = {}): Promise<{
-    cookbooks: ICookbook[];
+    cookbooks: (ICookbook | ICookbookPopulated)[];
     pagination: {
       page: number;
       limit: number;
