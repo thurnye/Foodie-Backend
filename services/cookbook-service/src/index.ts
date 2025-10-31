@@ -5,11 +5,9 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { execSync } from 'child_process';
 import { logger, mapErrorToResponse } from '@foodie/libs';
-import { healthCheck } from './health';
 
 // Import routes
-import recipeRoutes from './routes/recipe.routes';
-import reviewRoutes from './routes/review.routes';
+import cookbookRoutes from './routes/cookbook.routes';
 
 // Import middleware
 import { userContextMiddleware } from './middleware/userContext';
@@ -18,7 +16,7 @@ import { userContextMiddleware } from './middleware/userContext';
 dotenv.config();
 
 const app = express();
-const PORT = Number(process.env.PORT) || 3003;
+const PORT = Number(process.env.PORT) || 3004;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/FoodieBlog';
 
 /* --------------------------------------------
@@ -49,7 +47,7 @@ app.use(userContextMiddleware);
 
 // Request logging
 app.use((req: Request, _res: Response, next: NextFunction) => {
-  logger.info('Recipe Service: Incoming request', {
+  logger.info('Cookbook Service: Incoming request', {
     method: req.method,
     path: req.path,
     ip: req.ip,
@@ -58,76 +56,60 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 });
 
 // Health check
-app.get('/health', healthCheck);
+app.get('/health', (_req: Request, res: Response) => {
+  res.json({ success: true, message: 'Cookbook service is healthy' });
+});
 
 /* --------------------------------------------
    🛣️ Routes
 --------------------------------------------- */
-app.use('/api/recipe', recipeRoutes);
-app.use('/api/review', reviewRoutes);
+app.use('/api/cookbook', cookbookRoutes);
 
 // Legacy support
-app.use('/recipe', recipeRoutes);
-app.use('/review', reviewRoutes);
+app.use('/cookbook', cookbookRoutes);
 
 // 404
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ success: false, message: 'Route not found' });
 });
 
-// Global error handler
-app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
-  logger.error('Recipe Service: Error occurred', {
-    error: err.message,
-    stack: err.stack,
-    path: req.path,
-  });
-
-  const errorResponse = mapErrorToResponse(err);
-  res.status(errorResponse.statusCode).json(errorResponse);
+// Error handler
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  const { statusCode, ...errorResponse } = mapErrorToResponse(err);
+  logger.error('Cookbook Service: Request error', { error: err.message, stack: err.stack });
+  res.status(statusCode).json(errorResponse);
 });
 
 /* --------------------------------------------
-   🚀 MongoDB + Server Init
+   🗄️ MongoDB Connection
 --------------------------------------------- */
-let server: import('http').Server;
-
 mongoose
   .connect(MONGODB_URI)
   .then(() => {
-    logger.info('Recipe Service: Connected to MongoDB', { database: MONGODB_URI });
-
-    server = app.listen(PORT, () => {
-      logger.info(`🍳 Recipe service running on port ${PORT}`);
-    });
+    logger.info('Cookbook Service: Connected to MongoDB', { database: MONGODB_URI });
   })
-  .catch((error: any) => {
-    logger.error('MongoDB connection error', { error: error?.message || error });
+  .catch((error) => {
+    logger.error('Cookbook Service: MongoDB connection error', { error: error.message });
     process.exit(1);
   });
 
 /* --------------------------------------------
-   🧘 Graceful Shutdown
+   🚀 Start Server
 --------------------------------------------- */
-const shutdown = (signal: string) => {
-  logger.info(`${signal} received, closing server gracefully`);
+const server = app.listen(PORT, () => {
+  logger.info(`Cookbook service running on port ${PORT}`);
+});
 
-  if (server) {
-    server.close(() => {
-      logger.info('HTTP server closed');
-      mongoose.connection.close(false).then(() => {
-        logger.info('MongoDB connection closed');
-        process.exit(0);
-      });
-    });
-  } else {
-    mongoose.connection.close(false).then(() => {
-      process.exit(0);
-    });
-  }
-};
-
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT', () => shutdown('SIGINT'));
+/* --------------------------------------------
+   🛑 Graceful Shutdown
+--------------------------------------------- */
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM received, closing server gracefully');
+  server.close(() => {
+    mongoose.connection.close();
+    logger.info('Server and database connections closed');
+    process.exit(0);
+  });
+});
 
 export default app;
