@@ -8,6 +8,7 @@ import { logger, mapErrorToResponse } from '@foodie/libs';
 
 // Import routes
 import cookbookRoutes from './routes/cookbook.routes';
+import bookRoutes from './routes/book.routes';
 
 // Import middleware
 import { userContextMiddleware } from './middleware/userContext';
@@ -64,6 +65,7 @@ app.get('/health', (_req: Request, res: Response) => {
    🛣️ Routes
 --------------------------------------------- */
 app.use('/api/cookbook', cookbookRoutes);
+app.use('/api/books', bookRoutes);
 
 // Legacy support
 app.use('/cookbook', cookbookRoutes);
