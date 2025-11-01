@@ -1,6 +1,6 @@
 
 import { Schema, model } from 'mongoose';
-import { CookbookLayout, CookbookStatus, CookbookTheme, ICookbook } from '../Types/cookbook.types';
+import { CookbookLayout, CookbookStatus, CookbookTheme, ICookbook, PaperSize } from '../Types/cookbook.types';
 
 /**
  * Cookbook Schema
@@ -45,6 +45,12 @@ const CookbookSchema = new Schema<ICookbook>(
       type: String,
       enum: Object.values(CookbookLayout),
       default: CookbookLayout.SINGLE_COLUMN,
+    },
+
+    paperSize: {
+      type: String,
+      enum: Object.values(PaperSize),
+      default: PaperSize.A4,
     },
 
     coverImage: {

@@ -64,6 +64,16 @@ export enum CookbookLayout {
 }
 
 /**
+ * Paper Size Options
+ */
+export enum PaperSize {
+  A4 = 'A4',
+  LETTER = 'Letter',
+  LEGAL = 'Legal',
+  A5 = 'A5',
+}
+
+/**
  * Cookbook Interface
  */
 export interface ICookbook extends Document {
@@ -76,6 +86,7 @@ export interface ICookbook extends Document {
   // Customization
   theme: CookbookTheme;
   layout: CookbookLayout;
+  paperSize?: PaperSize;
   coverImage?: string;
   customColors?: {
     primary?: string;
