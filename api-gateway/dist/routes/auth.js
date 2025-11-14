@@ -15,12 +15,23 @@ router.use('/', rateLimit_1.authRateLimit, (0, http_proxy_middleware_1.createPro
         if (req.requestId) {
             proxyReq.setHeader('x-request-id', req.requestId);
         }
+        if (req.body && (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH')) {
+            const bodyData = JSON.stringify(req.body);
+            proxyReq.setHeader('Content-Type', 'application/json');
+            proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+            proxyReq.write(bodyData);
+        }
     },
-    onError: (err, _req, res) => {
+    onError: (_err, _req, res) => {
         res.status(503).json({
             success: false,
-            message: 'Auth service unavailable',
-            error: err.message,
+            data: null,
+            errors: [
+                {
+                    code: 'SERVICE_UNAVAILABLE',
+                    message: 'Auth service unavailable',
+                },
+            ],
         });
     },
 }));

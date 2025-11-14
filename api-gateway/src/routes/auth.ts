@@ -31,7 +31,7 @@ router.use(
         proxyReq.write(bodyData);
       }
     },
-    onError: (err, _req, res: any) => {
+    onError: (_err, _req, res: any) => {
       res.status(503).json({
         success: false,
         data: null,

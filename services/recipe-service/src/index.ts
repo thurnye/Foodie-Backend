@@ -19,28 +19,31 @@ dotenv.config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3003;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/FoodieBlog';
+const MONGODB_URI =
+  process.env.MONGODB_URI || 'mongodb://localhost:27017/FoodieBlog';
 
 /* --------------------------------------------
-   🔧 Kill existing process on same port (dev only)
+    Kill existing process on same port (dev only)
 --------------------------------------------- */
 if (process.env.NODE_ENV !== 'production') {
   try {
     execSync(`lsof -ti:${PORT} | xargs kill -9`, { stdio: 'ignore' });
-    console.log(`🧹 Cleared port ${PORT} before starting server`);
+    console.log(` Cleared port ${PORT} before starting server`);
   } catch {
     // ignore if port is free
   }
 }
 
 /* --------------------------------------------
-   🧩 Middleware
+    Middleware
 --------------------------------------------- */
 app.use(helmet());
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    credentials: true,
+  })
+);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -61,7 +64,7 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 app.get('/health', healthCheck);
 
 /* --------------------------------------------
-   🛣️ Routes
+   Routes
 --------------------------------------------- */
 app.use('/api/recipe', recipeRoutes);
 app.use('/api/review', reviewRoutes);
@@ -88,21 +91,25 @@ app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
 });
 
 /* --------------------------------------------
-   🚀 MongoDB + Server Init
+   MongoDB + Server Init
 --------------------------------------------- */
 let server: import('http').Server;
 
 mongoose
   .connect(MONGODB_URI)
   .then(() => {
-    logger.info('Recipe Service: Connected to MongoDB', { database: MONGODB_URI });
+    logger.info('Recipe Service: Connected to MongoDB', {
+      database: MONGODB_URI,
+    });
 
     server = app.listen(PORT, () => {
       logger.info(`🍳 Recipe service running on port ${PORT}`);
     });
   })
   .catch((error: any) => {
-    logger.error('MongoDB connection error', { error: error?.message || error });
+    logger.error('MongoDB connection error', {
+      error: error?.message || error,
+    });
     process.exit(1);
   });
 

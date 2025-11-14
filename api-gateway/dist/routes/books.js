@@ -3,12 +3,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const http_proxy_middleware_1 = require("http-proxy-middleware");
 const router = (0, express_1.Router)();
-const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://localhost:3002';
+const COOKBOOK_SERVICE_URL = process.env.COOKBOOK_SERVICE_URL || 'http://localhost:3004';
 router.use('/', (0, http_proxy_middleware_1.createProxyMiddleware)({
-    target: USER_SERVICE_URL,
+    target: COOKBOOK_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: {
-        '^/api/user': '',
+        '^/api/books': '/api/books',
     },
     onProxyReq: (proxyReq, req) => {
         if (req.requestId) {
@@ -26,11 +26,11 @@ router.use('/', (0, http_proxy_middleware_1.createProxyMiddleware)({
             errors: [
                 {
                     code: 'SERVICE_UNAVAILABLE',
-                    message: 'User service unavailable',
+                    message: 'Cookbook service unavailable',
                 },
             ],
         });
     },
 }));
 exports.default = router;
-//# sourceMappingURL=users.js.map
+//# sourceMappingURL=books.js.map

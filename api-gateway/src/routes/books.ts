@@ -2,25 +2,28 @@ import { Router } from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const router = Router();
-const RECIPE_SERVICE_URL = process.env.RECIPE_SERVICE_URL || 'http://localhost:3003';
+const COOKBOOK_SERVICE_URL = process.env.COOKBOOK_SERVICE_URL || 'http://localhost:3004';
 
 /**
- * Proxy all /api/review/* requests to recipe-service
+ * Proxy all /api/books/* requests to cookbook-service
  */
 router.use(
   '/',
   createProxyMiddleware({
-    target: RECIPE_SERVICE_URL,
+    target: COOKBOOK_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: {
-      '^/api/review': '/api/review',
+      '^/api/books': '/api/books',
     },
     onProxyReq: (proxyReq, req: any) => {
+      // Forward request ID for tracing
       if (req.requestId) {
         proxyReq.setHeader('x-request-id', req.requestId);
       }
+      // Forward user info from auth middleware
       if (req.user) {
         proxyReq.setHeader('x-user-id', req.user.userId);
+        proxyReq.setHeader('x-user-email', req.user.email);
       }
     },
     onError: (_err, _req, res: any) => {
@@ -30,7 +33,7 @@ router.use(
         errors: [
           {
             code: 'SERVICE_UNAVAILABLE',
-            message: 'Recipe service unavailable',
+            message: 'Cookbook service unavailable',
           },
         ],
       });

@@ -20,11 +20,16 @@ router.use('/', (0, http_proxy_middleware_1.createProxyMiddleware)({
             proxyReq.setHeader('x-user-email', req.user.email);
         }
     },
-    onError: (err, _req, res) => {
+    onError: (_err, _req, res) => {
         res.status(503).json({
             success: false,
-            message: 'Recipe service unavailable',
-            error: err.message,
+            data: null,
+            errors: [
+                {
+                    code: 'SERVICE_UNAVAILABLE',
+                    message: 'Recipe service unavailable',
+                },
+            ],
         });
     },
 }));

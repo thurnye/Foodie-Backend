@@ -9,7 +9,6 @@ const RECIPE_SERVICE_URL = process.env.RECIPE_SERVICE_URL || 'http://localhost:3
 interface CreateCookbookData {
   title: string;
   description?: string;
-  recipes: string[];
   theme?: CookbookTheme;
   layout?: CookbookLayout;
   coverImage?: string;
@@ -26,7 +25,6 @@ interface CreateCookbookData {
 interface UpdateCookbookData {
   title?: string;
   description?: string;
-  recipes?: string[];
   theme?: CookbookTheme;
   layout?: CookbookLayout;
   coverImage?: string;
@@ -167,25 +165,12 @@ class CookbookService {
    */
   async createCookbook(userId: string, data: CreateCookbookData): Promise<ICookbook> {
     try {
-      // Validate recipes if provided
-      let recipeIds: Types.ObjectId[] = [];
-
-      if (data.recipes && data.recipes.length > 0) {
-        if (data.recipes.length > 100) {
-          throw Errors.badRequest('A cookbook cannot contain more than 100 recipes');
-        }
-
-        // Verify all recipes exist and are accessible via recipe service
-        await this.validateRecipes(data.recipes, userId);
-        recipeIds = data.recipes.map((id) => new Types.ObjectId(id));
-      }
-
-      // Create cookbook
+      // Create cookbook (books will be added separately via Book API)
       const cookbook = new Cookbook({
         author: new Types.ObjectId(userId),
         title: data.title,
         description: data.description,
-        recipes: recipeIds,
+        books: [], // Empty books array, books added via Book API
         theme: data.theme || CookbookTheme.MODERN,
         layout: data.layout || CookbookLayout.SINGLE_COLUMN,
         coverImage: data.coverImage,
@@ -215,6 +200,9 @@ class CookbookService {
       const cookbook = await Cookbook.findOne({
         _id: cookbookId,
         isActive: true,
+      }).populate({
+        path: 'books',
+        match: { isActive: true },
       });
 
       if (!cookbook) {
@@ -231,40 +219,10 @@ class CookbookService {
         throw Errors.forbidden('This cookbook is private');
       }
 
-      // Populate recipes from recipe service
-      if (cookbook.recipes && cookbook.recipes.length > 0) {
-        const recipeIds = cookbook.recipes.map((id) => id.toString());
-        // Use authenticated userId if available, otherwise use cookbook author's ID
-        // The author must have access to these recipes since they added them
-        const fetchUserId = userId || cookbook.author.toString();
-
-        logger.info('Fetching recipe details for cookbook', {
-          cookbookId: cookbook._id,
-          recipeCount: recipeIds.length,
-          fetchUserId,
-          isAuthenticated: !!userId
-        });
-
-        console.log('USERID:::', fetchUserId);
-        const recipes = await this.fetchRecipeDetails(recipeIds, fetchUserId);
-        console.log('RECIPES FETCHED:::======================', recipes.length, 'recipes')
-
-        logger.info('Fetched recipes', {
-          cookbookId: cookbook._id,
-          fetchedCount: recipes.length,
-          expectedCount: recipeIds.length
-        });
-
-        // Convert Mongoose document to plain object to allow recipe population
-        const cookbookObject = cookbook.toObject();
-        cookbookObject.recipes = recipes;
-
-        console.log("cookbook with recipes==============", cookbookObject.recipes.length)
-
-        return cookbookObject as ICookbookPopulated;
-      }
-
-      console.log("cookbook (no recipes)==============", cookbook)
+      logger.info('Cookbook retrieved', {
+        cookbookId: cookbook._id,
+        bookCount: cookbook.books?.length || 0,
+      });
 
       return cookbook;
     } catch (error) {
@@ -309,29 +267,18 @@ class CookbookService {
       // Get total count
       const totalCookbooks = await Cookbook.countDocuments(filter);
 
-      // Get cookbooks
+      // Get cookbooks and populate books
       const cookbooks = await Cookbook.find(filter)
+        .populate({
+          path: 'books',
+          match: { isActive: true },
+        })
         .sort({ [sortBy]: sortOrder })
         .skip(skip)
         .limit(limit);
 
-      // Populate recipes for each cookbook
-      const cookbooksWithRecipes = await Promise.all(
-        cookbooks.map(async (cookbook) => {
-          if (cookbook.recipes && cookbook.recipes.length > 0) {
-            const recipeIds = cookbook.recipes.map((id) => id.toString());
-            const recipes = await this.fetchRecipeDetails(recipeIds, userId);
-            return {
-              ...cookbook.toObject(),
-              recipes,
-            };
-          }
-          return cookbook.toObject();
-        })
-      );
-
       return {
-        cookbooks: cookbooksWithRecipes as any,
+        cookbooks: cookbooks as any,
         pagination: {
           page,
           limit,
@@ -374,30 +321,18 @@ class CookbookService {
       // Get total count
       const totalCookbooks = await Cookbook.countDocuments(filter);
 
-      // Get cookbooks
+      // Get cookbooks and populate books
       const cookbooks = await Cookbook.find(filter)
+        .populate({
+          path: 'books',
+          match: { isActive: true, isPublic: true }, // Only show public books for public cookbooks
+        })
         .sort({ [sortBy]: sortOrder })
         .skip(skip)
         .limit(limit);
 
-      // Populate recipes for each cookbook (using a generic user context for public access)
-      const cookbooksWithRecipes = await Promise.all(
-        cookbooks.map(async (cookbook) => {
-          if (cookbook.recipes && cookbook.recipes.length > 0) {
-            const recipeIds = cookbook.recipes.map((id) => id.toString());
-            // For public cookbooks, we fetch recipes without user context (public recipes only)
-            const recipes = await this.fetchRecipeDetails(recipeIds, cookbook.author.toString());
-            return {
-              ...cookbook.toObject(),
-              recipes,
-            };
-          }
-          return cookbook.toObject();
-        })
-      );
-
       return {
-        cookbooks: cookbooksWithRecipes as any,
+        cookbooks: cookbooks as any,
         pagination: {
           page,
           limit,
@@ -439,22 +374,7 @@ class CookbookService {
         throw Errors.badRequest('Cannot update cookbook while it is being generated');
       }
 
-      // Validate recipes if provided
-      if (updates.recipes !== undefined) {
-        if (updates.recipes.length > 100) {
-          throw Errors.badRequest('A cookbook cannot contain more than 100 recipes');
-        }
-
-        if (updates.recipes.length > 0) {
-          // Verify all recipes exist and are accessible via recipe service
-          await this.validateRecipes(updates.recipes, userId);
-        }
-
-        const recipeIds = updates.recipes.map((id) => new Types.ObjectId(id));
-        cookbook.recipes = recipeIds;
-      }
-
-      // Update fields
+      // Update fields (books are managed via Book API)
       if (updates.title !== undefined) cookbook.title = updates.title;
       if (updates.description !== undefined) cookbook.description = updates.description;
       if (updates.theme !== undefined) cookbook.theme = updates.theme;
@@ -466,7 +386,7 @@ class CookbookService {
       if (updates.isPublic !== undefined) cookbook.isPublic = updates.isPublic;
 
       // Reset status to draft if content changed
-      if (updates.recipes || updates.theme || updates.layout) {
+      if (updates.theme || updates.layout) {
         cookbook.status = CookbookStatus.DRAFT;
         cookbook.pdfUrl = undefined;
         cookbook.generationProgress = 0;

@@ -18,11 +18,16 @@ router.use('/', (0, http_proxy_middleware_1.createProxyMiddleware)({
             proxyReq.setHeader('x-user-id', req.user.userId);
         }
     },
-    onError: (err, _req, res) => {
+    onError: (_err, _req, res) => {
         res.status(503).json({
             success: false,
-            message: 'Event service unavailable (not yet implemented)',
-            error: err.message,
+            data: null,
+            errors: [
+                {
+                    code: 'SERVICE_UNAVAILABLE',
+                    message: 'Event service unavailable (not yet implemented)',
+                },
+            ],
         });
     },
 }));

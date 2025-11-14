@@ -26,7 +26,7 @@ router.use(
         proxyReq.setHeader('x-user-email', req.user.email);
       }
     },
-    onError: (err, _req, res: any) => {
+    onError: (_err, _req, res: any) => {
       res.status(503).json({
         success: false,
         data: null,

@@ -26,7 +26,7 @@ exports.corsOptions = {
     credentials: true,
     optionsSuccessStatus: 200,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token', 'x-request-id'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token', 'x-request-id', 'x-device-fingerprint', 'x-bot-score'],
     exposedHeaders: ['x-access-token', 'x-request-id'],
 };
 exports.default = (0, cors_1.default)(exports.corsOptions);

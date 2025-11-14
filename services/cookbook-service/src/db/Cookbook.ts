@@ -27,10 +27,10 @@ const CookbookSchema = new Schema<ICookbook>(
       maxlength: 1000,
     },
 
-    recipes: [
+    books: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'Recipe',
+        ref: 'Book',
       },
     ],
 
@@ -139,15 +139,15 @@ CookbookSchema.index({ author: 1, isActive: 1, createdAt: -1 });
 CookbookSchema.index({ status: 1, createdAt: -1 });
 CookbookSchema.index({ isPublic: 1, isActive: 1 });
 
-// Virtual for recipe count
-CookbookSchema.virtual('recipeCount').get(function () {
-  return this.recipes?.length || 0;
+// Virtual for book count
+CookbookSchema.virtual('bookCount').get(function () {
+  return this.books?.length || 0;
 });
 
-// Pre-save middleware to validate recipes array
+// Pre-save middleware to validate books array
 CookbookSchema.pre('save', function (next) {
-  if (this.recipes && this.recipes.length > 100) {
-    next(new Error('A cookbook cannot contain more than 100 recipes'));
+  if (this.books && this.books.length > 100) {
+    next(new Error('A cookbook cannot contain more than 100 books'));
   } else {
     next();
   }

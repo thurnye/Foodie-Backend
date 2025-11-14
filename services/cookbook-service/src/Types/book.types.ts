@@ -14,7 +14,7 @@ export enum BookStatus {
  */
 export interface IBookSection {
   sectionId: string; // 'cover', 'intro', 'toc', 'notes', or recipe ID
-  sectionType: 'cover' | 'intro' | 'toc' | 'notes' | 'recipe';
+  sectionType: 'frontCover' | 'backCover' | 'intro' | 'toc' | 'notes' | 'recipe';
   content: string; // HTML content from editor
   lastEditedAt: Date;
 }
@@ -22,12 +22,58 @@ export interface IBookSection {
 /**
  * Book Interface - Stores edited cookbook content
  */
+
+// Type definitions for recipe subdocuments
+export interface IValueLabel {
+  value: string;
+  label: string;
+}
+
+export interface IContentBlock {
+  type: 'text' | 'image' | 'video' | 'title';
+  value: any;
+  isUnsplash?: boolean;
+  isMultiple?: boolean;
+}
+
+export interface IFAQ {
+  ques: string;
+  ans: string;
+}
+
+export interface IIngredient {
+  name: string;
+  type: 'main' | 'dressing';
+}
+
+export interface IMethod {
+  step: IContentBlock[];
+}
+
 export interface IBook extends Document {
   _id: Types.ObjectId;
   cookbook: Types.ObjectId; // Reference to original cookbook
-  author: Types.ObjectId;
-  title: string;
-  description?: string;
+  layout: string;
+  recipe?:{
+    basicInfo: {
+      recipeName: string;
+      duration: IValueLabel;
+      level: IValueLabel;
+      serving: IValueLabel;
+      tags: IValueLabel[];
+      categories: IValueLabel[];
+    };
+    details: {
+      thumbnail: string;
+      about: IContentBlock[];
+      faqs: IFAQ[];
+    };
+    directions: {
+      methods: IMethod[];
+      ingredients: IIngredient[];
+    };
+    author: Types.ObjectId;
+  },
 
   // Edited sections content
   sections: IBookSection[];

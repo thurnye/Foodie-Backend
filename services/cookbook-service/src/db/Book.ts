@@ -12,25 +12,85 @@ const BookSchema = new Schema<IBook>(
       required: true,
       index: true,
     },
-
-    author: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-      index: true,
-    },
-
-    title: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 200,
-    },
-
-    description: {
-      type: String,
-      trim: true,
-      maxlength: 1000,
+    layout: String,
+    recipe: {
+      basicInfo: {
+        recipeName: { type: String, required: true, trim: true, index: 'text' },
+        duration: {
+          value: { type: String, required: true },
+          label: { type: String, required: true },
+        },
+        level: {
+          value: { type: String, required: true },
+          label: { type: String, required: true },
+        },
+        serving: {
+          value: { type: String, required: true },
+          label: { type: String, required: true },
+        },
+        tags: [
+          {
+            value: { type: String, required: true },
+            label: { type: String, required: true },
+          },
+        ],
+        categories: [
+          {
+            value: { type: String, required: true },
+            label: { type: String, required: true },
+          },
+        ],
+      },
+      details: {
+        thumbnail: { type: String, required: true },
+        about: [
+          {
+            type: {
+              type: String,
+              required: true,
+              enum: ['text', 'image', 'video', 'title'],
+            },
+            value: { type: Schema.Types.Mixed, required: true },
+            isUnsplash: { type: Boolean },
+            isMultiple: { type: Boolean },
+          },
+        ],
+        faqs: [
+          {
+            ques: { type: String },
+            ans: { type: String },
+          },
+        ],
+      },
+      directions: {
+        methods: [
+          {
+            step: [
+              {
+                type: {
+                  type: String,
+                  required: true,
+                  enum: ['title', 'text', 'image', 'video'],
+                },
+                value: { type: Schema.Types.Mixed, required: true },
+                isUnsplash: { type: Boolean },
+                isMultiple: { type: Boolean },
+              },
+            ],
+          },
+        ],
+        ingredients: [
+          {
+            name: { type: String, required: true },
+            type: { type: String, required: true, enum: ['main', 'dressing'] },
+          },
+        ],
+      },
+      author: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        index: true,
+      },
     },
 
     // Array of edited sections
@@ -42,7 +102,7 @@ const BookSchema = new Schema<IBook>(
         },
         sectionType: {
           type: String,
-          enum: ['cover', 'intro', 'toc', 'notes', 'recipe'],
+          enum: ['frontCover', 'backCover', 'intro', 'toc', 'notes', 'recipe'],
           required: true,
         },
         content: {
@@ -90,7 +150,8 @@ const BookSchema = new Schema<IBook>(
 
 // Indexes for performance
 BookSchema.index({ cookbook: 1, isActive: 1 });
-BookSchema.index({ author: 1, isActive: 1, createdAt: -1 });
+BookSchema.index({ cookbook: 1, recipe: 1 });
+BookSchema.index({ recipe: 1, isActive: 1, createdAt: -1 });
 BookSchema.index({ status: 1, isPublic: 1 });
 
 // Virtual for section count

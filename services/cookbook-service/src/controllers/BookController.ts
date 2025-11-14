@@ -9,32 +9,35 @@ class BookController {
    */
   async createBook(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as any).user?.userId;
 
       if (!userId) {
         res.status(401).json({
           success: false,
-          message: 'User ID is required',
+          message: 'Authentication required. Please log in to create a book.',
         });
         return;
       }
 
-      const { cookbookId, title, description, sections } = req.body;
+      const { cookbookId, layout, sections, recipeData } = req.body;
 
-      if (!cookbookId || !title || !sections) {
+      if (!cookbookId) {
         res.status(400).json({
           success: false,
-          message: 'Cookbook ID, title, and sections are required',
+          message: 'Cookbook ID is required',
         });
         return;
       }
 
-      const book = await BookService.createBook(userId, {
-        cookbookId,
-        title,
-        description,
-        sections,
-      });
+      const book = await BookService.createBook(
+        userId,
+        {
+          cookbookId,
+          layout,
+          sections,
+        },
+        recipeData
+      );
 
       res.status(201).json({
         success: true,
@@ -57,7 +60,7 @@ class BookController {
   async getBookById(req: Request, res: Response): Promise<void> {
     try {
       const { bookId } = req.params;
-      const userId = req.headers['x-user-id'] as string | undefined;
+      const userId = (req as any).user?.userId;
 
       const book = await BookService.getBookById(bookId, userId);
 
@@ -80,23 +83,24 @@ class BookController {
    */
   async getMyBooks(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as any).user?.userId;
 
       if (!userId) {
         res.status(401).json({
           success: false,
-          message: 'User ID is required',
+          message: 'Authentication required. Please log in to view your books.',
         });
         return;
       }
 
-      const { page, limit, status, isPublic } = req.query;
+      const { page, limit, status, isPublic, cookbookId } = req.query;
 
       const result = await BookService.getMyBooks(userId, {
         page: page ? parseInt(page as string) : undefined,
         limit: limit ? parseInt(limit as string) : undefined,
         status: status as any,
         isPublic: isPublic === 'true' ? true : isPublic === 'false' ? false : undefined,
+        cookbookId: cookbookId as string | undefined,
       });
 
       res.status(200).json({
@@ -120,12 +124,12 @@ class BookController {
   async updateBook(req: Request, res: Response): Promise<void> {
     try {
       const { bookId } = req.params;
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as any).user?.userId;
 
       if (!userId) {
         res.status(401).json({
           success: false,
-          message: 'User ID is required',
+          message: 'Authentication required. Please log in to update this book.',
         });
         return;
       }
@@ -155,12 +159,12 @@ class BookController {
   async deleteBook(req: Request, res: Response): Promise<void> {
     try {
       const { bookId } = req.params;
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as any).user?.userId;
 
       if (!userId) {
         res.status(401).json({
           success: false,
-          message: 'User ID is required',
+          message: 'Authentication required. Please log in to delete this book.',
         });
         return;
       }
@@ -187,12 +191,12 @@ class BookController {
   async publishBook(req: Request, res: Response): Promise<void> {
     try {
       const { bookId } = req.params;
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as any).user?.userId;
 
       if (!userId) {
         res.status(401).json({
           success: false,
-          message: 'User ID is required',
+          message: 'Authentication required. Please log in to publish this book.',
         });
         return;
       }

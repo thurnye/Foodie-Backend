@@ -81,7 +81,7 @@ export interface ICookbook extends Document {
   author: Types.ObjectId;
   title: string;
   description?: string;
-  recipes: Types.ObjectId[];
+  books: Types.ObjectId[];
 
   // Customization
   theme: CookbookTheme;
@@ -137,9 +137,9 @@ export interface ICookBookRecipe {
 }
 
 /**
- * Cookbook with populated recipes (for API responses)
+ * Cookbook with populated books (for API responses)
  */
-export interface ICookbookPopulated extends Omit<ICookbook, 'recipes'> {
-  recipes: any[]; // Full recipe objects instead of ObjectIds
+export interface ICookbookPopulated extends Omit<ICookbook, 'books'> {
+  books: any[]; // Full book objects instead of ObjectIds
 }
 

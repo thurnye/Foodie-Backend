@@ -6,14 +6,12 @@ import { IBook, IBookSection, BookStatus } from '../Types/book.types';
 
 interface CreateBookData {
   cookbookId: string;
-  title: string;
-  description?: string;
-  sections: IBookSection[];
+  layout?: string;
+  sections?: IBookSection[];
 }
 
 interface UpdateBookData {
-  title?: string;
-  description?: string;
+  layout?: string;
   sections?: IBookSection[];
   status?: BookStatus;
   isPublic?: boolean;
@@ -21,9 +19,9 @@ interface UpdateBookData {
 
 class BookService {
   /**
-   * Create a new book from edited cookbook content
+   * Create a new book from a recipe in the cookbook
    */
-  async createBook(userId: string, data: CreateBookData): Promise<IBook> {
+  async createBook(userId: string, data: CreateBookData, recipeData?: any): Promise<IBook> {
     try {
       // Verify cookbook exists and user has access
       const cookbook = await Cookbook.findOne({
@@ -35,28 +33,46 @@ class BookService {
         throw Errors.notFound('Cookbook not found');
       }
 
-      // Check if user is the author
+      // Check if user is the cookbook author
       if (cookbook.author.toString() !== userId) {
         throw Errors.forbidden('You can only create books from your own cookbooks');
       }
 
-      // Create book
-      const book = new Book({
+      // Create book with optional embedded recipe data
+      const bookData: any = {
         cookbook: new Types.ObjectId(data.cookbookId),
-        author: new Types.ObjectId(userId),
-        title: data.title,
-        description: data.description,
-        sections: data.sections.map(section => ({
+        layout: data.layout || cookbook.layout || 'single-column',
+        sections: data.sections ? data.sections.map(section => ({
           ...section,
           lastEditedAt: new Date(),
-        })),
+        })) : [],
         status: BookStatus.DRAFT,
         isPublic: false,
-      });
+      };
 
+      // Add recipe data if provided
+      if (recipeData) {
+        bookData.recipe = {
+          basicInfo: recipeData.basicInfo,
+          details: recipeData.details,
+          directions: recipeData.directions,
+          author: recipeData.author,
+        };
+      }
+
+      const book = new Book(bookData);
       await book.save();
 
-      logger.info('Book created', { bookId: book._id, userId, cookbookId: data.cookbookId });
+      // Add book to cookbook's books array
+      cookbook.books.push(book._id);
+      await cookbook.save();
+
+      logger.info('Book created', {
+        bookId: book._id,
+        userId,
+        cookbookId: data.cookbookId,
+        hasRecipe: !!recipeData
+      });
 
       return book;
     } catch (error) {
@@ -79,9 +95,10 @@ class BookService {
         throw Errors.notFound('Book not found');
       }
 
-      // Check permissions: must be author or book must be public
+      // Check permissions via the cookbook author
+      const cookbook = book.cookbook as any;
       if (userId) {
-        const isAuthor = book.author.toString() === userId;
+        const isAuthor = cookbook.author?.toString() === userId;
         if (!isAuthor && !book.isPublic) {
           throw Errors.forbidden('You do not have permission to access this book');
         }
@@ -97,13 +114,14 @@ class BookService {
   }
 
   /**
-   * Get user's books
+   * Get user's books (via cookbook author)
    */
   async getMyBooks(userId: string, query: {
     page?: number;
     limit?: number;
     status?: BookStatus;
     isPublic?: boolean;
+    cookbookId?: string;
   } = {}): Promise<{
     books: IBook[];
     pagination: {
@@ -118,11 +136,23 @@ class BookService {
       const limit = query.limit || 10;
       const skip = (page - 1) * limit;
 
-      // Build filter
-      const filter: any = {
+      // First, get user's cookbooks
+      const userCookbooks = await Cookbook.find({
         author: userId,
         isActive: true,
+      }).select('_id');
+
+      const cookbookIds = userCookbooks.map(cb => cb._id);
+
+      // Build filter for books
+      const filter: any = {
+        cookbook: { $in: cookbookIds },
+        isActive: true,
       };
+
+      if (query.cookbookId) {
+        filter.cookbook = query.cookbookId;
+      }
 
       if (query.status) {
         filter.status = query.status;
@@ -169,20 +199,20 @@ class BookService {
       const book = await Book.findOne({
         _id: bookId,
         isActive: true,
-      });
+      }).populate('cookbook');
 
       if (!book) {
         throw Errors.notFound('Book not found');
       }
 
-      // Check if user is the author
-      if (book.author.toString() !== userId) {
-        throw Errors.forbidden('You can only update your own books');
+      // Check if user is the cookbook author
+      const cookbook = book.cookbook as any;
+      if (cookbook.author.toString() !== userId) {
+        throw Errors.forbidden('You can only update books from your own cookbooks');
       }
 
       // Update fields
-      if (updates.title !== undefined) book.title = updates.title;
-      if (updates.description !== undefined) book.description = updates.description;
+      if (updates.layout !== undefined) book.layout = updates.layout;
       if (updates.status !== undefined) book.status = updates.status;
       if (updates.isPublic !== undefined) book.isPublic = updates.isPublic;
 
@@ -233,20 +263,27 @@ class BookService {
       const book = await Book.findOne({
         _id: bookId,
         isActive: true,
-      });
+      }).populate('cookbook');
 
       if (!book) {
         throw Errors.notFound('Book not found');
       }
 
-      // Check if user is the author
-      if (book.author.toString() !== userId) {
-        throw Errors.forbidden('You can only delete your own books');
+      // Check if user is the cookbook author
+      const cookbook = book.cookbook as any;
+      if (cookbook.author.toString() !== userId) {
+        throw Errors.forbidden('You can only delete books from your own cookbooks');
       }
 
       // Soft delete
       book.isActive = false;
       await book.save();
+
+      // Remove book from cookbook's books array
+      await Cookbook.updateOne(
+        { _id: cookbook._id },
+        { $pull: { books: book._id } }
+      );
 
       logger.info('Book deleted', { bookId, userId });
     } catch (error) {

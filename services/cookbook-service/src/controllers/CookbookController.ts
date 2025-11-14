@@ -27,7 +27,7 @@ export const createCookbook = async (
       {
         cookbookId: cookbook._id,
         title: cookbook.title,
-        recipeCount: cookbook.recipes.length,
+        bookCount: cookbook.books?.length || 0,
         status: cookbook.status,
       },
       'Cookbook created successfully',

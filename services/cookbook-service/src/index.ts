@@ -18,28 +18,31 @@ dotenv.config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3004;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/FoodieBlog';
+const MONGODB_URI =
+  process.env.MONGODB_URI || 'mongodb://localhost:27017/FoodieBlog';
 
 /* --------------------------------------------
-   🔧 Kill existing process on same port (dev only)
+    Kill existing process on same port (dev only)
 --------------------------------------------- */
 if (process.env.NODE_ENV !== 'production') {
   try {
     execSync(`lsof -ti:${PORT} | xargs kill -9`, { stdio: 'ignore' });
-    console.log(`🧹 Cleared port ${PORT} before starting server`);
+    console.log(` Cleared port ${PORT} before starting server`);
   } catch {
     // ignore if port is free
   }
 }
 
 /* --------------------------------------------
-   🧩 Middleware
+    Middleware
 --------------------------------------------- */
 app.use(helmet());
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    credentials: true,
+  })
+);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -62,7 +65,7 @@ app.get('/health', (_req: Request, res: Response) => {
 });
 
 /* --------------------------------------------
-   🛣️ Routes
+   Routes
 --------------------------------------------- */
 app.use('/api/cookbook', cookbookRoutes);
 app.use('/api/books', bookRoutes);
@@ -78,32 +81,39 @@ app.use((_req: Request, res: Response) => {
 // Error handler
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   const { statusCode, ...errorResponse } = mapErrorToResponse(err);
-  logger.error('Cookbook Service: Request error', { error: err.message, stack: err.stack });
+  logger.error('Cookbook Service: Request error', {
+    error: err.message,
+    stack: err.stack,
+  });
   res.status(statusCode).json(errorResponse);
 });
 
 /* --------------------------------------------
-   🗄️ MongoDB Connection
+    MongoDB Connection
 --------------------------------------------- */
 mongoose
   .connect(MONGODB_URI)
   .then(() => {
-    logger.info('Cookbook Service: Connected to MongoDB', { database: MONGODB_URI });
+    logger.info('Cookbook Service: Connected to MongoDB', {
+      database: MONGODB_URI,
+    });
   })
   .catch((error) => {
-    logger.error('Cookbook Service: MongoDB connection error', { error: error.message });
+    logger.error('Cookbook Service: MongoDB connection error', {
+      error: error.message,
+    });
     process.exit(1);
   });
 
 /* --------------------------------------------
-   🚀 Start Server
+   Start Server
 --------------------------------------------- */
 const server = app.listen(PORT, () => {
   logger.info(`Cookbook service running on port ${PORT}`);
 });
 
 /* --------------------------------------------
-   🛑 Graceful Shutdown
+    Graceful Shutdown
 --------------------------------------------- */
 process.on('SIGTERM', () => {
   logger.info('SIGTERM received, closing server gracefully');

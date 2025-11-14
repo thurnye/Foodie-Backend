@@ -111,7 +111,7 @@ exports.swaggerSpec = {
                                 type: 'object',
                                 properties: {
                                     page: { type: 'number', default: 1 },
-                                    limit: { type: 'number', default: 10 },
+                                    limit: { type: 'number', default: 12 },
                                     categories: { type: 'array', items: { type: 'string' } },
                                     tags: { type: 'array', items: { type: 'string' } },
                                     minRating: { type: 'number', minimum: 0, maximum: 5 },
