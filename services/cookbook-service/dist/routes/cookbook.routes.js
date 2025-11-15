@@ -1,0 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const CookbookController_1 = require("../controllers/CookbookController");
+const libs_1 = require("@foodie/libs");
+const validators_1 = require("../utils/validators");
+const router = (0, express_1.Router)();
+router.post('/', (0, libs_1.validate)(validators_1.createCookbookSchema), CookbookController_1.createCookbook);
+router.get('/my-cookbooks', CookbookController_1.getMyCookbooks);
+router.get('/public', CookbookController_1.getPublicCookbooks);
+router.post('/:id/generate', CookbookController_1.generateCookbook);
+router.get('/:id/status', CookbookController_1.getCookbookStatus);
+router.get('/:id', CookbookController_1.getCookbookById);
+router.patch('/:id', (0, libs_1.validate)(validators_1.updateCookbookSchema), CookbookController_1.updateCookbook);
+router.delete('/:id', CookbookController_1.deleteCookbook);
+exports.default = router;
+//# sourceMappingURL=cookbook.routes.js.map

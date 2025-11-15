@@ -14,6 +14,7 @@ export class UserService {
     firstName?: string;
     lastName?: string;
     username?: string;
+    bio?: string;
   }): Promise<IUser> {
     const user = await User.create(data);
     return user;

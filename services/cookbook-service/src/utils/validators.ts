@@ -5,7 +5,7 @@ import { Request, Response, NextFunction } from 'express';
  * Generic validation middleware factory
  */
 export const validate = (schema: Joi.Schema) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     const { error } = schema.validate(req.body, { abortEarly: false });
 
     if (error) {
@@ -14,11 +14,12 @@ export const validate = (schema: Joi.Schema) => {
         message: detail.message,
       }));
 
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: 'Validation failed',
         errors,
       });
+      return;
     }
 
     next();

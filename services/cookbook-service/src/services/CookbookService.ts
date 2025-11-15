@@ -1,10 +1,8 @@
 import { ICookbook, ICookbookPopulated, CookbookStatus, CookbookTheme, CookbookLayout } from '../Types/cookbook.types';
 import { Types } from 'mongoose';
 import { Errors, logger } from '@foodie/libs';
-import axios from 'axios';
 import Cookbook from '../db/Cookbook';
-
-const RECIPE_SERVICE_URL = process.env.RECIPE_SERVICE_URL || 'http://localhost:3003';
+import { fetchUserData } from '../utils/userClient';
 
 interface CreateCookbookData {
   title: string;
@@ -48,118 +46,6 @@ interface ListCookbooksQuery {
 }
 
 class CookbookService {
-  /**
-   * Fetch recipe details from recipe service
-   */
-  private async fetchRecipeDetails(recipeIds: string[], userId: string): Promise<any[]> {
-    if (!recipeIds || recipeIds.length === 0) {
-      return [];
-    }
-
-    logger.info('fetchRecipeDetails called::::::--------------------------', {
-      recipeCount: recipeIds.length,
-      recipeServiceUrl: RECIPE_SERVICE_URL,
-      userId
-    });
-
-    try {
-      const recipePromises = recipeIds.map(async (recipeId) => {
-        try {
-          const url = `${RECIPE_SERVICE_URL}/api/recipe/${recipeId}`;
-          logger.info('Fetching recipe :::-----------------------------------', { recipeId, url, userId });
-
-          const response = await axios.get(url, {
-            headers: {
-              'x-user-id': userId,
-            },
-          });
-
-          logger.info('Recipe fetch response', {
-            recipeId,
-            status: response.status,
-            hasData: !!response.data,
-            dataKeys: response.data ? Object.keys(response.data) : []
-          });
-
-          // Extract the actual recipe data from the API response wrapper
-          // Response format: { success: true, data: <recipe>, message: "..." }
-          // console.log('RESPONSE:::========================', response.data)
-          const recipeData = response.data?.data || null;
-
-          if (!recipeData) {
-            logger.warn('Recipe data is null after extraction', {
-              recipeId,
-              responseData: response.data
-            });
-          }
-
-          return recipeData;
-        } catch (error: any) {
-          logger.warn(`Failed to fetch recipe ${recipeId}`, {
-            error: error.message,
-            status: error.response?.status,
-            statusText: error.response?.statusText
-          });
-          return null;
-        }
-      });
-
-      const recipes = await Promise.all(recipePromises);
-      const validRecipes = recipes.filter((recipe) => recipe !== null);
-
-      logger.info('Recipe fetch complete', {
-        totalRequested: recipeIds.length,
-        successfullyFetched: validRecipes.length,
-        failed: recipeIds.length - validRecipes.length
-      });
-
-      return validRecipes;
-    } catch (error) {
-      logger.error('Error fetching recipe details', { error });
-      return [];
-    }
-  }
-
-  /**
-   * Validate recipes exist and are accessible by fetching from recipe service
-   */
-  private async validateRecipes(recipeIds: string[], userId: string): Promise<void> {
-    try {
-      // Make requests to recipe service to validate each recipe exists and is accessible
-      const validationPromises = recipeIds.map(async (recipeId) => {
-        try {
-          const response = await axios.get(`${RECIPE_SERVICE_URL}/api/recipe/${recipeId}`, {
-            headers: {
-              'x-user-id': userId,
-            },
-          });
-          return response.status === 200;
-        } catch (error: any) {
-          // If 404 or 403, recipe doesn't exist or not accessible
-          if (error.response?.status === 404 || error.response?.status === 403) {
-            return false;
-          }
-          throw error;
-        }
-      });
-
-      const results = await Promise.all(validationPromises);
-      const allValid = results.every((valid) => valid === true);
-
-      if (!allValid) {
-        throw Errors.badRequest(
-          'Some recipes do not exist or you do not have permission to access them'
-        );
-      }
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('do not exist')) {
-        throw error;
-      }
-      logger.error('Error validating recipes with recipe service', { error });
-      throw Errors.internalServer('Failed to validate recipes');
-    }
-  }
-
   /**
    * Create a new cookbook
    */
@@ -219,12 +105,22 @@ class CookbookService {
         throw Errors.forbidden('This cookbook is private');
       }
 
+      // Fetch author data from user service
+      const authorData = await fetchUserData(cookbook.author.toString());
+
+      // Convert to plain object and attach author data
+      const cookbookObj = cookbook.toObject();
+      if (authorData) {
+        cookbookObj.author = authorData as any;
+      }
+
       logger.info('Cookbook retrieved', {
         cookbookId: cookbook._id,
         bookCount: cookbook.books?.length || 0,
+        authorPopulated: !!authorData,
       });
 
-      return cookbook;
+      return cookbookObj;
     } catch (error) {
       logger.error('Error fetching cookbook', { error, cookbookId });
       throw error;
@@ -277,8 +173,20 @@ class CookbookService {
         .skip(skip)
         .limit(limit);
 
+      // Fetch author data for each cookbook
+      const cookbooksWithAuthors = await Promise.all(
+        cookbooks.map(async (cookbook) => {
+          const cookbookObj = cookbook.toObject();
+          const authorData = await fetchUserData(cookbook.author.toString());
+          if (authorData) {
+            cookbookObj.author = authorData as any;
+          }
+          return cookbookObj;
+        })
+      );
+
       return {
-        cookbooks: cookbooks as any,
+        cookbooks: cookbooksWithAuthors as any,
         pagination: {
           page,
           limit,
@@ -331,8 +239,20 @@ class CookbookService {
         .skip(skip)
         .limit(limit);
 
+      // Fetch author data for each cookbook
+      const cookbooksWithAuthors = await Promise.all(
+        cookbooks.map(async (cookbook) => {
+          const cookbookObj = cookbook.toObject();
+          const authorData = await fetchUserData(cookbook.author.toString());
+          if (authorData) {
+            cookbookObj.author = authorData as any;
+          }
+          return cookbookObj;
+        })
+      );
+
       return {
-        cookbooks: cookbooks as any,
+        cookbooks: cookbooksWithAuthors as any,
         pagination: {
           page,
           limit,
