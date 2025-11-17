@@ -32,6 +32,7 @@ const methodSchema = joi_1.default.object({
     step: joi_1.default.array().items(contentBlockSchema).min(1),
 });
 exports.addRecipeSchema = joi_1.default.object({
+    _id: joi_1.default.string().pattern(/^[0-9a-fA-F]{24}$/).optional(),
     basicInfo: joi_1.default.object({
         recipeName: joi_1.default.string().required().trim(),
         duration: valueLabelSchema.required(),
@@ -74,10 +75,10 @@ exports.updateRecipeSchema = joi_1.default.object({
 exports.queryRecipesSchema = joi_1.default.object({
     page: joi_1.default.number().integer().min(1).default(1),
     limit: joi_1.default.number().integer().min(1).max(100).default(10),
-    search: joi_1.default.string().optional(),
-    categories: joi_1.default.alternatives().try(joi_1.default.string(), joi_1.default.array().items(joi_1.default.string())).optional(),
-    tags: joi_1.default.alternatives().try(joi_1.default.string(), joi_1.default.array().items(joi_1.default.string())).optional(),
-    level: joi_1.default.string().optional(),
+    search: joi_1.default.string().allow('').optional(),
+    categories: joi_1.default.alternatives().try(joi_1.default.string().allow(''), joi_1.default.array().items(joi_1.default.string())).optional(),
+    tags: joi_1.default.alternatives().try(joi_1.default.string().allow(''), joi_1.default.array().items(joi_1.default.string())).optional(),
+    level: joi_1.default.string().allow('').optional(),
     minRating: joi_1.default.number().min(0).max(5).optional(),
     sortBy: joi_1.default.string().valid('createdAt', 'averageRating', 'recipeName').default('createdAt'),
     sortOrder: joi_1.default.string().valid('asc', 'desc').default('desc'),

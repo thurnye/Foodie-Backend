@@ -14,6 +14,7 @@ const validate = (schema) => {
         });
         if (error) {
             const errorMessage = error.details.map((detail) => detail.message).join(', ');
+            console.log('Validation error:', errorMessage);
             (0, response_1.fail)(res, errorMessage, 422);
             return;
         }

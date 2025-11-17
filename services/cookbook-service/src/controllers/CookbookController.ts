@@ -277,3 +277,99 @@ export const getCookbookStatus = async (
     next(error);
   }
 };
+
+/**
+ * Add extra page to cookbook
+ * POST /api/cookbooks/:id/extra-pages
+ */
+export const addExtraPage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const userId = (req as any).user?.userId;
+
+    if (!userId) {
+      fail(res, 'Authentication required. Please log in to add pages.', 401);
+      return;
+    }
+
+    const { title, pageType, templateType, section, position } = req.body;
+
+    if (!title || !pageType || !section || position === undefined) {
+      fail(res, 'Title, pageType, section, and position are required', 400);
+      return;
+    }
+
+    const cookbook = await CookbookService.addExtraPage(id, userId, {
+      title,
+      pageType,
+      templateType,
+      section,
+      position,
+    });
+
+    success(res, cookbook, 'Extra page added successfully', 201);
+  } catch (error) {
+    logger.error('Add extra page error', { error, cookbookId: req.params.id });
+    next(error);
+  }
+};
+
+/**
+ * Update extra page in cookbook
+ * PUT /api/cookbooks/:id/extra-pages/:pageId
+ */
+export const updateExtraPage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id, pageId } = req.params;
+    const userId = (req as any).user?.userId;
+
+    if (!userId) {
+      fail(res, 'Authentication required. Please log in to update pages.', 401);
+      return;
+    }
+
+    const updates = req.body;
+
+    const cookbook = await CookbookService.updateExtraPage(id, pageId, userId, updates);
+
+    success(res, cookbook, 'Extra page updated successfully');
+  } catch (error) {
+    logger.error('Update extra page error', { error, cookbookId: req.params.id });
+    next(error);
+  }
+};
+
+/**
+ * Delete extra page from cookbook
+ * DELETE /api/cookbooks/:id/extra-pages/:pageId
+ */
+export const deleteExtraPage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id, pageId } = req.params;
+    const userId = (req as any).user?.userId;
+
+    if (!userId) {
+      fail(res, 'Authentication required. Please log in to delete pages.', 401);
+      return;
+    }
+
+    const cookbook = await CookbookService.deleteExtraPage(id, pageId, userId);
+
+    success(res, cookbook, 'Extra page deleted successfully');
+  } catch (error) {
+    logger.error('Delete extra page error', { error, cookbookId: req.params.id });
+    next(error);
+  }
+};

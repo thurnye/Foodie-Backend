@@ -74,6 +74,19 @@ export enum PaperSize {
 }
 
 /**
+ * Extra Page Interface - for user-added pages (blank pages, templates)
+ */
+export interface IExtraPage {
+  pageId: string;
+  title: string;
+  pageType: 'blank' | 'template';
+  templateType?: 'weekly-planner' | 'note-page';
+  section: 'front' | 'back';
+  position: number;
+  createdAt?: Date;
+}
+
+/**
  * Cookbook Interface
  */
 export interface ICookbook extends Document {
@@ -82,6 +95,9 @@ export interface ICookbook extends Document {
   title: string;
   description?: string;
   books: Types.ObjectId[];
+
+  // Extra pages (blank pages, templates) added by user
+  extraPages?: IExtraPage[];
 
   // Customization
   theme: CookbookTheme;

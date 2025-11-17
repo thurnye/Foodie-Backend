@@ -24,7 +24,7 @@ export async function fetchUserData(userId: string): Promise<UserData | null> {
 
     if (response.data.success && response.data.data) {
       const user = response.data.data;
-      console.log('Fetched user data:', user);
+      // console.log('Fetched user data:', user);
       return {
         _id: user._id || userId,
         firstName: user.firstName,

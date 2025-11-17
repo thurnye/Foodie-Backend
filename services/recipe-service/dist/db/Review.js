@@ -34,6 +34,18 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
+const ReactionSchema = new mongoose_1.Schema({
+    type: {
+        type: String,
+        enum: ['like', 'love', 'laugh', 'wow', 'sad', 'angry'],
+        required: true,
+    },
+    userId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        required: true,
+        ref: 'User',
+    },
+}, { _id: false });
 const ReviewSchema = new mongoose_1.Schema({
     review: {
         type: String,
@@ -58,6 +70,11 @@ const ReviewSchema = new mongoose_1.Schema({
         ref: 'Recipes',
         index: true,
     },
+    likes: [{
+            type: mongoose_1.Schema.Types.ObjectId,
+            ref: 'User',
+        }],
+    reactions: [ReactionSchema],
 }, {
     timestamps: true,
 });

@@ -16,7 +16,7 @@ class BookController {
                 });
                 return;
             }
-            const { cookbookId, layout, sections, recipeData } = req.body;
+            const { cookbookId, pages, sections, recipeIds } = req.body;
             if (!cookbookId) {
                 res.status(400).json({
                     success: false,
@@ -26,9 +26,10 @@ class BookController {
             }
             const book = await BookService_1.default.createBook(userId, {
                 cookbookId,
-                layout,
+                pages,
                 sections,
-            }, recipeData);
+                recipeIds,
+            });
             res.status(201).json({
                 success: true,
                 data: book,
@@ -97,6 +98,11 @@ class BookController {
         try {
             const { bookId } = req.params;
             const userId = req.user?.userId;
+            console.log('📥 UPDATE BOOK REQUEST:', {
+                bookId,
+                userId,
+                updates: req.body,
+            });
             if (!userId) {
                 res.status(401).json({
                     success: false,
@@ -106,6 +112,10 @@ class BookController {
             }
             const updates = req.body;
             const book = await BookService_1.default.updateBook(bookId, userId, updates);
+            console.log('✅ BOOK UPDATED SUCCESSFULLY:', {
+                bookId,
+                updatedLayout: book.layout,
+            });
             res.status(200).json({
                 success: true,
                 data: book,
@@ -113,6 +123,7 @@ class BookController {
             });
         }
         catch (error) {
+            console.error('❌ UPDATE BOOK ERROR:', error);
             libs_1.logger.error('Update book error', { error });
             res.status(error.statusCode || 500).json({
                 success: false,
@@ -142,6 +153,139 @@ class BookController {
             res.status(error.statusCode || 500).json({
                 success: false,
                 message: error.message || 'Failed to delete book',
+            });
+        }
+    }
+    async addPage(req, res) {
+        try {
+            const { bookId } = req.params;
+            const userId = req.user?.userId;
+            if (!userId) {
+                res.status(401).json({
+                    success: false,
+                    message: 'Authentication required. Please log in to add pages.',
+                });
+                return;
+            }
+            const pageData = req.body;
+            if (!pageData.pageType || pageData.position === undefined) {
+                res.status(400).json({
+                    success: false,
+                    message: 'Page type and position are required',
+                });
+                return;
+            }
+            const book = await BookService_1.default.addPage(bookId, userId, pageData);
+            res.status(201).json({
+                success: true,
+                data: book,
+                message: 'Page added successfully',
+            });
+        }
+        catch (error) {
+            libs_1.logger.error('Add page error', { error });
+            res.status(error.statusCode || 500).json({
+                success: false,
+                message: error.message || 'Failed to add page',
+            });
+        }
+    }
+    async updatePage(req, res) {
+        try {
+            const { bookId, pageId } = req.params;
+            const userId = req.user?.userId;
+            console.log('📥 UPDATE PAGE REQUEST:', {
+                bookId,
+                pageId,
+                userId,
+                updates: req.body,
+            });
+            if (!userId) {
+                res.status(401).json({
+                    success: false,
+                    message: 'Authentication required. Please log in to update pages.',
+                });
+                return;
+            }
+            const updates = req.body;
+            const book = await BookService_1.default.updatePage(bookId, pageId, userId, updates);
+            console.log('✅ PAGE UPDATED SUCCESSFULLY:', {
+                bookId,
+                pageId,
+                updatedLayout: book.pages.find(p => p.pageId === pageId)?.layout,
+            });
+            res.status(200).json({
+                success: true,
+                data: book,
+                message: 'Page updated successfully',
+            });
+        }
+        catch (error) {
+            console.error('❌ UPDATE PAGE ERROR:', error);
+            libs_1.logger.error('Update page error', { error });
+            res.status(error.statusCode || 500).json({
+                success: false,
+                message: error.message || 'Failed to update page',
+            });
+        }
+    }
+    async deletePage(req, res) {
+        try {
+            const { bookId, pageId } = req.params;
+            const userId = req.user?.userId;
+            if (!userId) {
+                res.status(401).json({
+                    success: false,
+                    message: 'Authentication required. Please log in to delete pages.',
+                });
+                return;
+            }
+            const book = await BookService_1.default.deletePage(bookId, pageId, userId);
+            res.status(200).json({
+                success: true,
+                data: book,
+                message: 'Page deleted successfully',
+            });
+        }
+        catch (error) {
+            libs_1.logger.error('Delete page error', { error });
+            res.status(error.statusCode || 500).json({
+                success: false,
+                message: error.message || 'Failed to delete page',
+            });
+        }
+    }
+    async reorderPages(req, res) {
+        try {
+            const { bookId } = req.params;
+            const userId = req.user?.userId;
+            if (!userId) {
+                res.status(401).json({
+                    success: false,
+                    message: 'Authentication required. Please log in to reorder pages.',
+                });
+                return;
+            }
+            const { pageOrder } = req.body;
+            if (!Array.isArray(pageOrder)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'Page order must be an array of { pageId, position } objects',
+                });
+                return;
+            }
+            const book = await BookService_1.default.reorderPages(bookId, userId, pageOrder);
+            res.status(200).json({
+                success: true,
+                data: book,
+                message: 'Pages reordered successfully',
+            });
+        }
+        catch (error) {
+            libs_1.logger.error('Reorder pages error', { error });
+            res.status(error.statusCode || 500).json({
+                success: false,
+                message: error.message || 'Failed to reorder pages',
             });
         }
     }

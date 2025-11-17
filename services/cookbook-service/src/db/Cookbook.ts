@@ -34,6 +34,42 @@ const CookbookSchema = new Schema<ICookbook>(
       },
     ],
 
+    // Extra pages (blank pages, templates) added by user
+    extraPages: [
+      {
+        pageId: {
+          type: String,
+          required: true,
+        },
+        title: {
+          type: String,
+          required: true,
+        },
+        pageType: {
+          type: String,
+          enum: ['blank', 'template'],
+          required: true,
+        },
+        templateType: {
+          type: String,
+          enum: ['weekly-planner', 'note-page'],
+        },
+        section: {
+          type: String,
+          enum: ['front', 'back'],
+          required: true,
+        },
+        position: {
+          type: Number,
+          required: true,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+
     // Customization options
     theme: {
       type: String,

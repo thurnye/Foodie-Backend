@@ -2,6 +2,134 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
 const book_types_1 = require("../Types/book.types");
+const PageSchema = new mongoose_1.Schema({
+    pageId: {
+        type: String,
+        required: true,
+    },
+    pageType: {
+        type: String,
+        enum: Object.values(book_types_1.PageType),
+        required: true,
+    },
+    position: {
+        type: Number,
+        required: true,
+    },
+    coverData: {
+        title: String,
+        subtitle: String,
+        backgroundImage: String,
+        backgroundColor: String,
+        customText: String,
+        layout: String,
+    },
+    introData: {
+        backgroundImage: String,
+        customContent: String,
+        layout: String,
+    },
+    recipe: [{
+            basicInfo: {
+                recipeName: { type: String, trim: true, index: 'text' },
+                duration: {
+                    value: String,
+                    label: String,
+                },
+                level: {
+                    value: String,
+                    label: String,
+                },
+                serving: {
+                    value: String,
+                    label: String,
+                },
+                tags: [
+                    {
+                        value: String,
+                        label: String,
+                    },
+                ],
+                categories: [
+                    {
+                        value: String,
+                        label: String,
+                    },
+                ],
+            },
+            details: {
+                thumbnail: String,
+                about: [
+                    {
+                        type: {
+                            type: String,
+                            enum: ['text', 'image', 'video', 'title'],
+                        },
+                        value: mongoose_1.Schema.Types.Mixed,
+                        isUnsplash: Boolean,
+                        isMultiple: Boolean,
+                    },
+                ],
+                faqs: [
+                    {
+                        ques: String,
+                        ans: String,
+                    },
+                ],
+            },
+            directions: {
+                methods: [
+                    {
+                        step: [
+                            {
+                                type: {
+                                    type: String,
+                                    enum: ['title', 'text', 'image', 'video'],
+                                },
+                                value: mongoose_1.Schema.Types.Mixed,
+                                isUnsplash: Boolean,
+                                isMultiple: Boolean,
+                            },
+                        ],
+                    },
+                ],
+                ingredients: [
+                    {
+                        name: String,
+                        type: { type: String, enum: ['main', 'dressing'] },
+                    },
+                ],
+            },
+            author: {
+                userId: {
+                    type: String,
+                    required: true,
+                },
+                firstName: String,
+                lastName: String,
+                avatar: String,
+                slogan: String,
+            },
+            order: {
+                type: Number,
+                required: true,
+                default: 1,
+            }
+        }],
+    extraPageData: {
+        title: String,
+        pageType: {
+            type: String,
+            enum: ['blank', 'template'],
+        },
+        templateType: String,
+        content: String,
+        layout: String,
+    },
+    layout: String,
+    editedContent: String,
+    lastEditedAt: Date,
+});
 const BookSchema = new mongoose_1.Schema({
     cookbook: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -9,86 +137,7 @@ const BookSchema = new mongoose_1.Schema({
         required: true,
         index: true,
     },
-    layout: String,
-    recipe: {
-        basicInfo: {
-            recipeName: { type: String, required: true, trim: true, index: 'text' },
-            duration: {
-                value: { type: String, required: true },
-                label: { type: String, required: true },
-            },
-            level: {
-                value: { type: String, required: true },
-                label: { type: String, required: true },
-            },
-            serving: {
-                value: { type: String, required: true },
-                label: { type: String, required: true },
-            },
-            tags: [
-                {
-                    value: { type: String, required: true },
-                    label: { type: String, required: true },
-                },
-            ],
-            categories: [
-                {
-                    value: { type: String, required: true },
-                    label: { type: String, required: true },
-                },
-            ],
-        },
-        details: {
-            thumbnail: { type: String, required: true },
-            about: [
-                {
-                    type: {
-                        type: String,
-                        required: true,
-                        enum: ['text', 'image', 'video', 'title'],
-                    },
-                    value: { type: mongoose_1.Schema.Types.Mixed, required: true },
-                    isUnsplash: { type: Boolean },
-                    isMultiple: { type: Boolean },
-                },
-            ],
-            faqs: [
-                {
-                    ques: { type: String },
-                    ans: { type: String },
-                },
-            ],
-        },
-        directions: {
-            methods: [
-                {
-                    step: [
-                        {
-                            type: {
-                                type: String,
-                                required: true,
-                                enum: ['title', 'text', 'image', 'video'],
-                            },
-                            value: { type: mongoose_1.Schema.Types.Mixed, required: true },
-                            isUnsplash: { type: Boolean },
-                            isMultiple: { type: Boolean },
-                        },
-                    ],
-                },
-            ],
-            ingredients: [
-                {
-                    name: { type: String, required: true },
-                    type: { type: String, required: true, enum: ['main', 'dressing'] },
-                },
-            ],
-        },
-        author: {
-            type: mongoose_1.Schema.Types.ObjectId,
-            required: true,
-            index: true,
-        },
-    },
+    pages: [PageSchema],
     sections: [
         {
             sectionId: {
@@ -135,9 +184,13 @@ const BookSchema = new mongoose_1.Schema({
     toObject: { virtuals: true },
 });
 BookSchema.index({ cookbook: 1, isActive: 1 });
-BookSchema.index({ cookbook: 1, recipe: 1 });
-BookSchema.index({ recipe: 1, isActive: 1, createdAt: -1 });
+BookSchema.index({ cookbook: 1, 'pages.pageId': 1 });
+BookSchema.index({ 'pages.recipe.author.userId': 1, isActive: 1, createdAt: -1 });
 BookSchema.index({ status: 1, isPublic: 1 });
+BookSchema.index({ 'pages.position': 1 });
+BookSchema.virtual('pageCount').get(function () {
+    return this.pages?.length || 0;
+});
 BookSchema.virtual('sectionCount').get(function () {
     return this.sections?.length || 0;
 });

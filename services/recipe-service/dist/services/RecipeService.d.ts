@@ -1,5 +1,6 @@
 import { IRecipe } from '../db/Recipe';
 export declare class RecipeService {
+    private populateAuthors;
     createRecipe(userId: string, recipeData: Partial<IRecipe>): Promise<IRecipe>;
     getRecipeById(recipeId: string): Promise<IRecipe>;
     getRecipes(queryParams: any): Promise<{

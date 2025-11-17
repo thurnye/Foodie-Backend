@@ -11,6 +11,10 @@ router.get('/my', BookController_1.default.getMyBooks.bind(BookController_1.defa
 router.get('/:bookId', BookController_1.default.getBookById.bind(BookController_1.default));
 router.put('/:bookId', BookController_1.default.updateBook.bind(BookController_1.default));
 router.delete('/:bookId', BookController_1.default.deleteBook.bind(BookController_1.default));
+router.post('/:bookId/pages', BookController_1.default.addPage.bind(BookController_1.default));
+router.put('/:bookId/pages/reorder', BookController_1.default.reorderPages.bind(BookController_1.default));
+router.put('/:bookId/pages/:pageId', BookController_1.default.updatePage.bind(BookController_1.default));
+router.delete('/:bookId/pages/:pageId', BookController_1.default.deletePage.bind(BookController_1.default));
 router.post('/:bookId/publish', BookController_1.default.publishBook.bind(BookController_1.default));
 exports.default = router;
 //# sourceMappingURL=book.routes.js.map

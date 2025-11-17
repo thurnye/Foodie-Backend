@@ -9,10 +9,11 @@ const buildRecipeFilter = (queryParams) => {
             { $text: { $search: queryParams.search } },
         ];
     }
-    if (queryParams.categories) {
-        const categories = Array.isArray(queryParams.categories)
-            ? queryParams.categories
-            : [queryParams.categories];
+    const categoryParam = queryParams.category || queryParams.categories;
+    if (categoryParam) {
+        const categories = Array.isArray(categoryParam)
+            ? categoryParam
+            : [categoryParam];
         filter['basicInfo.categories.value'] = { $in: categories };
     }
     if (queryParams.tags) {

@@ -61,6 +61,18 @@ declare class CookbookService {
     updateCookbook(cookbookId: string, userId: string, updates: UpdateCookbookData): Promise<ICookbook>;
     deleteCookbook(cookbookId: string, userId: string): Promise<void>;
     updateGenerationStatus(cookbookId: string, status: CookbookStatus, progress?: number, pdfUrl?: string, errorMessage?: string, pageCount?: number, fileSize?: number): Promise<ICookbook>;
+    addExtraPage(cookbookId: string, userId: string, pageData: {
+        title: string;
+        pageType: 'blank' | 'template';
+        templateType?: 'weekly-planner' | 'note-page';
+        section: 'front' | 'back';
+        position: number;
+    }): Promise<ICookbook>;
+    updateExtraPage(cookbookId: string, pageId: string, userId: string, updates: {
+        title?: string;
+        position?: number;
+    }): Promise<ICookbook>;
+    deleteExtraPage(cookbookId: string, pageId: string, userId: string): Promise<ICookbook>;
 }
 declare const _default: CookbookService;
 export default _default;

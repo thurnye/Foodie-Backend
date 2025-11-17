@@ -1,138 +1,115 @@
-'use strict';
-var __createBinding =
-  (this && this.__createBinding) ||
-  (Object.create
-    ? function (o, m, k, k2) {
-        if (k2 === undefined) k2 = k;
-        var desc = Object.getOwnPropertyDescriptor(m, k);
-        if (
-          !desc ||
-          ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)
-        ) {
-          desc = {
-            enumerable: true,
-            get: function () {
-              return m[k];
-            },
-          };
-        }
-        Object.defineProperty(o, k2, desc);
-      }
-    : function (o, m, k, k2) {
-        if (k2 === undefined) k2 = k;
-        o[k2] = m[k];
-      });
-var __setModuleDefault =
-  (this && this.__setModuleDefault) ||
-  (Object.create
-    ? function (o, v) {
-        Object.defineProperty(o, 'default', { enumerable: true, value: v });
-      }
-    : function (o, v) {
-        o['default'] = v;
-      });
-var __importStar =
-  (this && this.__importStar) ||
-  (function () {
-    var ownKeys = function (o) {
-      ownKeys =
-        Object.getOwnPropertyNames ||
-        function (o) {
-          var ar = [];
-          for (var k in o)
-            if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-          return ar;
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
         };
-      return ownKeys(o);
+        return ownKeys(o);
     };
     return function (mod) {
-      if (mod && mod.__esModule) return mod;
-      var result = {};
-      if (mod != null)
-        for (var k = ownKeys(mod), i = 0; i < k.length; i++)
-          if (k[i] !== 'default') __createBinding(result, mod, k[i]);
-      __setModuleDefault(result, mod);
-      return result;
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
     };
-  })();
-Object.defineProperty(exports, '__esModule', { value: true });
-const mongoose_1 = __importStar(require('mongoose'));
-const UserSchema = new mongoose_1.Schema(
-  {
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+const mongoose_1 = __importStar(require("mongoose"));
+const UserSchema = new mongoose_1.Schema({
     email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-      index: true,
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true,
+        index: true,
     },
     password: {
-      type: String,
-      required: true,
-      select: false,
+        type: String,
+        required: true,
+        select: false,
     },
     firstName: {
-      type: String,
-      trim: true,
+        type: String,
+        trim: true,
     },
     lastName: {
-      type: String,
-      trim: true,
+        type: String,
+        trim: true,
     },
     username: {
-      type: String,
-      unique: true,
-      sparse: true,
-      trim: true,
-      index: true,
+        type: String,
+        unique: true,
+        sparse: true,
+        trim: true,
+        index: true,
     },
     bio: {
-      type: String,
-      maxlength: 500,
+        type: String,
+        maxlength: 500,
     },
     avatar: {
-      type: String,
+        type: String,
+    },
+    slogan: {
+        type: String,
     },
     isEmailVerified: {
-      type: Boolean,
-      default: false,
+        type: Boolean,
+        default: false,
     },
     emailVerificationToken: {
-      type: String,
-      select: false,
+        type: String,
+        select: false,
     },
     emailVerificationExpires: {
-      type: Date,
-      select: false,
+        type: Date,
+        select: false,
     },
     passwordResetToken: {
-      type: String,
-      select: false,
+        type: String,
+        select: false,
     },
     passwordResetExpires: {
-      type: Date,
-      select: false,
+        type: Date,
+        select: false,
     },
     refreshTokens: {
-      type: [String],
-      default: [],
-      select: false,
+        type: [String],
+        default: [],
+        select: false,
     },
     role: {
-      type: String,
-      enum: ['user', 'admin', 'moderator'],
-      default: 'user',
+        type: String,
+        enum: ['user', 'admin', 'moderator'],
+        default: 'user',
     },
     reputation: {
-      type: Number,
-      default: 0,
+        type: Number,
+        default: 0,
     },
-  },
-  {
+}, {
     timestamps: true,
-  }
-);
+});
 UserSchema.index({ email: 1 });
 UserSchema.index({ username: 1 });
 UserSchema.index({ createdAt: -1 });

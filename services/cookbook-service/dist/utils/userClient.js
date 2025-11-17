@@ -20,7 +20,7 @@ async function fetchUserData(userId) {
                 lastName: user.lastName,
                 email: user.email,
                 avatar: user.avatar,
-                aboutMe: user.bio || user.aboutMe,
+                bio: user.bio,
             };
         }
         return null;

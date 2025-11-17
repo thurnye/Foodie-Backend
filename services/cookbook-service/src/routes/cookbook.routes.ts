@@ -8,6 +8,9 @@ import {
   deleteCookbook,
   generateCookbook,
   getCookbookStatus,
+  addExtraPage,
+  updateExtraPage,
+  deleteExtraPage,
 } from '../controllers/CookbookController';
 import { validate } from '@foodie/libs';
 import { createCookbookSchema, updateCookbookSchema } from '../utils/validators';
@@ -37,5 +40,15 @@ router.patch('/:id', validate(updateCookbookSchema), updateCookbook);
 
 // DELETE /api/cookbook/:id - Delete cookbook (authenticated, soft delete)
 router.delete('/:id', deleteCookbook);
+
+// Extra Pages Routes
+// POST /api/cookbook/:id/extra-pages - Add extra page to cookbook (authenticated)
+router.post('/:id/extra-pages', addExtraPage);
+
+// PUT /api/cookbook/:id/extra-pages/:pageId - Update extra page (authenticated)
+router.put('/:id/extra-pages/:pageId', updateExtraPage);
+
+// DELETE /api/cookbook/:id/extra-pages/:pageId - Delete extra page (authenticated)
+router.delete('/:id/extra-pages/:pageId', deleteExtraPage);
 
 export default router;

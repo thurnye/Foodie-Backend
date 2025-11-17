@@ -49,12 +49,22 @@ export declare enum PaperSize {
     LEGAL = "Legal",
     A5 = "A5"
 }
+export interface IExtraPage {
+    pageId: string;
+    title: string;
+    pageType: 'blank' | 'template';
+    templateType?: 'weekly-planner' | 'note-page';
+    section: 'front' | 'back';
+    position: number;
+    createdAt?: Date;
+}
 export interface ICookbook extends Document {
     _id: Types.ObjectId;
     author: Types.ObjectId;
     title: string;
     description?: string;
     books: Types.ObjectId[];
+    extraPages?: IExtraPage[];
     theme: CookbookTheme;
     layout: CookbookLayout;
     paperSize?: PaperSize;

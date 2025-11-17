@@ -1,10 +1,16 @@
 import mongoose, { Document } from 'mongoose';
+export interface IReaction {
+    type: 'like' | 'love' | 'laugh' | 'wow' | 'sad' | 'angry';
+    userId: mongoose.Types.ObjectId;
+}
 export interface IReview extends Document {
     _id: string;
     review: string;
     rating: number;
     userId: mongoose.Types.ObjectId;
     recipeId: mongoose.Types.ObjectId;
+    likes: mongoose.Types.ObjectId[];
+    reactions: IReaction[];
     createdAt: Date;
     updatedAt: Date;
 }

@@ -10,7 +10,7 @@ const helmet_1 = __importDefault(require("helmet"));
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const libs_1 = require("@foodie/libs");
-const index_1 = __importDefault(require("./routes/index"));
+const auth_1 = __importDefault(require("./routes/auth"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3001;
@@ -31,7 +31,7 @@ app.use((req, _res, next) => {
     });
     next();
 });
-app.use(index_1.default);
+app.use('/', auth_1.default);
 app.use((_req, res) => {
     res.status(404).json({
         success: false,
@@ -47,11 +47,12 @@ app.use((err, req, res, _next) => {
     const errorResponse = (0, libs_1.mapErrorToResponse)(err);
     res.status(errorResponse.statusCode).json(errorResponse);
 });
+let server;
 mongoose_1.default
     .connect(MONGODB_URI)
     .then(() => {
     libs_1.logger.info('Connected to MongoDB', { database: MONGODB_URI });
-    app.listen(PORT, () => {
+    server = app.listen(PORT, () => {
         libs_1.logger.info(`Auth service running on port ${PORT}`);
     });
 })
@@ -62,8 +63,20 @@ mongoose_1.default
 });
 process.on('SIGTERM', () => {
     libs_1.logger.info('SIGTERM received, closing server gracefully');
-    mongoose_1.default.connection.close();
-    process.exit(0);
+    if (server) {
+        server.close(() => {
+            libs_1.logger.info('HTTP server closed');
+            mongoose_1.default.connection.close(false).then(() => {
+                libs_1.logger.info('MongoDB connection closed');
+                process.exit(0);
+            });
+        });
+    }
+    else {
+        mongoose_1.default.connection.close(false).then(() => {
+            process.exit(0);
+        });
+    }
 });
 exports.default = app;
 //# sourceMappingURL=index.js.map

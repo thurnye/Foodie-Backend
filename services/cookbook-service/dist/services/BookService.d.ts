@@ -1,17 +1,37 @@
-import { IBook, IBookSection, BookStatus } from '../Types/book.types';
+import { IBook, IBookSection, BookStatus, IPage, PageType, ICoverPageData, IIntroPageData, IExtraPageData } from '../Types/book.types';
 interface CreateBookData {
     cookbookId: string;
-    layout?: string;
+    pages?: IPage[];
     sections?: IBookSection[];
+    recipeIds?: string[];
 }
 interface UpdateBookData {
-    layout?: string;
+    pages?: IPage[];
     sections?: IBookSection[];
     status?: BookStatus;
     isPublic?: boolean;
+    layout?: string;
+}
+interface CreatePageData {
+    pageType: PageType;
+    position: number;
+    coverData?: ICoverPageData;
+    introData?: IIntroPageData;
+    recipe?: any;
+    extraPageData?: IExtraPageData;
+    layout?: string;
+}
+interface UpdatePageData {
+    position?: number;
+    coverData?: ICoverPageData;
+    introData?: IIntroPageData;
+    recipe?: any;
+    extraPageData?: IExtraPageData;
+    layout?: string;
+    editedContent?: string;
 }
 declare class BookService {
-    createBook(userId: string, data: CreateBookData, recipeData?: any): Promise<IBook>;
+    createBook(userId: string, data: CreateBookData): Promise<IBook>;
     getBookById(bookId: string, userId?: string): Promise<IBook>;
     getMyBooks(userId: string, query?: {
         page?: number;
@@ -30,6 +50,13 @@ declare class BookService {
     }>;
     updateBook(bookId: string, userId: string, updates: UpdateBookData): Promise<IBook>;
     deleteBook(bookId: string, userId: string): Promise<void>;
+    addPage(bookId: string, userId: string, pageData: CreatePageData): Promise<IBook>;
+    updatePage(bookId: string, pageId: string, userId: string, updates: UpdatePageData): Promise<IBook>;
+    deletePage(bookId: string, pageId: string, userId: string): Promise<IBook>;
+    reorderPages(bookId: string, userId: string, pageOrder: {
+        pageId: string;
+        position: number;
+    }[]): Promise<IBook>;
     publishBook(bookId: string, userId: string): Promise<IBook>;
 }
 declare const _default: BookService;

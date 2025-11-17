@@ -7,8 +7,14 @@ const validators_1 = require("../utils/validators");
 const router = (0, express_1.Router)();
 router.post('/recipe', (0, libs_1.validate)(validators_1.addReviewSchema), ReviewController_1.addReview);
 router.get('/recipe/:recipeId', ReviewController_1.getReviewsForRecipe);
+router.get('/recipe/:recipeId/with-replies', ReviewController_1.getReviewsWithReplies);
 router.get('/user/:recipeId', ReviewController_1.getUserReviewForRecipe);
 router.patch('/:reviewId', (0, libs_1.validate)(validators_1.updateReviewSchema), ReviewController_1.updateReview);
 router.delete('/:reviewId', ReviewController_1.deleteReview);
+router.post('/:reviewId/like', ReviewController_1.toggleReviewLike);
+router.post('/:reviewId/reaction', ReviewController_1.toggleReviewReaction);
+router.post('/reply', ReviewController_1.createReply);
+router.post('/reply/:replyId/like', ReviewController_1.toggleReplyLike);
+router.post('/reply/:replyId/reaction', ReviewController_1.toggleReplyReaction);
 exports.default = router;
 //# sourceMappingURL=review.routes.js.map

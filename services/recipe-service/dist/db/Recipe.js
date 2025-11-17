@@ -69,7 +69,7 @@ const RecipeSchema = new mongoose_1.Schema({
                 type: {
                     type: String,
                     required: true,
-                    enum: ['text', 'image', 'video'],
+                    enum: ['text', 'image', 'video', 'title'],
                 },
                 value: { type: mongoose_1.Schema.Types.Mixed, required: true },
                 isUnsplash: { type: Boolean },
@@ -125,7 +125,6 @@ const RecipeSchema = new mongoose_1.Schema({
     author: {
         type: mongoose_1.Schema.Types.ObjectId,
         required: true,
-        ref: 'User',
         index: true,
     },
     averageRating: {
@@ -138,15 +137,21 @@ const RecipeSchema = new mongoose_1.Schema({
         type: Number,
         default: 0,
     },
+    isActive: {
+        type: Boolean,
+        default: true,
+        index: true,
+    },
 }, {
     timestamps: true,
 });
 RecipeSchema.index({ 'basicInfo.recipeName': 'text' });
-RecipeSchema.index({ author: 1, createdAt: -1 });
-RecipeSchema.index({ 'basicInfo.categories.value': 1 });
-RecipeSchema.index({ 'basicInfo.tags.value': 1 });
-RecipeSchema.index({ averageRating: -1 });
-RecipeSchema.index({ createdAt: -1 });
+RecipeSchema.index({ author: 1, isActive: 1, createdAt: -1 });
+RecipeSchema.index({ 'basicInfo.categories.value': 1, isActive: 1 });
+RecipeSchema.index({ 'basicInfo.tags.value': 1, isActive: 1 });
+RecipeSchema.index({ averageRating: -1, isActive: 1 });
+RecipeSchema.index({ createdAt: -1, isActive: 1 });
+RecipeSchema.index({ isActive: 1 });
 const Recipe = mongoose_1.default.model('Recipes', RecipeSchema);
 exports.default = Recipe;
 //# sourceMappingURL=Recipe.js.map

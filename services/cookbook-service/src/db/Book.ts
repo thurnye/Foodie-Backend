@@ -1,64 +1,88 @@
 import { Schema, model } from 'mongoose';
-import { BookStatus, IBook } from '../Types/book.types';
+import { BookStatus, IBook, PageType } from '../Types/book.types';
 
 /**
- * Book Schema - Stores edited cookbook content
+ * Page Sub-Schema - Represents a single page in the cookbook
  */
-const BookSchema = new Schema<IBook>(
-  {
-    cookbook: {
-      type: Schema.Types.ObjectId,
-      ref: 'Cookbook',
-      required: true,
-      index: true,
-    },
+const PageSchema = new Schema({
+  pageId: {
+    type: String,
+    required: true,
+  },
+  pageType: {
+    type: String,
+    enum: Object.values(PageType),
+    required: true,
+  },
+  position: {
+    type: Number,
+    required: true,
+  },
+
+  // Cover page data
+  coverData: {
+    title: String,
+    subtitle: String,
+    backgroundImage: String,
+    backgroundColor: String,
+    customText: String,
     layout: String,
-    recipe: {
+  },
+
+  // Introduction page data
+  introData: {
+    backgroundImage: String,
+    customContent: String,
+    layout: String,
+  },
+
+  // Recipe page data
+  recipe: [
+    {
       basicInfo: {
-        recipeName: { type: String, required: true, trim: true, index: 'text' },
+        recipeName: { type: String, trim: true, index: 'text' },
         duration: {
-          value: { type: String, required: true },
-          label: { type: String, required: true },
+          value: String,
+          label: String,
         },
         level: {
-          value: { type: String, required: true },
-          label: { type: String, required: true },
+          value: String,
+          label: String,
         },
         serving: {
-          value: { type: String, required: true },
-          label: { type: String, required: true },
+          value: String,
+          label: String,
         },
         tags: [
           {
-            value: { type: String, required: true },
-            label: { type: String, required: true },
+            value: String,
+            label: String,
           },
         ],
         categories: [
           {
-            value: { type: String, required: true },
-            label: { type: String, required: true },
+            value: String,
+            label: String,
           },
         ],
       },
       details: {
-        thumbnail: { type: String, required: true },
+        thumbnail: String,
         about: [
           {
             type: {
               type: String,
-              required: true,
               enum: ['text', 'image', 'video', 'title'],
             },
-            value: { type: Schema.Types.Mixed, required: true },
-            isUnsplash: { type: Boolean },
-            isMultiple: { type: Boolean },
+            value: Schema.Types.Mixed,
+            isUnsplash: Boolean,
+            isMultiple: Boolean,
           },
         ],
         faqs: [
           {
-            ques: { type: String },
-            ans: { type: String },
+            ques: String,
+            ans: String,
           },
         ],
       },
@@ -69,29 +93,86 @@ const BookSchema = new Schema<IBook>(
               {
                 type: {
                   type: String,
-                  required: true,
                   enum: ['title', 'text', 'image', 'video'],
                 },
-                value: { type: Schema.Types.Mixed, required: true },
-                isUnsplash: { type: Boolean },
-                isMultiple: { type: Boolean },
+                value: Schema.Types.Mixed,
+                isUnsplash: Boolean,
+                isMultiple: Boolean,
               },
             ],
           },
         ],
         ingredients: [
           {
-            name: { type: String, required: true },
-            type: { type: String, required: true, enum: ['main', 'dressing'] },
+            name: String,
+            type: { type: String, enum: ['main', 'dressing'] },
           },
         ],
       },
       author: {
-        type: Schema.Types.ObjectId,
+        userId: {
+          type: String,
+          required: true,
+        },
+        firstName: String,
+        lastName: String,
+        avatar: String,
+        slogan: String,
+      },
+      order: {
+        type: Number,
         required: true,
-        index: true,
+        default: 1,
+      },
+      layout: {
+        type: String,
+        required: true,
+        default: 'layout-one',
       },
     },
+  ],
+
+  // Extra page data (blank pages, templates)
+  extraPageData: {
+    title: String,
+    pageType: {
+      type: String,
+      enum: ['blank', 'template'],
+    },
+    templateType: String, // 'weekly-planner', 'note-page'
+    content: String, // HTML content if edited
+    layout: String,
+  },
+
+  // Layout for this specific page
+  layout: String,
+
+  // Edited content for this page
+  editedContent: String,
+  lastEditedAt: Date,
+});
+
+/**
+ * Book Schema - Stores edited cookbook content
+ */
+const BookSchema = new Schema<IBook>(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+    },
+    cookbook: {
+      type: Schema.Types.ObjectId,
+      ref: 'Cookbook',
+      required: true,
+      index: true,
+    },
+
+    // Array of all pages in the book
+    pages: [PageSchema],
 
     // Array of edited sections
     sections: [
@@ -150,11 +231,20 @@ const BookSchema = new Schema<IBook>(
 
 // Indexes for performance
 BookSchema.index({ cookbook: 1, isActive: 1 });
-BookSchema.index({ cookbook: 1, recipe: 1 });
-BookSchema.index({ recipe: 1, isActive: 1, createdAt: -1 });
+BookSchema.index({ cookbook: 1, 'pages.pageId': 1 });
+BookSchema.index({
+  'pages.recipe.author.userId': 1,
+  isActive: 1,
+  createdAt: -1,
+});
 BookSchema.index({ status: 1, isPublic: 1 });
+BookSchema.index({ 'pages.position': 1 }); // For sorting pages
 
-// Virtual for section count
+// Virtuals
+BookSchema.virtual('pageCount').get(function () {
+  return this.pages?.length || 0;
+});
+
 BookSchema.virtual('sectionCount').get(function () {
   return this.sections?.length || 0;
 });

@@ -51,6 +51,7 @@ export interface IRecipe extends Document {
     author: mongoose.Types.ObjectId;
     averageRating?: number;
     totalReviews?: number;
+    isActive: boolean;
     createdAt: Date;
     updatedAt: Date;
 }

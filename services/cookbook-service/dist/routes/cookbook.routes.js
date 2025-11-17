@@ -13,5 +13,8 @@ router.get('/:id/status', CookbookController_1.getCookbookStatus);
 router.get('/:id', CookbookController_1.getCookbookById);
 router.patch('/:id', (0, libs_1.validate)(validators_1.updateCookbookSchema), CookbookController_1.updateCookbook);
 router.delete('/:id', CookbookController_1.deleteCookbook);
+router.post('/:id/extra-pages', CookbookController_1.addExtraPage);
+router.put('/:id/extra-pages/:pageId', CookbookController_1.updateExtraPage);
+router.delete('/:id/extra-pages/:pageId', CookbookController_1.deleteExtraPage);
 exports.default = router;
 //# sourceMappingURL=cookbook.routes.js.map
