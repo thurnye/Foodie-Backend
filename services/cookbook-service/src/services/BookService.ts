@@ -11,6 +11,7 @@ import {
   ICoverPageData,
   IIntroPageData,
   IExtraPageData,
+  IRecipePage,
 } from '../Types/book.types';
 
 interface CreateBookData {
@@ -43,6 +44,7 @@ interface CreatePageData {
 }
 
 interface UpdatePageData {
+  pageType?: PageType; // Flag to indicate which field to update
   position?: number;
   coverData?: ICoverPageData;
   introData?: IIntroPageData;
@@ -588,79 +590,106 @@ class BookService {
         throw Errors.forbidden('You can only update pages in your own books');
       }
 
-      // Find if it's a recipe page in the recipe array
-      const recipeIndex = book.recipe?.findIndex((r: any) => r.pageId === pageId) ?? -1;
-
       console.log('🔧 BEFORE UPDATE:', {
+        bookId,
         pageId,
-        recipeIndex,
-        recipeCount: book.recipe?.length,
+        pageType: updates.pageType,
         incomingUpdates: updates,
       });
 
-      if (recipeIndex !== -1 && book.recipe) {
-        // Update recipe page
-        const recipePage = book.recipe[recipeIndex];
+      let updated = false;
 
-        console.log(`📐 Current recipe layout: ${recipePage.layout}`);
+      // Helper function to apply updates to a page object
+      // const applyUpdates = (page: any, fieldName: string) => {
+      //   if (updates.layout !== undefined) page.layout = updates.layout;
+      //   if (updates.position !== undefined) page.position = updates.position;
+      //   book.markModified(fieldName);
+      //   updated = true;
+      // };
 
-        if (updates.position !== undefined) recipePage.position = updates.position;
-        if (updates.layout !== undefined) {
-          console.log(`📐 UPDATING RECIPE LAYOUT: ${recipePage.layout} -> ${updates.layout}`);
-          recipePage.layout = updates.layout;
-        }
+      // Use pageType for direct lookup or search all fields
+      const pageType = updates.pageType;
 
-        // Reorder recipes if position changed
-        if (updates.position !== undefined) {
-          book.recipe.sort((a: any, b: any) => a.position - b.position);
-        }
+      // Update recipe page
+      if (!pageType || pageType === PageType.RECIPE) {
+        console.log("Book's recipe pages:", book.recipe);
 
-        // Mark the recipe array as modified so Mongoose detects the change
-        book.markModified('recipe');
+        // const recipeIndex = book.recipe?.findIndex((r: any) => r._id === pageId)
 
-        console.log('🔖 Marked recipe array as modified');
+        const recipePage = book.recipe?.find((r:any) => r._id.toString() === pageId.toString());
+        console.log('🔍 Recipe page found:', recipePage);
 
-        await book.save();
+        if (recipePage) {
+          // const recipePage = book.recipe[recipeIndex];
 
-        console.log('💾 Book saved to database');
+          if (updates.position !== undefined) recipePage.position = updates.position;
+          if (updates.layout !== undefined) recipePage.layout = updates.layout;
+          if (updates.recipe !== undefined) Object.assign(recipePage, updates.recipe);
 
-        console.log('💾 SAVED TO DATABASE:', {
-          pageId,
-          savedLayout: book.recipe[recipeIndex].layout,
-        });
-      } else if (book.coverData && pageId === book.coverData.pageId) {
-        // Update cover page
-        if (updates.layout !== undefined && book.coverData) {
-          book.coverData.layout = updates.layout;
+          // Reorder if position changed
+          // if (updates.position !== undefined) {
+          //   book.recipe.sort((a: any, b: any) => a.order - b.order);
+          // }
+
+          book.markModified('recipe');
+          updated = true;
+
+          if (pageType) return await book.save(); // Early return if pageType was specified
+        } else if (pageType === PageType.RECIPE) {
+          throw Errors.notFound('Recipe page not found in book');
         }
-        if (updates.coverData !== undefined) {
-          book.coverData = { ...book.coverData, ...updates.coverData };
+      }
+
+      // Update cover page
+      if (!updated && (!pageType || pageType === PageType.COVER)) {
+        if (book.coverData?.pageId === pageId) {
+          if (updates.layout !== undefined) book.coverData.layout = updates.layout;
+          if (updates.coverData !== undefined) {
+            book.coverData = { ...book.coverData, ...updates.coverData };
+          }
+          book.markModified('coverData');
+          updated = true;
+          if (pageType) return await book.save();
+        } else if (pageType === PageType.COVER) {
+          throw Errors.notFound('Cover page not found in book');
         }
-        book.markModified('coverData');
-        await book.save();
-      } else if (book.introData && pageId === book.introData.pageId) {
-        // Update intro page
-        if (updates.layout !== undefined && book.introData) {
-          book.introData.layout = updates.layout;
+      }
+
+      // Update intro page
+      if (!updated && (!pageType || pageType === PageType.INTRO)) {
+        if (book.introData?.pageId === pageId) {
+          if (updates.layout !== undefined) book.introData.layout = updates.layout;
+          if (updates.introData !== undefined) {
+            book.introData = { ...book.introData, ...updates.introData };
+          }
+          book.markModified('introData');
+          updated = true;
+          if (pageType) return await book.save();
+        } else if (pageType === PageType.INTRO) {
+          throw Errors.notFound('Intro page not found in book');
         }
-        if (updates.introData !== undefined) {
-          book.introData = { ...book.introData, ...updates.introData };
+      }
+
+      // Update extra page
+      if (!updated && (!pageType || pageType === PageType.EXTRA)) {
+        if (book.extraPageData?.pageId === pageId) {
+          if (updates.layout !== undefined) book.extraPageData.layout = updates.layout;
+          if (updates.extraPageData !== undefined) {
+            book.extraPageData = { ...book.extraPageData, ...updates.extraPageData };
+          }
+          book.markModified('extraPageData');
+          updated = true;
+          if (pageType) return await book.save();
+        } else if (pageType === PageType.EXTRA) {
+          throw Errors.notFound('Extra page not found in book');
         }
-        book.markModified('introData');
-        await book.save();
-      } else if (book.extraPageData && pageId === book.extraPageData.pageId) {
-        // Update extra page
-        if (updates.layout !== undefined && book.extraPageData) {
-          book.extraPageData.layout = updates.layout;
-        }
-        if (updates.extraPageData !== undefined) {
-          book.extraPageData = { ...book.extraPageData, ...updates.extraPageData };
-        }
-        book.markModified('extraPageData');
-        await book.save();
-      } else {
+      }
+
+      if (!updated) {
         throw Errors.notFound('Page not found in book');
       }
+
+      await book.save();
 
       logger.info('Page updated in book', { bookId, userId, pageId });
 
