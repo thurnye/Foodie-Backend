@@ -12,6 +12,22 @@ const book_types_1 = require("../Types/book.types");
 class BookService {
     async createBook(userId, data) {
         try {
+            console.log('📥 BookService.createBook called with:', {
+                bookId: data.bookId,
+                cookbookId: data.cookbookId,
+                recipeCount: data.recipeIds?.length
+            });
+            let currentBook = null;
+            if (data.bookId) {
+                currentBook = await Book_1.default.findOne({
+                    _id: data.bookId,
+                    isActive: true,
+                });
+                console.log('🔍 Found existing book:', currentBook ? 'YES' : 'NO');
+                if (currentBook && currentBook.cookbook.toString() !== data.cookbookId) {
+                    throw libs_1.Errors.badRequest('Book does not belong to the specified cookbook');
+                }
+            }
             const cookbook = await Cookbook_1.default.findOne({
                 _id: data.cookbookId,
                 isActive: true,
@@ -22,55 +38,80 @@ class BookService {
             if (cookbook.author.toString() !== userId) {
                 throw libs_1.Errors.forbidden('You can only create books from your own cookbooks');
             }
-            const defaultPages = [
-                {
-                    pageId: 'cover',
-                    pageType: book_types_1.PageType.COVER,
-                    position: 1,
-                    coverData: {
-                        title: cookbook.title || '',
-                        subtitle: cookbook.description || '',
-                        layout: 'cover-layout-one',
-                    },
-                    layout: 'cover-layout-one',
-                },
-                {
-                    pageId: 'intro',
-                    pageType: book_types_1.PageType.INTRO,
-                    position: 2,
-                    introData: {
-                        customContent: '',
-                        layout: 'intro-layout-one',
-                    },
-                    layout: 'intro-layout-one',
-                },
-                {
-                    pageId: 'toc',
-                    pageType: book_types_1.PageType.TOC,
-                    position: 3,
-                },
-            ];
+            const defaultCoverData = {
+                pageId: 'cover',
+                pageType: book_types_1.PageType.COVER,
+                position: 1,
+                title: cookbook.title || '',
+                subtitle: cookbook.description || '',
+                layout: 'cover-layout-one',
+            };
+            const defaultIntroData = {
+                pageId: 'intro',
+                pageType: book_types_1.PageType.INTRO,
+                position: 2,
+                customContent: '',
+                layout: 'intro-layout-one',
+            };
+            let recipeArray = [];
             if (data.recipeIds && data.recipeIds.length > 0) {
-                console.log(`📥 Creating book with ${data.recipeIds.length} recipe(s)`);
+                console.log(`📥 Adding ${data.recipeIds.length} recipe(s) to book`);
                 const recipeDataPromises = data.recipeIds.map((recipeId) => (0, recipeClient_1.fetchRecipeData)(recipeId));
                 const recipesData = await Promise.all(recipeDataPromises);
-                let recipeOrder = 1;
-                console.log(` Adding recipe pages to book...`, recipesData);
-                recipesData.forEach((recipe) => ({
-                    ...recipe,
-                    order: recipeOrder++,
-                    layout: 'layout-one'
-                }));
-                defaultPages.push({
-                    pageId: 'recipe-' + new mongoose_1.Types.ObjectId(),
-                    pageType: book_types_1.PageType.RECIPE,
-                    position: 4,
-                    recipe: recipesData.filter((r) => r !== null),
+                console.log('📋 Fetched recipe data:', recipesData);
+                if (currentBook) {
+                    console.log('📝 Updating existing book with new recipes');
+                    const maxPosition = currentBook.recipe && currentBook.recipe.length > 0
+                        ? Math.max(...currentBook.recipe.map((r) => r.position))
+                        : 3;
+                    recipesData.forEach((recipeData, index) => {
+                        if (recipeData) {
+                            const recipePage = {
+                                ...recipeData,
+                                pageId: 'recipe-' + new mongoose_1.Types.ObjectId(),
+                                pageType: book_types_1.PageType.RECIPE,
+                                position: maxPosition + index + 1,
+                                order: (currentBook.recipe?.length || 0) + index + 1,
+                                layout: 'layout-one'
+                            };
+                            if (!currentBook.recipe) {
+                                currentBook.recipe = [];
+                            }
+                            currentBook.recipe.push(recipePage);
+                        }
+                    });
+                    if (data.sections) {
+                        currentBook.sections = data.sections.map((section) => ({
+                            ...section,
+                            lastEditedAt: new Date(),
+                        }));
+                    }
+                    currentBook.markModified('recipe');
+                    await currentBook.save();
+                    console.log(`✅ Updated book with ${recipesData.length} new recipe pages. Total recipes: ${currentBook.recipe?.length || 0}`);
+                    return currentBook;
+                }
+                console.log('📘 Creating new book with recipe pages');
+                recipesData.forEach((recipeData, index) => {
+                    if (recipeData) {
+                        recipeArray.push({
+                            ...recipeData,
+                            pageId: 'recipe-' + new mongoose_1.Types.ObjectId(),
+                            pageType: book_types_1.PageType.RECIPE,
+                            position: 4 + index,
+                            order: index + 1,
+                            layout: 'layout-one'
+                        });
+                    }
                 });
             }
             const bookData = {
+                name: data.name || `${cookbook.title || 'My Cookbook'} - ${new Date().toLocaleDateString()}`,
+                description: data.description || cookbook.description || 'My cookbook book',
                 cookbook: new mongoose_1.Types.ObjectId(data.cookbookId),
-                pages: data.pages || defaultPages,
+                coverData: defaultCoverData,
+                introData: defaultIntroData,
+                recipe: recipeArray,
                 sections: data.sections
                     ? data.sections.map((section) => ({
                         ...section,
@@ -89,7 +130,7 @@ class BookService {
                 userId,
                 cookbookId: data.cookbookId,
                 recipeCount: data.recipeIds?.length || 0,
-                pageCount: book.pages.length,
+                recipeArrayLength: book.recipe?.length || 0,
             });
             return book;
         }
@@ -181,6 +222,10 @@ class BookService {
             if (cookbook.author.toString() !== userId) {
                 throw libs_1.Errors.forbidden('You can only update books from your own cookbooks');
             }
+            if (updates.name !== undefined)
+                book.name = updates.name;
+            if (updates.description !== undefined)
+                book.description = updates.description;
             if (updates.status !== undefined)
                 book.status = updates.status;
             if (updates.isPublic !== undefined)
@@ -190,10 +235,7 @@ class BookService {
                 book.layout = updates.layout;
             }
             if (updates.pages !== undefined) {
-                book.pages = updates.pages.map((page) => ({
-                    ...page,
-                    lastEditedAt: new Date(),
-                }));
+                console.warn('⚠️  WARNING: Updating book.pages is deprecated. Use individual page update endpoints instead.');
             }
             if (updates.sections !== undefined) {
                 updates.sections.forEach((updatedSection) => {
@@ -265,19 +307,50 @@ class BookService {
                 throw libs_1.Errors.forbidden('You can only add pages to your own books');
             }
             const pageId = `${pageData.pageType}-${new mongoose_1.Types.ObjectId()}`;
-            const newPage = {
-                pageId,
-                pageType: pageData.pageType,
-                position: pageData.position,
-                coverData: pageData.coverData,
-                introData: pageData.introData,
-                recipe: pageData.recipe,
-                extraPageData: pageData.extraPageData,
-                layout: pageData.layout,
-                lastEditedAt: new Date(),
-            };
-            book.pages.push(newPage);
-            book.pages.sort((a, b) => a.position - b.position);
+            if (pageData.pageType === book_types_1.PageType.RECIPE && pageData.recipe) {
+                if (!book.recipe) {
+                    book.recipe = [];
+                }
+                const recipePage = {
+                    pageId,
+                    pageType: book_types_1.PageType.RECIPE,
+                    position: pageData.position,
+                    ...pageData.recipe,
+                    layout: pageData.layout || 'layout-one',
+                };
+                book.recipe.push(recipePage);
+                book.recipe.sort((a, b) => a.position - b.position);
+                book.markModified('recipe');
+            }
+            else if (pageData.pageType === book_types_1.PageType.COVER && pageData.coverData) {
+                book.coverData = {
+                    ...pageData.coverData,
+                    pageId,
+                    pageType: book_types_1.PageType.COVER,
+                    position: pageData.position,
+                };
+                book.markModified('coverData');
+            }
+            else if (pageData.pageType === book_types_1.PageType.INTRO && pageData.introData) {
+                book.introData = {
+                    ...pageData.introData,
+                    pageId,
+                    pageType: book_types_1.PageType.INTRO,
+                    position: pageData.position,
+                };
+                book.markModified('introData');
+            }
+            else if (pageData.pageType === book_types_1.PageType.EXTRA && pageData.extraPageData) {
+                book.extraPageData = {
+                    ...pageData.extraPageData,
+                    pageId,
+                    position: pageData.position,
+                };
+                book.markModified('extraPageData');
+            }
+            else {
+                throw libs_1.Errors.badRequest('Invalid page type or missing page data');
+            }
             await book.save();
             libs_1.logger.info('Page added to book', {
                 bookId,
@@ -305,45 +378,67 @@ class BookService {
             if (cookbook.author.toString() !== userId) {
                 throw libs_1.Errors.forbidden('You can only update pages in your own books');
             }
-            const pageIndex = book.pages.findIndex((p) => p.pageId === pageId);
-            if (pageIndex === -1) {
-                throw libs_1.Errors.notFound('Page not found in book');
-            }
-            const page = book.pages[pageIndex];
+            const recipeIndex = book.recipe?.findIndex((r) => r.pageId === pageId) ?? -1;
             console.log('🔧 BEFORE UPDATE:', {
                 pageId,
-                currentLayout: page.layout,
+                recipeIndex,
+                recipeCount: book.recipe?.length,
                 incomingUpdates: updates,
             });
-            if (updates.position !== undefined)
-                page.position = updates.position;
-            if (updates.coverData !== undefined)
-                page.coverData = updates.coverData;
-            if (updates.introData !== undefined)
-                page.introData = updates.introData;
-            if (updates.recipe !== undefined)
-                page.recipe = updates.recipe;
-            if (updates.extraPageData !== undefined)
-                page.extraPageData = updates.extraPageData;
-            if (updates.layout !== undefined) {
-                console.log(`📐 UPDATING LAYOUT: ${page.layout} -> ${updates.layout}`);
-                page.layout = updates.layout;
+            if (recipeIndex !== -1 && book.recipe) {
+                const recipePage = book.recipe[recipeIndex];
+                console.log(`📐 Current recipe layout: ${recipePage.layout}`);
+                if (updates.position !== undefined)
+                    recipePage.position = updates.position;
+                if (updates.layout !== undefined) {
+                    console.log(`📐 UPDATING RECIPE LAYOUT: ${recipePage.layout} -> ${updates.layout}`);
+                    recipePage.layout = updates.layout;
+                }
+                if (updates.position !== undefined) {
+                    book.recipe.sort((a, b) => a.position - b.position);
+                }
+                book.markModified('recipe');
+                console.log('🔖 Marked recipe array as modified');
+                await book.save();
+                console.log('💾 Book saved to database');
+                console.log('💾 SAVED TO DATABASE:', {
+                    pageId,
+                    savedLayout: book.recipe[recipeIndex].layout,
+                });
             }
-            if (updates.editedContent !== undefined)
-                page.editedContent = updates.editedContent;
-            page.lastEditedAt = new Date();
-            console.log('🔧 AFTER UPDATE (before save):', {
-                pageId,
-                newLayout: page.layout,
-            });
-            if (updates.position !== undefined) {
-                book.pages.sort((a, b) => a.position - b.position);
+            else if (book.coverData && pageId === book.coverData.pageId) {
+                if (updates.layout !== undefined && book.coverData) {
+                    book.coverData.layout = updates.layout;
+                }
+                if (updates.coverData !== undefined) {
+                    book.coverData = { ...book.coverData, ...updates.coverData };
+                }
+                book.markModified('coverData');
+                await book.save();
             }
-            await book.save();
-            console.log('💾 SAVED TO DATABASE:', {
-                pageId,
-                savedLayout: book.pages[pageIndex].layout,
-            });
+            else if (book.introData && pageId === book.introData.pageId) {
+                if (updates.layout !== undefined && book.introData) {
+                    book.introData.layout = updates.layout;
+                }
+                if (updates.introData !== undefined) {
+                    book.introData = { ...book.introData, ...updates.introData };
+                }
+                book.markModified('introData');
+                await book.save();
+            }
+            else if (book.extraPageData && pageId === book.extraPageData.pageId) {
+                if (updates.layout !== undefined && book.extraPageData) {
+                    book.extraPageData.layout = updates.layout;
+                }
+                if (updates.extraPageData !== undefined) {
+                    book.extraPageData = { ...book.extraPageData, ...updates.extraPageData };
+                }
+                book.markModified('extraPageData');
+                await book.save();
+            }
+            else {
+                throw libs_1.Errors.notFound('Page not found in book');
+            }
             libs_1.logger.info('Page updated in book', { bookId, userId, pageId });
             return book;
         }
@@ -365,12 +460,26 @@ class BookService {
             if (cookbook.author.toString() !== userId) {
                 throw libs_1.Errors.forbidden('You can only delete pages from your own books');
             }
-            const pageIndex = book.pages.findIndex((p) => p.pageId === pageId);
-            if (pageIndex === -1) {
+            const recipeIndex = book.recipe?.findIndex((r) => r.pageId === pageId) ?? -1;
+            if (recipeIndex !== -1 && book.recipe) {
+                book.recipe.splice(recipeIndex, 1);
+                book.markModified('recipe');
+                await book.save();
+            }
+            else if (book.coverData && pageId === book.coverData.pageId) {
+                throw libs_1.Errors.badRequest('Cannot delete cover page');
+            }
+            else if (book.introData && pageId === book.introData.pageId) {
+                throw libs_1.Errors.badRequest('Cannot delete intro page');
+            }
+            else if (book.extraPageData && pageId === book.extraPageData.pageId) {
+                book.extraPageData = undefined;
+                book.markModified('extraPageData');
+                await book.save();
+            }
+            else {
                 throw libs_1.Errors.notFound('Page not found in book');
             }
-            book.pages.splice(pageIndex, 1);
-            await book.save();
             libs_1.logger.info('Page deleted from book', { bookId, userId, pageId });
             return book;
         }
@@ -393,12 +502,28 @@ class BookService {
                 throw libs_1.Errors.forbidden('You can only reorder pages in your own books');
             }
             pageOrder.forEach(({ pageId, position }) => {
-                const page = book.pages.find((p) => p.pageId === pageId);
-                if (page) {
-                    page.position = position;
+                const recipeIndex = book.recipe?.findIndex((r) => r.pageId === pageId) ?? -1;
+                if (recipeIndex !== -1 && book.recipe) {
+                    book.recipe[recipeIndex].position = position;
+                    book.markModified('recipe');
+                }
+                else if (book.coverData && pageId === book.coverData.pageId) {
+                    book.coverData.position = position;
+                    book.markModified('coverData');
+                }
+                else if (book.introData && pageId === book.introData.pageId) {
+                    book.introData.position = position;
+                    book.markModified('introData');
+                }
+                else if (book.extraPageData && pageId === book.extraPageData.pageId) {
+                    book.extraPageData.position = position;
+                    book.markModified('extraPageData');
                 }
             });
-            book.pages.sort((a, b) => a.position - b.position);
+            if (book.recipe && book.recipe.length > 0) {
+                book.recipe.sort((a, b) => a.position - b.position);
+                book.markModified('recipe');
+            }
             await book.save();
             libs_1.logger.info('Pages reordered in book', {
                 bookId,

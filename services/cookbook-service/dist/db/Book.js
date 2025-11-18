@@ -2,21 +2,27 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
 const book_types_1 = require("../Types/book.types");
-const PageSchema = new mongoose_1.Schema({
-    pageId: {
+const BookSchema = new mongoose_1.Schema({
+    name: {
         type: String,
         required: true,
     },
-    pageType: {
+    description: {
         type: String,
-        enum: Object.values(book_types_1.PageType),
-        required: true,
     },
-    position: {
-        type: Number,
+    cookbook: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: 'Cookbook',
         required: true,
+        index: true,
     },
     coverData: {
+        pageId: String,
+        pageType: {
+            type: String,
+            enum: Object.values(book_types_1.PageType),
+        },
+        position: Number,
         title: String,
         subtitle: String,
         backgroundImage: String,
@@ -25,11 +31,31 @@ const PageSchema = new mongoose_1.Schema({
         layout: String,
     },
     introData: {
+        pageId: String,
+        pageType: {
+            type: String,
+            enum: Object.values(book_types_1.PageType),
+        },
+        position: Number,
         backgroundImage: String,
         customContent: String,
         layout: String,
     },
-    recipe: [{
+    recipe: [
+        {
+            pageId: {
+                type: String,
+                required: true,
+            },
+            pageType: {
+                type: String,
+                enum: Object.values(book_types_1.PageType),
+                required: true,
+            },
+            position: {
+                type: Number,
+                required: true,
+            },
             basicInfo: {
                 recipeName: { type: String, trim: true, index: 'text' },
                 duration: {
@@ -114,9 +140,17 @@ const PageSchema = new mongoose_1.Schema({
                 type: Number,
                 required: true,
                 default: 1,
-            }
-        }],
+            },
+            layout: {
+                type: String,
+                required: true,
+                default: 'layout-one',
+            },
+        },
+    ],
     extraPageData: {
+        pageId: String,
+        position: Number,
         title: String,
         pageType: {
             type: String,
@@ -126,18 +160,6 @@ const PageSchema = new mongoose_1.Schema({
         content: String,
         layout: String,
     },
-    layout: String,
-    editedContent: String,
-    lastEditedAt: Date,
-});
-const BookSchema = new mongoose_1.Schema({
-    cookbook: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        ref: 'Cookbook',
-        required: true,
-        index: true,
-    },
-    pages: [PageSchema],
     sections: [
         {
             sectionId: {
@@ -184,12 +206,16 @@ const BookSchema = new mongoose_1.Schema({
     toObject: { virtuals: true },
 });
 BookSchema.index({ cookbook: 1, isActive: 1 });
-BookSchema.index({ cookbook: 1, 'pages.pageId': 1 });
-BookSchema.index({ 'pages.recipe.author.userId': 1, isActive: 1, createdAt: -1 });
+BookSchema.index({ cookbook: 1, 'recipe.pageId': 1 });
+BookSchema.index({
+    'recipe.author.userId': 1,
+    isActive: 1,
+    createdAt: -1,
+});
 BookSchema.index({ status: 1, isPublic: 1 });
-BookSchema.index({ 'pages.position': 1 });
-BookSchema.virtual('pageCount').get(function () {
-    return this.pages?.length || 0;
+BookSchema.index({ 'recipe.position': 1 });
+BookSchema.virtual('recipeCount').get(function () {
+    return this.recipe?.length || 0;
 });
 BookSchema.virtual('sectionCount').get(function () {
     return this.sections?.length || 0;

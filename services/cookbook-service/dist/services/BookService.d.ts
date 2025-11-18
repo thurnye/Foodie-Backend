@@ -1,12 +1,16 @@
-import { IBook, IBookSection, BookStatus, IPage, PageType, ICoverPageData, IIntroPageData, IExtraPageData } from '../Types/book.types';
+import { IBook, IBookSection, BookStatus, PageType, ICoverPageData, IIntroPageData, IExtraPageData } from '../Types/book.types';
 interface CreateBookData {
+    bookId?: string;
+    name?: string;
+    description?: string;
     cookbookId: string;
-    pages?: IPage[];
     sections?: IBookSection[];
     recipeIds?: string[];
 }
 interface UpdateBookData {
-    pages?: IPage[];
+    name?: string;
+    description?: string;
+    pages?: any[];
     sections?: IBookSection[];
     status?: BookStatus;
     isPublic?: boolean;

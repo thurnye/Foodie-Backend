@@ -19,29 +19,9 @@ class BookController {
         return;
       }
 
-      const { bookId, name, description, cookbookId, pages, sections, recipeIds } = req.body;
+      const { bookId, name, description, cookbookId, sections, recipeIds } = req.body;
 
       console.log('📥 CREATE/UPDATE BOOK REQUEST:', req.body);
-
-      // If bookId is provided, update existing book
-      // if (bookId) {
-      //   console.log('📝 Updating existing book:', bookId);
-
-      //   const updates: any = {};
-      //   if (name !== undefined) updates.name = name;
-      //   if (description !== undefined) updates.description = description;
-      //   if (pages !== undefined) updates.pages = pages;
-      //   if (sections !== undefined) updates.sections = sections;
-
-      //   // const book = await BookService.updateBook(bookId, userId, updates);
-
-      //   res.status(200).json({
-      //     success: true,
-      //     // data: book,
-      //     message: 'Book updated successfully',
-      //   });
-      //   return;
-      // }
 
       // Otherwise, create new book
       if (!cookbookId) {
@@ -61,7 +41,6 @@ class BookController {
           name,
           description,
           cookbookId,
-          pages,
           sections,
           recipeIds,
         }
@@ -285,6 +264,9 @@ class BookController {
         pageId,
         userId,
         updates: req.body,
+        layoutUpdate: req.body.layout,
+        requestUrl: req.originalUrl,
+        method: req.method,
       });
 
       if (!userId) {
@@ -299,10 +281,20 @@ class BookController {
 
       const book = await BookService.updatePage(bookId, pageId, userId, updates);
 
+      // Find updated page in the new schema (could be in recipe array, coverData, introData, or extraPageData)
+      const updatedRecipe = book.recipe?.find((r: any) => r.pageId === pageId);
+      const updatedPage = updatedRecipe ||
+        (book.coverData?.pageId === pageId ? book.coverData : null) ||
+        (book.introData?.pageId === pageId ? book.introData : null) ||
+        (book.extraPageData?.pageId === pageId ? book.extraPageData : null);
+
       console.log('✅ PAGE UPDATED SUCCESSFULLY:', {
         bookId,
         pageId,
-        updatedLayout: book.pages.find(p => p.pageId === pageId)?.layout,
+        updatedLayout: updatedPage?.layout,
+        pageExists: !!updatedPage,
+        totalRecipes: book.recipe?.length || 0,
+        allRecipeLayouts: book.recipe?.map((r: any) => ({ pageId: r.pageId, layout: r.layout })) || [],
       });
 
       res.status(200).json({

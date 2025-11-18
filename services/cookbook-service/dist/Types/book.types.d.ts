@@ -14,6 +14,9 @@ export declare enum PageType {
     EXTRA = "extra"
 }
 export interface ICoverPageData {
+    pageId: string;
+    pageType: PageType;
+    position: number;
     title?: string;
     subtitle?: string;
     backgroundImage?: string;
@@ -22,11 +25,16 @@ export interface ICoverPageData {
     layout: string;
 }
 export interface IIntroPageData {
+    pageId: string;
+    pageType: PageType;
+    position: number;
     backgroundImage?: string;
     customContent?: string;
     layout: string;
 }
 export interface IExtraPageData {
+    pageId: string;
+    position: number;
     title: string;
     pageType: 'blank' | 'template';
     templateType?: string;
@@ -86,23 +94,24 @@ export interface IRecipePage {
         ingredients: IIngredient[];
     };
     author: IRecipeAuthor;
-}
-export interface IPage {
-    pageId: string;
+    order: number;
+    layout: string;
+    pageId: {
+        type: String;
+        required: true;
+    };
     pageType: PageType;
     position: number;
+}
+export interface IBook extends Document {
+    _id: Types.ObjectId;
+    name: string;
+    description?: string;
+    cookbook: Types.ObjectId;
     coverData?: ICoverPageData;
     introData?: IIntroPageData;
     recipe?: IRecipePage[];
     extraPageData?: IExtraPageData;
-    layout?: string;
-    editedContent?: string;
-    lastEditedAt?: Date;
-}
-export interface IBook extends Document {
-    _id: Types.ObjectId;
-    cookbook: Types.ObjectId;
-    pages: IPage[];
     sections?: IBookSection[];
     status: BookStatus;
     isPublic: boolean;

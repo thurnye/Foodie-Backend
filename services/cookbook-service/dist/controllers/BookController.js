@@ -16,31 +16,38 @@ class BookController {
                 });
                 return;
             }
-            const { cookbookId, pages, sections, recipeIds } = req.body;
+            const { bookId, name, description, cookbookId, sections, recipeIds } = req.body;
+            console.log('📥 CREATE/UPDATE BOOK REQUEST:', req.body);
             if (!cookbookId) {
                 res.status(400).json({
                     success: false,
-                    message: 'Cookbook ID is required',
+                    message: 'Cookbook ID is required to create a new book',
                 });
                 return;
             }
+            console.log('📘 Creating new book for cookbook:', cookbookId);
             const book = await BookService_1.default.createBook(userId, {
+                bookId,
+                name,
+                description,
                 cookbookId,
-                pages,
                 sections,
                 recipeIds,
             });
-            res.status(201).json({
+            const message = bookId
+                ? 'Book updated successfully with new recipes'
+                : 'Book created successfully';
+            res.status(bookId ? 200 : 201).json({
                 success: true,
                 data: book,
-                message: 'Book created successfully',
+                message,
             });
         }
         catch (error) {
-            libs_1.logger.error('Create book error', { error });
+            libs_1.logger.error('Create/Update book error', { error });
             res.status(error.statusCode || 500).json({
                 success: false,
-                message: error.message || 'Failed to create book',
+                message: error.message || 'Failed to create/update book',
             });
         }
     }
@@ -199,6 +206,9 @@ class BookController {
                 pageId,
                 userId,
                 updates: req.body,
+                layoutUpdate: req.body.layout,
+                requestUrl: req.originalUrl,
+                method: req.method,
             });
             if (!userId) {
                 res.status(401).json({
@@ -209,10 +219,18 @@ class BookController {
             }
             const updates = req.body;
             const book = await BookService_1.default.updatePage(bookId, pageId, userId, updates);
+            const updatedRecipe = book.recipe?.find((r) => r.pageId === pageId);
+            const updatedPage = updatedRecipe ||
+                (book.coverData?.pageId === pageId ? book.coverData : null) ||
+                (book.introData?.pageId === pageId ? book.introData : null) ||
+                (book.extraPageData?.pageId === pageId ? book.extraPageData : null);
             console.log('✅ PAGE UPDATED SUCCESSFULLY:', {
                 bookId,
                 pageId,
-                updatedLayout: book.pages.find(p => p.pageId === pageId)?.layout,
+                updatedLayout: updatedPage?.layout,
+                pageExists: !!updatedPage,
+                totalRecipes: book.recipe?.length || 0,
+                allRecipeLayouts: book.recipe?.map((r) => ({ pageId: r.pageId, layout: r.layout })) || [],
             });
             res.status(200).json({
                 success: true,

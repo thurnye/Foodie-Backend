@@ -26,6 +26,10 @@ export enum PageType {
  * Cover/Back Cover Page Data
  */
 export interface ICoverPageData {
+  pageId: string; // Unique identifier for the page
+  pageType: PageType;
+  position: number; // Position/order in the cookbook
+
   title?: string;
   subtitle?: string;
   backgroundImage?: string;
@@ -38,6 +42,10 @@ export interface ICoverPageData {
  * Introduction Page Data
  */
 export interface IIntroPageData {
+  pageId: string; // Unique identifier for the page
+  pageType: PageType;
+  position: number; // Position/order in the cookbook
+
   backgroundImage?: string;
   customContent?: string;
   layout: string; // e.g., 'intro-layout-one'
@@ -47,6 +55,9 @@ export interface IIntroPageData {
  * Extra Page Data (for custom pages like weekly planner, note pages, blank pages)
  */
 export interface IExtraPageData {
+  pageId: string; // Unique identifier for the page
+  position: number; // Position/order in the cookbook
+
   title: string;
   pageType: 'blank' | 'template'; // blank page or template
   templateType?: string; // 'weekly-planner', 'note-page'
@@ -128,15 +139,46 @@ export interface IRecipePage {
     ingredients: IIngredient[];
   };
   author: IRecipeAuthor;
+  order: number;
+  layout: string;
+  pageId: {
+    type: String;
+    required: true;
+  };
+  pageType: PageType;
+  position: number;
 }
 /**
  * Page Interface - Represents a single page in the cookbook
  * This can be a cover page, intro page, recipe page, extra page, etc.
  */
-export interface IPage {
-  pageId: string; // Unique identifier for the page
-  pageType: PageType;
-  position: number; // Position/order in the cookbook
+// export interface IPage {
+//   pageId: string; // Unique identifier for the page
+//   pageType: PageType;
+//   position: number; // Position/order in the cookbook
+
+//   // Cover page specific data
+//   coverData?: ICoverPageData;
+
+//   // Introduction page specific data
+//   introData?: IIntroPageData;
+
+//   // Recipe page specific data (if it's a recipe page)
+//   recipe?: IRecipePage[];
+
+//   // Extra page specific data (blank pages, templates)
+//   extraPageData?: IExtraPageData;
+// }
+
+export interface IBook extends Document {
+  _id: Types.ObjectId;
+  name: string;
+  description?: string;
+  cookbook: Types.ObjectId; // Reference to original cookbook
+
+  // pageId: string; // Unique identifier for the page
+  // pageType: PageType;
+  // position: number; // Position/order in the cookbook
 
   // Cover page specific data
   coverData?: ICoverPageData;
@@ -149,23 +191,6 @@ export interface IPage {
 
   // Extra page specific data (blank pages, templates)
   extraPageData?: IExtraPageData;
-
-  // Layout for this specific page
-  layout?: string;
-
-  // Edited content for this page
-  editedContent?: string;
-  lastEditedAt?: Date;
-}
-
-export interface IBook extends Document {
-  _id: Types.ObjectId;
-  name: string;
-  description?: string;
-  cookbook: Types.ObjectId; // Reference to original cookbook
-
-  // Array of all pages in the book with their positions
-  pages: IPage[];
 
   // Edited sections content (for backward compatibility, can be deprecated later)
   sections?: IBookSection[];
