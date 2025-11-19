@@ -10,8 +10,9 @@ import {
   PageType,
   ICoverPageData,
   IIntroPageData,
+  ITocPageData,
+  IBackCoverPageData,
   IExtraPageData,
-  IRecipePage,
 } from '../Types/book.types';
 
 interface CreateBookData {
@@ -38,6 +39,8 @@ interface CreatePageData {
   position: number;
   coverData?: ICoverPageData;
   introData?: IIntroPageData;
+  tocData?: ITocPageData;
+  backCoverData?: IBackCoverPageData;
   recipe?: any;
   extraPageData?: IExtraPageData;
   layout?: string;
@@ -48,6 +51,8 @@ interface UpdatePageData {
   position?: number;
   coverData?: ICoverPageData;
   introData?: IIntroPageData;
+  tocData?: ITocPageData;
+  backCoverData?: IBackCoverPageData;
   recipe?: any;
   extraPageData?: IExtraPageData;
   layout?: string;
@@ -115,6 +120,23 @@ class BookService {
         position: 2,
         customContent: '',
         layout: 'intro-layout-one',
+      };
+
+      const defaultTocData: ITocPageData = {
+        pageId: 'toc',
+        pageType: PageType.TOC,
+        position: 3,
+        customContent: '',
+        layout: 'toc-layout-one',
+      };
+
+      const defaultBackCoverData: IBackCoverPageData = {
+        pageId: 'back-cover',
+        pageType: PageType.BACK_COVER,
+        position: 999, // Place at end
+        title: cookbook.title || '',
+        subtitle: '',
+        layout: 'back-cover-layout-one',
       };
 
       // Prepare recipe array
@@ -199,6 +221,8 @@ class BookService {
         cookbook: new Types.ObjectId(data.cookbookId),
         coverData: defaultCoverData,
         introData: defaultIntroData,
+        tocData: defaultTocData,
+        backCoverData: defaultBackCoverData,
         recipe: recipeArray,
         sections: data.sections
           ? data.sections.map((section) => ({
@@ -233,6 +257,76 @@ class BookService {
   }
 
   /**
+   * Ensure book has all required pages (cover, intro, toc, back cover)
+   * Adds missing pages with default data
+   */
+  private async ensureRequiredPages(book: IBook): Promise<boolean> {
+    let updated = false;
+
+    // Ensure cover page exists
+    if (!book.coverData) {
+      const cookbook = book.cookbook as any;
+      book.coverData = {
+        pageId: 'cover',
+        pageType: PageType.COVER,
+        position: 1,
+        title: cookbook?.title || book.name || '',
+        subtitle: cookbook?.description || book.description || '',
+        layout: 'cover-layout-one',
+      };
+      book.markModified('coverData');
+      updated = true;
+    }
+
+    // Ensure intro page exists
+    if (!book.introData) {
+      book.introData = {
+        pageId: 'intro',
+        pageType: PageType.INTRO,
+        position: 2,
+        customContent: '',
+        layout: 'intro-layout-one',
+      };
+      book.markModified('introData');
+      updated = true;
+    }
+
+    // Ensure TOC page exists
+    if (!book.tocData) {
+      book.tocData = {
+        pageId: 'toc',
+        pageType: PageType.TOC,
+        position: 3,
+        customContent: '',
+        layout: 'toc-layout-one',
+      };
+      book.markModified('tocData');
+      updated = true;
+    }
+
+    // Ensure back cover page exists
+    if (!book.backCoverData) {
+      const cookbook = book.cookbook as any;
+      book.backCoverData = {
+        pageId: 'back-cover',
+        pageType: PageType.BACK_COVER,
+        position: 999,
+        title: cookbook?.title || book.name || '',
+        subtitle: '',
+        layout: 'back-cover-layout-one',
+      };
+      book.markModified('backCoverData');
+      updated = true;
+    }
+
+    if (updated) {
+      await book.save();
+    }
+
+    return updated;
+  }
+
+  /**
    * Get book by ID
    */
   async getBookById(bookId: string, userId?: string): Promise<IBook> {
@@ -245,6 +339,9 @@ class BookService {
       if (!book) {
         throw Errors.notFound('Book not found');
       }
+
+      // Ensure all required pages exist (for backward compatibility)
+      await this.ensureRequiredPages(book);
 
       // Check permissions via the cookbook author
       const cookbook = book.cookbook as any;
@@ -537,13 +634,38 @@ class BookService {
           position: pageData.position,
         };
         book.markModified('introData');
+      } else if (pageData.pageType === PageType.TOC && pageData.tocData) {
+        // Set TOC data
+        book.tocData = {
+          ...pageData.tocData,
+          pageId,
+          pageType: PageType.TOC,
+          position: pageData.position,
+        };
+        book.markModified('tocData');
+      } else if (pageData.pageType === PageType.BACK_COVER && pageData.backCoverData) {
+        // Set back cover data
+        book.backCoverData = {
+          ...pageData.backCoverData,
+          pageId,
+          pageType: PageType.BACK_COVER,
+          position: pageData.position,
+        };
+        book.markModified('backCoverData');
       } else if (pageData.pageType === PageType.EXTRA && pageData.extraPageData) {
-        // Set extra page data
-        book.extraPageData = {
+        // Add extra page to extraPageData array
+        if (!book.extraPageData) {
+          book.extraPageData = [];
+        }
+
+        const extraPage: any = {
           ...pageData.extraPageData,
           pageId,
           position: pageData.position,
         };
+
+        book.extraPageData.push(extraPage);
+        book.extraPageData.sort((a: any, b: any) => a.position - b.position);
         book.markModified('extraPageData');
       } else {
         throw Errors.badRequest('Invalid page type or missing page data');
@@ -590,6 +712,9 @@ class BookService {
         throw Errors.forbidden('You can only update pages in your own books');
       }
 
+      // Ensure all required pages exist (for backward compatibility)
+      await this.ensureRequiredPages(book);
+
       console.log('🔧 BEFORE UPDATE:', {
         bookId,
         pageId,
@@ -598,14 +723,6 @@ class BookService {
       });
 
       let updated = false;
-
-      // Helper function to apply updates to a page object
-      // const applyUpdates = (page: any, fieldName: string) => {
-      //   if (updates.layout !== undefined) page.layout = updates.layout;
-      //   if (updates.position !== undefined) page.position = updates.position;
-      //   book.markModified(fieldName);
-      //   updated = true;
-      // };
 
       // Use pageType for direct lookup or search all fields
       const pageType = updates.pageType;
@@ -670,13 +787,53 @@ class BookService {
         }
       }
 
+      // Update TOC page
+      if (!updated && (!pageType || pageType === PageType.TOC)) {
+        if (book.tocData?.pageId === pageId) {
+          if (updates.layout !== undefined) book.tocData.layout = updates.layout;
+          if (updates.tocData !== undefined) {
+            book.tocData = { ...book.tocData, ...updates.tocData };
+          }
+          book.markModified('tocData');
+          updated = true;
+          if (pageType) return await book.save();
+        } else if (pageType === PageType.TOC) {
+          throw Errors.notFound('TOC page not found in book');
+        }
+      }
+
+      // Update back cover page
+      if (!updated && (!pageType || pageType === PageType.BACK_COVER)) {
+        if (book.backCoverData?.pageId === pageId) {
+          if (updates.layout !== undefined) book.backCoverData.layout = updates.layout;
+          if (updates.backCoverData !== undefined) {
+            book.backCoverData = { ...book.backCoverData, ...updates.backCoverData };
+          }
+          book.markModified('backCoverData');
+          updated = true;
+          if (pageType) return await book.save();
+        } else if (pageType === PageType.BACK_COVER) {
+          throw Errors.notFound('Back cover page not found in book');
+        }
+      }
+
       // Update extra page
       if (!updated && (!pageType || pageType === PageType.EXTRA)) {
-        if (book.extraPageData?.pageId === pageId) {
-          if (updates.layout !== undefined) book.extraPageData.layout = updates.layout;
+        const extraPageIndex = book.extraPageData?.findIndex((p: any) => p.pageId === pageId) ?? -1;
+        if (extraPageIndex !== -1 && book.extraPageData) {
+          const extraPage = book.extraPageData[extraPageIndex];
+
+          if (updates.layout !== undefined) extraPage.layout = updates.layout;
+          if (updates.position !== undefined) extraPage.position = updates.position;
           if (updates.extraPageData !== undefined) {
-            book.extraPageData = { ...book.extraPageData, ...updates.extraPageData };
+            Object.assign(extraPage, updates.extraPageData);
           }
+
+          // Reorder if position changed
+          if (updates.position !== undefined) {
+            book.extraPageData.sort((a: any, b: any) => a.position - b.position);
+          }
+
           book.markModified('extraPageData');
           updated = true;
           if (pageType) return await book.save();
@@ -738,13 +895,23 @@ class BookService {
       } else if (book.introData && pageId === book.introData.pageId) {
         // Cannot delete intro page
         throw Errors.badRequest('Cannot delete intro page');
-      } else if (book.extraPageData && pageId === book.extraPageData.pageId) {
-        // Delete extra page
-        book.extraPageData = undefined;
-        book.markModified('extraPageData');
-        await book.save();
+      } else if (book.tocData && pageId === book.tocData.pageId) {
+        // Cannot delete TOC page
+        throw Errors.badRequest('Cannot delete TOC page');
+      } else if (book.backCoverData && pageId === book.backCoverData.pageId) {
+        // Cannot delete back cover page
+        throw Errors.badRequest('Cannot delete back cover page');
       } else {
-        throw Errors.notFound('Page not found in book');
+        // Check if it's an extra page
+        const extraPageIndex = book.extraPageData?.findIndex((p: any) => p.pageId === pageId) ?? -1;
+        if (extraPageIndex !== -1 && book.extraPageData) {
+          // Delete extra page
+          book.extraPageData.splice(extraPageIndex, 1);
+          book.markModified('extraPageData');
+          await book.save();
+        } else {
+          throw Errors.notFound('Page not found in book');
+        }
       }
 
       logger.info('Page deleted from book', { bookId, userId, pageId });
@@ -798,10 +965,13 @@ class BookService {
           book.introData.position = position;
           book.markModified('introData');
         }
-        // Check extra page
-        else if (book.extraPageData && pageId === book.extraPageData.pageId) {
-          book.extraPageData.position = position;
-          book.markModified('extraPageData');
+        // Check extra pages array
+        else if (book.extraPageData) {
+          const extraPage = book.extraPageData.find((p: any) => p.pageId === pageId);
+          if (extraPage) {
+            extraPage.position = position;
+            book.markModified('extraPageData');
+          }
         }
       });
 
@@ -809,6 +979,12 @@ class BookService {
       if (book.recipe && book.recipe.length > 0) {
         book.recipe.sort((a: any, b: any) => a.position - b.position);
         book.markModified('recipe');
+      }
+
+      // Sort extra pages by position
+      if (book.extraPageData && book.extraPageData.length > 0) {
+        book.extraPageData.sort((a: any, b: any) => a.position - b.position);
+        book.markModified('extraPageData');
       }
 
       await book.save();

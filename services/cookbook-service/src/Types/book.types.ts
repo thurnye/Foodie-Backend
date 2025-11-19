@@ -52,6 +52,34 @@ export interface IIntroPageData {
 }
 
 /**
+ * Table of Contents Page Data
+ */
+export interface ITocPageData {
+  pageId: string; // Unique identifier for the page
+  pageType: PageType;
+  position: number; // Position/order in the cookbook
+
+  customContent?: string;
+  layout: string; // e.g., 'toc-layout-one'
+}
+
+/**
+ * Back Cover Page Data
+ */
+export interface IBackCoverPageData {
+  pageId: string; // Unique identifier for the page
+  pageType: PageType;
+  position: number; // Position/order in the cookbook
+
+  title?: string;
+  subtitle?: string;
+  backgroundImage?: string;
+  backgroundColor?: string;
+  customText?: string;
+  layout: string; // e.g., 'back-cover-layout-one'
+}
+
+/**
  * Extra Page Data (for custom pages like weekly planner, note pages, blank pages)
  */
 export interface IExtraPageData {
@@ -61,8 +89,10 @@ export interface IExtraPageData {
   title: string;
   pageType: 'blank' | 'template'; // blank page or template
   templateType?: string; // 'weekly-planner', 'note-page'
+  section: 'front' | 'back'; // front or back section
   content?: string; // HTML content if edited
   layout?: string;
+  createdAt?: Date;
 }
 
 /**
@@ -186,11 +216,17 @@ export interface IBook extends Document {
   // Introduction page specific data
   introData?: IIntroPageData;
 
+  // Table of Contents page specific data
+  tocData?: ITocPageData;
+
+  // Back Cover page specific data
+  backCoverData?: IBackCoverPageData;
+
   // Recipe page specific data (if it's a recipe page)
   recipe?: IRecipePage[];
 
-  // Extra page specific data (blank pages, templates)
-  extraPageData?: IExtraPageData;
+  // Extra pages array (blank pages, templates, etc.)
+  extraPageData?: IExtraPageData[];
 
   // Edited sections content (for backward compatibility, can be deprecated later)
   sections?: IBookSection[];

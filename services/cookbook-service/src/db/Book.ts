@@ -53,6 +53,34 @@ const BookSchema = new Schema<IBook>(
       layout: String,
     },
 
+    // Table of Contents page data
+    tocData: {
+      pageId: String,
+      pageType: {
+        type: String,
+        enum: Object.values(PageType),
+      },
+      position: Number,
+      customContent: String,
+      layout: String,
+    },
+
+    // Back Cover page data
+    backCoverData: {
+      pageId: String,
+      pageType: {
+        type: String,
+        enum: Object.values(PageType),
+      },
+      position: Number,
+      title: String,
+      subtitle: String,
+      backgroundImage: String,
+      backgroundColor: String,
+      customText: String,
+      layout: String,
+    },
+
     // Recipe pages array
     recipe: [
       {
@@ -161,20 +189,43 @@ const BookSchema = new Schema<IBook>(
         },
       },
     ],
+    // Extra pages (blank pages, templates) added by user
+    extraPageData: [
+      {
+        pageId: {
+          type: String,
+          required: true,
+        },
+        title: {
+          type: String,
+          required: true,
+        },
+        pageType: {
+          type: String,
+          enum: ['blank', 'template'],
+          required: true,
+        },
+        templateType: {
+          type: String,
+          enum: ['weekly-planner', 'note-page'],
+        },
+        section: {
+          type: String,
+          enum: ['front', 'back'],
+          required: true,
+        },
+        position: {
+          type: Number,
+          required: true,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
 
     // Extra page data (blank pages, templates)
-    extraPageData: {
-      pageId: String,
-      position: Number,
-      title: String,
-      pageType: {
-        type: String,
-        enum: ['blank', 'template'],
-      },
-      templateType: String,
-      content: String,
-      layout: String,
-    },
 
     // Array of edited sections (for backward compatibility)
     sections: [

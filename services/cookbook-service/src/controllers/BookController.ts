@@ -281,12 +281,13 @@ class BookController {
 
       const book = await BookService.updatePage(bookId, pageId, userId, updates);
 
-      // Find updated page in the new schema (could be in recipe array, coverData, introData, or extraPageData)
+      // Find updated page in the new schema (could be in recipe array, coverData, introData, or extraPageData array)
       const updatedRecipe = book.recipe?.find((r: any) => r.pageId === pageId);
+      const updatedExtraPage = book.extraPageData?.find((p: any) => p.pageId === pageId);
       const updatedPage = updatedRecipe ||
         (book.coverData?.pageId === pageId ? book.coverData : null) ||
         (book.introData?.pageId === pageId ? book.introData : null) ||
-        (book.extraPageData?.pageId === pageId ? book.extraPageData : null);
+        updatedExtraPage;
 
       console.log('✅ PAGE UPDATED SUCCESSFULLY:', {
         bookId,
