@@ -1,4 +1,5 @@
 import { fetchRecipeData } from './../utils/recipeClient';
+import { fetchUserData } from '../utils/userClient';
 import { Types } from 'mongoose';
 import { Errors, logger } from '@foodie/libs';
 import Book from '../db/Book';
@@ -353,10 +354,17 @@ class BookService {
       // Ensure all required pages exist (for backward compatibility)
       await this.ensureRequiredPages(book);
 
-      // Check permissions via the cookbook author
+      // Fetch author data from user-service
       const cookbook = book.cookbook as any;
+      let authorData = null;
+      if (cookbook && cookbook.author) {
+        authorData = await fetchUserData(cookbook.author.toString());
+      }
+
+      // Check permissions via the cookbook author
       if (userId) {
-        const isAuthor = cookbook.author?.toString() === userId;
+        const authorId = authorData?._id || cookbook?.author;
+        const isAuthor = authorId?.toString() === userId;
         if (!isAuthor && !book.isPublic) {
           throw Errors.forbidden(
             'You do not have permission to access this book'
@@ -364,6 +372,15 @@ class BookService {
         }
       } else if (!book.isPublic) {
         throw Errors.forbidden('This book is private');
+      }
+
+      // Convert to plain object and attach author data
+      if (authorData) {
+        const bookObj = book.toObject();
+        if (bookObj.cookbook && typeof bookObj.cookbook === 'object') {
+          (bookObj.cookbook as any).author = authorData;
+        }
+        return bookObj as IBook;
       }
 
       return book;
@@ -390,6 +407,33 @@ class BookService {
 
       // Ensure all required pages exist (for backward compatibility)
       await this.ensureRequiredPages(book);
+
+      // Fetch author data from user-service
+      const cookbook = book.cookbook as any;
+      console.log('📚 Cookbook data before fetching author:', {
+        cookbookId: cookbook?._id,
+        authorId: cookbook?.author,
+        authorType: typeof cookbook?.author,
+      });
+
+      if (cookbook && cookbook.author) {
+        const authorData = await fetchUserData(cookbook.author.toString());
+        console.log('👤 Author data fetched from user-service:', authorData);
+
+        if (authorData) {
+          // Convert the cookbook to a plain object to allow modification
+          const bookObj = book.toObject();
+          if (bookObj.cookbook && typeof bookObj.cookbook === 'object') {
+            (bookObj.cookbook as any).author = authorData;
+          }
+          console.log('✅ Author data attached to cookbook:', (bookObj.cookbook as any)?.author);
+          return bookObj as IBook;
+        } else {
+          console.log('❌ No author data returned from user-service');
+        }
+      } else {
+        console.log('❌ No cookbook or author found in book');
+      }
 
       return book;
     } catch (error) {
@@ -790,14 +834,11 @@ class BookService {
       if (!pageType || pageType === PageType.RECIPE) {
         console.log("Book's recipe pages:", book.recipe);
 
-        // const recipeIndex = book.recipe?.findIndex((r: any) => r._id === pageId)
-
-        const recipePage = book.recipe?.find((r:any) => r._id.toString() === pageId.toString());
+        // Search by pageId (e.g., "recipe-691f74d1fda9fce27b9f1e66")
+        const recipePage = book.recipe?.find((r:any) => r.pageId === pageId);
         console.log('🔍 Recipe page found:', recipePage);
 
         if (recipePage) {
-          // const recipePage = book.recipe[recipeIndex];
-
           if (updates.position !== undefined) recipePage.position = updates.position;
           if (updates.layout !== undefined) recipePage.layout = updates.layout;
           if (updates.recipe !== undefined) Object.assign(recipePage, updates.recipe);
