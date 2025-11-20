@@ -97,13 +97,13 @@ class PdfGenerationService {
             if (book.introData) {
                 libs_1.logger.info('📄 Generating intro page...');
                 const paperSize = book.introData.paperSize || 'A4';
-                const introPdf = await this.generatePagePdf(browser, bookId, book.introData.pageId, 'intro', paperSize, false);
+                const introPdf = await this.generatePagePdf(browser, bookId, book.introData.pageId, 'intro', paperSize, paperSize === 'A3');
                 pagePdfs.push(introPdf);
             }
             if (book.tocData) {
                 libs_1.logger.info('📄 Generating TOC page...');
                 const paperSize = book.tocData.paperSize || 'A4';
-                const tocPdf = await this.generatePagePdf(browser, bookId, book.tocData.pageId, 'toc', paperSize, false);
+                const tocPdf = await this.generatePagePdf(browser, bookId, book.tocData.pageId, 'toc', paperSize, paperSize === 'A3');
                 pagePdfs.push(tocPdf);
             }
             const frontExtraPages = book.extraPageData?.filter((p) => p.section === 'front') || [];
@@ -111,7 +111,7 @@ class PdfGenerationService {
             for (const extraPage of frontExtraPages) {
                 libs_1.logger.info(`📄 Generating front extra page: ${extraPage.title}...`);
                 const paperSize = extraPage.paperSize || 'A4';
-                const extraPdf = await this.generatePagePdf(browser, bookId, extraPage.pageId, 'extra', paperSize, false);
+                const extraPdf = await this.generatePagePdf(browser, bookId, extraPage.pageId, 'extra', paperSize, paperSize === 'A3');
                 pagePdfs.push(extraPdf);
             }
             if (book.recipe && book.recipe.length > 0) {
@@ -128,7 +128,7 @@ class PdfGenerationService {
             for (const extraPage of backExtraPages) {
                 libs_1.logger.info(`📄 Generating back extra page: ${extraPage.title}...`);
                 const paperSize = extraPage.paperSize || 'A4';
-                const extraPdf = await this.generatePagePdf(browser, bookId, extraPage.pageId, 'extra', paperSize, false);
+                const extraPdf = await this.generatePagePdf(browser, bookId, extraPage.pageId, 'extra', paperSize, paperSize === 'A3');
                 pagePdfs.push(extraPdf);
             }
             if (book.backCoverData) {

@@ -64,7 +64,6 @@ export interface ICookbook extends Document {
     title: string;
     description?: string;
     books: Types.ObjectId[];
-    extraPages?: IExtraPage[];
     theme: CookbookTheme;
     layout: CookbookLayout;
     paperSize?: PaperSize;

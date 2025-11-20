@@ -162,12 +162,12 @@ class PdfGenerationService {
           book.introData.pageId,
           'intro',
           paperSize,
-          false // Portrait
+          paperSize === 'A3' // Landscape for A3, Portrait for A4
         );
         pagePdfs.push(introPdf);
       }
 
-      // 3. Generate TOC Page PDF (Portrait)
+      // 3. Generate TOC Page PDF 
       if (book.tocData) {
         logger.info('📄 Generating TOC page...');
         const paperSize = book.tocData.paperSize || 'A4';
@@ -177,12 +177,12 @@ class PdfGenerationService {
           book.tocData.pageId,
           'toc',
           paperSize,
-          false // Portrait
+          paperSize === 'A3' // Portrait or landscape based on size
         );
         pagePdfs.push(tocPdf);
       }
 
-      // 4. Generate Front Extra Pages PDFs (Portrait)
+      // 4. Generate Front Extra Pages PDFs 
       const frontExtraPages = book.extraPageData?.filter(
         (p: any) => p.section === 'front'
       ) || [];
@@ -197,7 +197,7 @@ class PdfGenerationService {
           extraPage.pageId,
           'extra',
           paperSize,
-          false // Portrait
+          paperSize === 'A3' // Portrait
         );
         pagePdfs.push(extraPdf);
       }
@@ -236,7 +236,7 @@ class PdfGenerationService {
           extraPage.pageId,
           'extra',
           paperSize,
-          false // Portrait
+          paperSize === 'A3' // Portrait
         );
         pagePdfs.push(extraPdf);
       }

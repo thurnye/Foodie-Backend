@@ -96,9 +96,6 @@ export interface ICookbook extends Document {
   description?: string;
   books: Types.ObjectId[];
 
-  // Extra pages (blank pages, templates) added by user
-  extraPages?: IExtraPage[];
-
   // Customization
   theme: CookbookTheme;
   layout: CookbookLayout;
