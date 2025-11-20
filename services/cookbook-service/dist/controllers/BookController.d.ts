@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 declare class BookController {
     createBook(req: Request, res: Response): Promise<void>;
     getBookById(req: Request, res: Response): Promise<void>;
+    getBookForRendering(req: Request, res: Response): Promise<void>;
     getMyBooks(req: Request, res: Response): Promise<void>;
     updateBook(req: Request, res: Response): Promise<void>;
     deleteBook(req: Request, res: Response): Promise<void>;

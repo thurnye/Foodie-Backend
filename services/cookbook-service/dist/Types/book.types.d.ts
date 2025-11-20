@@ -13,6 +13,10 @@ export declare enum PageType {
     BACK_COVER = "backCover",
     EXTRA = "extra"
 }
+export declare enum PageLayoutFormat {
+    A3 = "A3",
+    A4 = "A4"
+}
 export interface ICoverPageData {
     pageId: string;
     pageType: PageType;
@@ -23,6 +27,7 @@ export interface ICoverPageData {
     backgroundColor?: string;
     customText?: string;
     layout: string;
+    paperSize?: PageLayoutFormat;
 }
 export interface IIntroPageData {
     pageId: string;
@@ -31,6 +36,27 @@ export interface IIntroPageData {
     backgroundImage?: string;
     customContent?: string;
     layout: string;
+    paperSize?: PageLayoutFormat;
+}
+export interface ITocPageData {
+    pageId: string;
+    pageType: PageType;
+    position: number;
+    customContent?: string;
+    layout: string;
+    paperSize?: PageLayoutFormat;
+}
+export interface IBackCoverPageData {
+    pageId: string;
+    pageType: PageType;
+    position: number;
+    title?: string;
+    subtitle?: string;
+    backgroundImage?: string;
+    backgroundColor?: string;
+    customText?: string;
+    layout: string;
+    paperSize?: PageLayoutFormat;
 }
 export interface IExtraPageData {
     pageId: string;
@@ -38,8 +64,11 @@ export interface IExtraPageData {
     title: string;
     pageType: 'blank' | 'template';
     templateType?: string;
+    section: 'front' | 'back';
     content?: string;
     layout?: string;
+    createdAt?: Date;
+    paperSize?: PageLayoutFormat;
 }
 export interface IBookSection {
     sectionId: string;
@@ -102,6 +131,7 @@ export interface IRecipePage {
     };
     pageType: PageType;
     position: number;
+    paperSize: PageLayoutFormat;
 }
 export interface IBook extends Document {
     _id: Types.ObjectId;
@@ -110,9 +140,12 @@ export interface IBook extends Document {
     cookbook: Types.ObjectId;
     coverData?: ICoverPageData;
     introData?: IIntroPageData;
+    tocData?: ITocPageData;
+    backCoverData?: IBackCoverPageData;
     recipe?: IRecipePage[];
-    extraPageData?: IExtraPageData;
+    extraPageData?: IExtraPageData[];
     sections?: IBookSection[];
+    bookUrl?: string;
     status: BookStatus;
     isPublic: boolean;
     isActive: boolean;

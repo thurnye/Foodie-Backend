@@ -3,12 +3,14 @@ import mongoose from 'mongoose';
 import helmet from 'helmet';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 import { execSync } from 'child_process';
 import { logger, mapErrorToResponse } from '@foodie/libs';
 
 // Import routes
 import cookbookRoutes from './routes/cookbook.routes';
 import bookRoutes from './routes/book.routes';
+import pdfRoutes from './routes/pdf.routes';
 
 // Import middleware
 import { userContextMiddleware } from './middleware/userContext';
@@ -64,11 +66,15 @@ app.get('/health', (_req: Request, res: Response) => {
   res.json({ success: true, message: 'Cookbook service is healthy' });
 });
 
+// Serve static files (PDF uploads)
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
 /* --------------------------------------------
    Routes
 --------------------------------------------- */
 app.use('/api/cookbook', cookbookRoutes);
 app.use('/api/books', bookRoutes);
+app.use('/api/cookbook/pdf', pdfRoutes);
 
 // Legacy support
 app.use('/cookbook', cookbookRoutes);

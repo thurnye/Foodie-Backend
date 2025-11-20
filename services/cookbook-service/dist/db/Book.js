@@ -29,6 +29,10 @@ const BookSchema = new mongoose_1.Schema({
         backgroundColor: String,
         customText: String,
         layout: String,
+        paperSize: {
+            type: String,
+            enum: Object.values(book_types_1.PageLayoutFormat),
+        },
     },
     introData: {
         pageId: String,
@@ -40,6 +44,42 @@ const BookSchema = new mongoose_1.Schema({
         backgroundImage: String,
         customContent: String,
         layout: String,
+        paperSize: {
+            type: String,
+            enum: Object.values(book_types_1.PageLayoutFormat),
+        },
+    },
+    tocData: {
+        pageId: String,
+        pageType: {
+            type: String,
+            enum: Object.values(book_types_1.PageType),
+        },
+        position: Number,
+        customContent: String,
+        layout: String,
+        paperSize: {
+            type: String,
+            enum: Object.values(book_types_1.PageLayoutFormat),
+        },
+    },
+    backCoverData: {
+        pageId: String,
+        pageType: {
+            type: String,
+            enum: Object.values(book_types_1.PageType),
+        },
+        position: Number,
+        title: String,
+        subtitle: String,
+        backgroundImage: String,
+        backgroundColor: String,
+        customText: String,
+        layout: String,
+        paperSize: {
+            type: String,
+            enum: Object.values(book_types_1.PageLayoutFormat),
+        },
     },
     recipe: [
         {
@@ -146,20 +186,51 @@ const BookSchema = new mongoose_1.Schema({
                 required: true,
                 default: 'layout-one',
             },
+            paperSize: {
+                type: String,
+                enum: Object.values(book_types_1.PageLayoutFormat),
+                default: 'A3',
+            },
         },
     ],
-    extraPageData: {
-        pageId: String,
-        position: Number,
-        title: String,
-        pageType: {
-            type: String,
-            enum: ['blank', 'template'],
+    extraPageData: [
+        {
+            pageId: {
+                type: String,
+                required: true,
+            },
+            title: {
+                type: String,
+                required: true,
+            },
+            pageType: {
+                type: String,
+                enum: ['blank', 'template'],
+                required: true,
+            },
+            templateType: {
+                type: String,
+                enum: ['weekly-planner', 'note-page'],
+            },
+            section: {
+                type: String,
+                enum: ['front', 'back'],
+                required: true,
+            },
+            position: {
+                type: Number,
+                required: true,
+            },
+            createdAt: {
+                type: Date,
+                default: Date.now,
+            },
+            paperSize: {
+                type: String,
+                enum: Object.values(book_types_1.PageLayoutFormat),
+            },
         },
-        templateType: String,
-        content: String,
-        layout: String,
-    },
+    ],
     sections: [
         {
             sectionId: {
@@ -181,6 +252,9 @@ const BookSchema = new mongoose_1.Schema({
             },
         },
     ],
+    bookUrl: {
+        type: String,
+    },
     status: {
         type: String,
         enum: Object.values(book_types_1.BookStatus),

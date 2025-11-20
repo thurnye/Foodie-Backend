@@ -89,6 +89,31 @@ class BookController {
   }
 
   /**
+   * Get book data for PDF rendering (unauthenticated - for internal use only)
+   * GET /api/books/:bookId/render-data
+   */
+  async getBookForRendering(req: Request, res: Response): Promise<void> {
+    const { bookId } = req.params;
+
+    try {
+      // Get book without user authentication (for PDF rendering by Playwright)
+      // Note: This endpoint should ideally be protected by IP restrictions or internal network
+      const book = await BookService.getBookByIdWithoutAuth(bookId);
+
+      res.status(200).json({
+        success: true,
+        data: book,
+      });
+    } catch (error: any) {
+      logger.error('Get book for rendering error', { error, bookId });
+      res.status(error.statusCode || 500).json({
+        success: false,
+        message: error.message || 'Failed to get book for rendering',
+      });
+    }
+  }
+
+  /**
    * Get user's books
    * GET /api/books/my
    */

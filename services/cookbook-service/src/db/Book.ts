@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { BookStatus, IBook, PageType } from '../Types/book.types';
+import { BookStatus, IBook, PageType, PageLayoutFormat } from '../Types/book.types';
 
 /**
  * Page Sub-Schema - Represents a single page in the cookbook
@@ -38,6 +38,10 @@ const BookSchema = new Schema<IBook>(
       backgroundColor: String,
       customText: String,
       layout: String,
+      paperSize: {
+        type: String,
+        enum: Object.values(PageLayoutFormat),
+      },
     },
 
     // Introduction page data
@@ -51,6 +55,10 @@ const BookSchema = new Schema<IBook>(
       backgroundImage: String,
       customContent: String,
       layout: String,
+      paperSize: {
+        type: String,
+        enum: Object.values(PageLayoutFormat),
+      },
     },
 
     // Table of Contents page data
@@ -63,6 +71,10 @@ const BookSchema = new Schema<IBook>(
       position: Number,
       customContent: String,
       layout: String,
+      paperSize: {
+        type: String,
+        enum: Object.values(PageLayoutFormat),
+      },
     },
 
     // Back Cover page data
@@ -79,6 +91,10 @@ const BookSchema = new Schema<IBook>(
       backgroundColor: String,
       customText: String,
       layout: String,
+      paperSize: {
+        type: String,
+        enum: Object.values(PageLayoutFormat),
+      },
     },
 
     // Recipe pages array
@@ -187,6 +203,11 @@ const BookSchema = new Schema<IBook>(
           required: true,
           default: 'layout-one',
         },
+        paperSize: {
+          type: String,
+          enum: Object.values(PageLayoutFormat),
+          default: 'A3',
+        },
       },
     ],
     // Extra pages (blank pages, templates) added by user
@@ -222,6 +243,10 @@ const BookSchema = new Schema<IBook>(
           type: Date,
           default: Date.now,
         },
+        paperSize: {
+          type: String,
+          enum: Object.values(PageLayoutFormat),
+        },
       },
     ],
 
@@ -249,6 +274,11 @@ const BookSchema = new Schema<IBook>(
         },
       },
     ],
+
+    // PDF URL - URL to the generated PDF file
+    bookUrl: {
+      type: String,
+    },
 
     // Status
     status: {

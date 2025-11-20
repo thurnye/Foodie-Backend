@@ -13,6 +13,7 @@ import {
   ITocPageData,
   IBackCoverPageData,
   IExtraPageData,
+  PageLayoutFormat,
 } from '../Types/book.types';
 
 interface CreateBookData {
@@ -56,6 +57,7 @@ interface UpdatePageData {
   recipe?: any;
   extraPageData?: IExtraPageData;
   layout?: string;
+  paperSize?: PageLayoutFormat; // Paper size for the page
   editedContent?: string;
 }
 
@@ -112,6 +114,7 @@ class BookService {
         title: cookbook.title || '',
         subtitle: cookbook.description || '',
         layout: 'cover-layout-one',
+        paperSize: PageLayoutFormat.A4,
       };
 
       const defaultIntroData: IIntroPageData = {
@@ -120,6 +123,7 @@ class BookService {
         position: 2,
         customContent: '',
         layout: 'intro-layout-one',
+        paperSize: PageLayoutFormat.A4,
       };
 
       const defaultTocData: ITocPageData = {
@@ -128,6 +132,7 @@ class BookService {
         position: 3,
         customContent: '',
         layout: 'toc-layout-one',
+        paperSize: PageLayoutFormat.A4,
       };
 
       const defaultBackCoverData: IBackCoverPageData = {
@@ -137,6 +142,7 @@ class BookService {
         title: cookbook.title || '',
         subtitle: '',
         layout: 'back-cover-layout-one',
+        paperSize: PageLayoutFormat.A4,
       };
 
       // Prepare recipe array
@@ -172,7 +178,7 @@ class BookService {
                 pageType: PageType.RECIPE,
                 position: maxPosition + index + 1,
                 order: (currentBook.recipe?.length || 0) + index + 1,
-                layout: 'layout-one'
+                layout: 'layout-one',
               };
 
               if (!currentBook.recipe) {
@@ -273,6 +279,7 @@ class BookService {
         title: cookbook?.title || book.name || '',
         subtitle: cookbook?.description || book.description || '',
         layout: 'cover-layout-one',
+        paperSize: PageLayoutFormat.A4,
       };
       book.markModified('coverData');
       updated = true;
@@ -286,6 +293,7 @@ class BookService {
         position: 2,
         customContent: '',
         layout: 'intro-layout-one',
+        paperSize: PageLayoutFormat.A4,
       };
       book.markModified('introData');
       updated = true;
@@ -299,6 +307,7 @@ class BookService {
         position: 3,
         customContent: '',
         layout: 'toc-layout-one',
+        paperSize: PageLayoutFormat.A4,
       };
       book.markModified('tocData');
       updated = true;
@@ -314,6 +323,7 @@ class BookService {
         title: cookbook?.title || book.name || '',
         subtitle: '',
         layout: 'back-cover-layout-one',
+        paperSize: PageLayoutFormat.A4,
       };
       book.markModified('backCoverData');
       updated = true;
@@ -359,6 +369,31 @@ class BookService {
       return book;
     } catch (error) {
       logger.error('Error fetching book', { error, bookId });
+      throw error;
+    }
+  }
+
+  /**
+   * Get book by ID without authentication (for PDF rendering)
+   * WARNING: This bypasses permission checks - use only for internal PDF generation
+   */
+  async getBookByIdWithoutAuth(bookId: string): Promise<IBook> {
+    try {
+      const book = await Book.findOne({
+        _id: bookId,
+        isActive: true,
+      }).populate('cookbook');
+
+      if (!book) {
+        throw Errors.notFound('Book not found');
+      }
+
+      // Ensure all required pages exist (for backward compatibility)
+      await this.ensureRequiredPages(book);
+
+      return book;
+    } catch (error) {
+      logger.error('Error fetching book for rendering', { error, bookId });
       throw error;
     }
   }
@@ -528,6 +563,30 @@ class BookService {
       return book;
     } catch (error) {
       logger.error('Error updating book', { error, bookId });
+      throw error;
+    }
+  }
+
+  /**
+   * Update book URL after PDF generation (internal use only)
+   */
+  async updateBookUrl(bookId: string, bookUrl: string): Promise<void> {
+    try {
+      const book = await Book.findOne({
+        _id: bookId,
+        isActive: true,
+      });
+
+      if (!book) {
+        throw Errors.notFound('Book not found');
+      }
+
+      book.bookUrl = bookUrl;
+      await book.save();
+
+      logger.info('Book URL updated', { bookId, bookUrl });
+    } catch (error) {
+      logger.error('Error updating book URL', { error, bookId });
       throw error;
     }
   }
@@ -761,6 +820,7 @@ class BookService {
       if (!updated && (!pageType || pageType === PageType.COVER)) {
         if (book.coverData?.pageId === pageId) {
           if (updates.layout !== undefined) book.coverData.layout = updates.layout;
+          if (updates.paperSize !== undefined) book.coverData.paperSize = updates.paperSize;
           if (updates.coverData !== undefined) {
             book.coverData = { ...book.coverData, ...updates.coverData };
           }
@@ -776,6 +836,7 @@ class BookService {
       if (!updated && (!pageType || pageType === PageType.INTRO)) {
         if (book.introData?.pageId === pageId) {
           if (updates.layout !== undefined) book.introData.layout = updates.layout;
+          if (updates.paperSize !== undefined) book.introData.paperSize = updates.paperSize;
           if (updates.introData !== undefined) {
             book.introData = { ...book.introData, ...updates.introData };
           }
@@ -791,6 +852,7 @@ class BookService {
       if (!updated && (!pageType || pageType === PageType.TOC)) {
         if (book.tocData?.pageId === pageId) {
           if (updates.layout !== undefined) book.tocData.layout = updates.layout;
+          if (updates.paperSize !== undefined) book.tocData.paperSize = updates.paperSize;
           if (updates.tocData !== undefined) {
             book.tocData = { ...book.tocData, ...updates.tocData };
           }
@@ -806,6 +868,7 @@ class BookService {
       if (!updated && (!pageType || pageType === PageType.BACK_COVER)) {
         if (book.backCoverData?.pageId === pageId) {
           if (updates.layout !== undefined) book.backCoverData.layout = updates.layout;
+          if (updates.paperSize !== undefined) book.backCoverData.paperSize = updates.paperSize;
           if (updates.backCoverData !== undefined) {
             book.backCoverData = { ...book.backCoverData, ...updates.backCoverData };
           }
@@ -824,6 +887,7 @@ class BookService {
           const extraPage = book.extraPageData[extraPageIndex];
 
           if (updates.layout !== undefined) extraPage.layout = updates.layout;
+          if (updates.paperSize !== undefined) extraPage.paperSize = updates.paperSize;
           if (updates.position !== undefined) extraPage.position = updates.position;
           if (updates.extraPageData !== undefined) {
             Object.assign(extraPage, updates.extraPageData);

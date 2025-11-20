@@ -26,40 +26,6 @@ const CookbookSchema = new mongoose_1.Schema({
             ref: 'Book',
         },
     ],
-    extraPages: [
-        {
-            pageId: {
-                type: String,
-                required: true,
-            },
-            title: {
-                type: String,
-                required: true,
-            },
-            pageType: {
-                type: String,
-                enum: ['blank', 'template'],
-                required: true,
-            },
-            templateType: {
-                type: String,
-                enum: ['weekly-planner', 'note-page'],
-            },
-            section: {
-                type: String,
-                enum: ['front', 'back'],
-                required: true,
-            },
-            position: {
-                type: Number,
-                required: true,
-            },
-            createdAt: {
-                type: Date,
-                default: Date.now,
-            },
-        },
-    ],
     theme: {
         type: String,
         enum: Object.values(cookbook_types_1.CookbookTheme),

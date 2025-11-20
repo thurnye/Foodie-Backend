@@ -13,6 +13,10 @@ router.post('/', BookController.createBook.bind(BookController));
 // Get user's books
 router.get('/my', BookController.getMyBooks.bind(BookController));
 
+// Get book for PDF rendering (unauthenticated endpoint for internal use)
+// Must be before /:bookId to avoid route conflict
+router.get('/:bookId/render-data', BookController.getBookForRendering.bind(BookController));
+
 // Get book by ID
 router.get('/:bookId', BookController.getBookById.bind(BookController));
 

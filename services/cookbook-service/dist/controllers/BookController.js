@@ -69,6 +69,23 @@ class BookController {
             });
         }
     }
+    async getBookForRendering(req, res) {
+        const { bookId } = req.params;
+        try {
+            const book = await BookService_1.default.getBookByIdWithoutAuth(bookId);
+            res.status(200).json({
+                success: true,
+                data: book,
+            });
+        }
+        catch (error) {
+            libs_1.logger.error('Get book for rendering error', { error, bookId });
+            res.status(error.statusCode || 500).json({
+                success: false,
+                message: error.message || 'Failed to get book for rendering',
+            });
+        }
+    }
     async getMyBooks(req, res) {
         try {
             const userId = req.user?.userId;
@@ -220,10 +237,11 @@ class BookController {
             const updates = req.body;
             const book = await BookService_1.default.updatePage(bookId, pageId, userId, updates);
             const updatedRecipe = book.recipe?.find((r) => r.pageId === pageId);
+            const updatedExtraPage = book.extraPageData?.find((p) => p.pageId === pageId);
             const updatedPage = updatedRecipe ||
                 (book.coverData?.pageId === pageId ? book.coverData : null) ||
                 (book.introData?.pageId === pageId ? book.introData : null) ||
-                (book.extraPageData?.pageId === pageId ? book.extraPageData : null);
+                updatedExtraPage;
             console.log('✅ PAGE UPDATED SUCCESSFULLY:', {
                 bookId,
                 pageId,

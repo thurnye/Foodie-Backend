@@ -21,6 +21,13 @@ export enum PageType {
   BACK_COVER = 'backCover',
   EXTRA = 'extra', // For custom pages (weekly planner, note pages, blank pages)
 }
+/**
+ * Layout Size Enum
+ */
+export enum PageLayoutFormat {
+  A3 = 'A3',
+  A4 = 'A4',
+}
 
 /**
  * Cover/Back Cover Page Data
@@ -36,6 +43,7 @@ export interface ICoverPageData {
   backgroundColor?: string;
   customText?: string;
   layout: string; // e.g., 'cover-layout-one', 'back-cover-layout-one'
+  paperSize?: PageLayoutFormat; // Paper size: 'A3' or 'A4'
 }
 
 /**
@@ -49,6 +57,7 @@ export interface IIntroPageData {
   backgroundImage?: string;
   customContent?: string;
   layout: string; // e.g., 'intro-layout-one'
+  paperSize?: PageLayoutFormat; // Paper size: 'A3' or 'A4'
 }
 
 /**
@@ -61,6 +70,7 @@ export interface ITocPageData {
 
   customContent?: string;
   layout: string; // e.g., 'toc-layout-one'
+  paperSize?: PageLayoutFormat; // Paper size: 'A3' or 'A4'
 }
 
 /**
@@ -77,6 +87,7 @@ export interface IBackCoverPageData {
   backgroundColor?: string;
   customText?: string;
   layout: string; // e.g., 'back-cover-layout-one'
+  paperSize?: PageLayoutFormat; // Paper size: 'A3' or 'A4'
 }
 
 /**
@@ -93,6 +104,7 @@ export interface IExtraPageData {
   content?: string; // HTML content if edited
   layout?: string;
   createdAt?: Date;
+  paperSize?: PageLayoutFormat; // Paper size: 'A3' or 'A4'
 }
 
 /**
@@ -177,6 +189,7 @@ export interface IRecipePage {
   };
   pageType: PageType;
   position: number;
+  paperSize: PageLayoutFormat; // Default: A3 (set in schema)
 }
 /**
  * Page Interface - Represents a single page in the cookbook
@@ -230,6 +243,9 @@ export interface IBook extends Document {
 
   // Edited sections content (for backward compatibility, can be deprecated later)
   sections?: IBookSection[];
+
+  // PDF URL - URL to the generated PDF file
+  bookUrl?: string;
 
   // Metadata
   status: BookStatus;

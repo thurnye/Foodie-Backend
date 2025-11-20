@@ -8,10 +8,12 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const helmet_1 = __importDefault(require("helmet"));
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const path_1 = __importDefault(require("path"));
 const child_process_1 = require("child_process");
 const libs_1 = require("@foodie/libs");
 const cookbook_routes_1 = __importDefault(require("./routes/cookbook.routes"));
 const book_routes_1 = __importDefault(require("./routes/book.routes"));
+const pdf_routes_1 = __importDefault(require("./routes/pdf.routes"));
 const userContext_1 = require("./middleware/userContext");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -44,8 +46,10 @@ app.use((req, _res, next) => {
 app.get('/health', (_req, res) => {
     res.json({ success: true, message: 'Cookbook service is healthy' });
 });
+app.use('/uploads', express_1.default.static(path_1.default.join(process.cwd(), 'uploads')));
 app.use('/api/cookbook', cookbook_routes_1.default);
 app.use('/api/books', book_routes_1.default);
+app.use('/api/cookbook/pdf', pdf_routes_1.default);
 app.use('/cookbook', cookbook_routes_1.default);
 app.use((_req, res) => {
     res.status(404).json({ success: false, message: 'Route not found' });

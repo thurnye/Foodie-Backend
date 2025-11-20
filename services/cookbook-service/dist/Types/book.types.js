@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PageType = exports.BookStatus = void 0;
+exports.PageLayoutFormat = exports.PageType = exports.BookStatus = void 0;
 var BookStatus;
 (function (BookStatus) {
     BookStatus["DRAFT"] = "draft";
@@ -17,4 +17,9 @@ var PageType;
     PageType["BACK_COVER"] = "backCover";
     PageType["EXTRA"] = "extra";
 })(PageType || (exports.PageType = PageType = {}));
+var PageLayoutFormat;
+(function (PageLayoutFormat) {
+    PageLayoutFormat["A3"] = "A3";
+    PageLayoutFormat["A4"] = "A4";
+})(PageLayoutFormat || (exports.PageLayoutFormat = PageLayoutFormat = {}));
 //# sourceMappingURL=book.types.js.map

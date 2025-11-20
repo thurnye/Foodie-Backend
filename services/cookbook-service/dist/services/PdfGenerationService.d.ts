@@ -1,0 +1,13 @@
+declare class PdfGenerationService {
+    private frontendUrl;
+    private browser;
+    constructor();
+    private initBrowser;
+    closeBrowser(): Promise<void>;
+    private generatePagePdf;
+    generateBookPdf(bookId: string, userId: string): Promise<Buffer>;
+    generateSinglePagePdf(bookId: string, pageId: string, pageType: string, userId: string): Promise<Buffer>;
+}
+declare const _default: PdfGenerationService;
+export default _default;
+//# sourceMappingURL=PdfGenerationService.d.ts.map

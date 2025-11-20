@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteExtraPage = exports.updateExtraPage = exports.addExtraPage = exports.getCookbookStatus = exports.generateCookbook = exports.deleteCookbook = exports.updateCookbook = exports.getPublicCookbooks = exports.getMyCookbooks = exports.getCookbookById = exports.createCookbook = void 0;
+exports.getCookbookStatus = exports.generateCookbook = exports.deleteCookbook = exports.updateCookbook = exports.getPublicCookbooks = exports.getMyCookbooks = exports.getCookbookById = exports.createCookbook = void 0;
 const CookbookService_1 = __importDefault(require("../services/CookbookService"));
 const libs_1 = require("@foodie/libs");
 const createCookbook = async (req, res, next) => {
@@ -179,67 +179,4 @@ const getCookbookStatus = async (req, res, next) => {
     }
 };
 exports.getCookbookStatus = getCookbookStatus;
-const addExtraPage = async (req, res, next) => {
-    try {
-        const { id } = req.params;
-        const userId = req.user?.userId;
-        if (!userId) {
-            (0, libs_1.fail)(res, 'Authentication required. Please log in to add pages.', 401);
-            return;
-        }
-        const { title, pageType, templateType, section, position } = req.body;
-        if (!title || !pageType || !section || position === undefined) {
-            (0, libs_1.fail)(res, 'Title, pageType, section, and position are required', 400);
-            return;
-        }
-        const cookbook = await CookbookService_1.default.addExtraPage(id, userId, {
-            title,
-            pageType,
-            templateType,
-            section,
-            position,
-        });
-        (0, libs_1.success)(res, cookbook, 'Extra page added successfully', 201);
-    }
-    catch (error) {
-        libs_1.logger.error('Add extra page error', { error, cookbookId: req.params.id });
-        next(error);
-    }
-};
-exports.addExtraPage = addExtraPage;
-const updateExtraPage = async (req, res, next) => {
-    try {
-        const { id, pageId } = req.params;
-        const userId = req.user?.userId;
-        if (!userId) {
-            (0, libs_1.fail)(res, 'Authentication required. Please log in to update pages.', 401);
-            return;
-        }
-        const updates = req.body;
-        const cookbook = await CookbookService_1.default.updateExtraPage(id, pageId, userId, updates);
-        (0, libs_1.success)(res, cookbook, 'Extra page updated successfully');
-    }
-    catch (error) {
-        libs_1.logger.error('Update extra page error', { error, cookbookId: req.params.id });
-        next(error);
-    }
-};
-exports.updateExtraPage = updateExtraPage;
-const deleteExtraPage = async (req, res, next) => {
-    try {
-        const { id, pageId } = req.params;
-        const userId = req.user?.userId;
-        if (!userId) {
-            (0, libs_1.fail)(res, 'Authentication required. Please log in to delete pages.', 401);
-            return;
-        }
-        const cookbook = await CookbookService_1.default.deleteExtraPage(id, pageId, userId);
-        (0, libs_1.success)(res, cookbook, 'Extra page deleted successfully');
-    }
-    catch (error) {
-        libs_1.logger.error('Delete extra page error', { error, cookbookId: req.params.id });
-        next(error);
-    }
-};
-exports.deleteExtraPage = deleteExtraPage;
 //# sourceMappingURL=CookbookController.js.map
