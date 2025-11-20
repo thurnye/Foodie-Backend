@@ -41,7 +41,7 @@ class PdfGenerationService {
             libs_1.logger.info(`📄 Rendering page: ${pageType} (${pageId})`, { url, paperSize, isLandscape });
             await page.goto(url, { waitUntil: 'networkidle' });
             await page.waitForSelector('[data-pdf-ready="true"]', { timeout: 30000 });
-            await page.waitForTimeout(1000);
+            await page.waitForTimeout(3000);
             let width, height;
             if (paperSize === 'A3') {
                 width = isLandscape ? '420mm' : '297mm';
@@ -103,7 +103,7 @@ class PdfGenerationService {
             if (book.tocData) {
                 libs_1.logger.info('📄 Generating TOC page...');
                 const paperSize = book.tocData.paperSize || 'A4';
-                const tocPdf = await this.generatePagePdf(browser, bookId, book.tocData.pageId, 'toc', paperSize, paperSize === 'A3');
+                const tocPdf = await this.generatePagePdf(browser, bookId, book.tocData.pageId, 'toc', paperSize, false);
                 pagePdfs.push(tocPdf);
             }
             const frontExtraPages = book.extraPageData?.filter((p) => p.section === 'front') || [];

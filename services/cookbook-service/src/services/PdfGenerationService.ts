@@ -67,7 +67,7 @@ class PdfGenerationService {
       await page.waitForSelector('[data-pdf-ready="true"]', { timeout: 30000 });
 
       // Give it a bit more time for fonts and images to load
-      await page.waitForTimeout(1000);
+      await page.waitForTimeout(3000);
 
       // Define paper dimensions
       // A4: 210mm x 297mm, A3: 297mm x 420mm
@@ -167,19 +167,41 @@ class PdfGenerationService {
         pagePdfs.push(introPdf);
       }
 
-      // 3. Generate TOC Page PDF 
+      // 3. Generate TOC Page PDFs - can be multiple pages
       if (book.tocData) {
-        logger.info('📄 Generating TOC page...');
+        logger.info('📄 Generating TOC pages...');
         const paperSize = book.tocData.paperSize || 'A4';
-        const tocPdf = await this.generatePagePdf(
-          browser,
-          bookId,
-          book.tocData.pageId,
-          'toc',
-          paperSize,
-          paperSize === 'A3' // Portrait or landscape based on size
-        );
-        pagePdfs.push(tocPdf);
+
+        // TOC with A3 uses landscape (same as recipe pages)
+        // TOC with A4 uses portrait
+        
+
+        // Calculate number of TOC pages based on recipe count
+        const recipeCount = book.recipe?.length || 0;
+        let tocPageCount = 1; // At least one page
+
+        if (recipeCount > 9) {
+          // First page has 9 items, remaining pages have 10 items each
+          const remainingRecipes = recipeCount - 9;
+          const additionalPages = Math.ceil(remainingRecipes / 10);
+          tocPageCount = 1 + additionalPages;
+        }
+
+        logger.info(`📄 Generating ${tocPageCount} TOC page(s) for ${recipeCount} recipes...`);
+
+        // Generate each TOC page separately
+        for (let pageIndex = 0; pageIndex < tocPageCount; pageIndex++) {
+          logger.info(`📄 Generating TOC page ${pageIndex + 1}/${tocPageCount}...`);
+          const tocPdf = await this.generatePagePdf(
+            browser,
+            bookId,
+            book.tocData.pageId,
+            `toc&pageIndex=${pageIndex}`, // Pass page index in pageType
+            paperSize,
+            paperSize === 'A3'
+          );
+          pagePdfs.push(tocPdf);
+        }
       }
 
       // 4. Generate Front Extra Pages PDFs 
