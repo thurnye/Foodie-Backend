@@ -78,37 +78,7 @@ const CookbookSchema = new Schema<ICookbook>(
       trim: true,
     },
 
-    // Status tracking
-    status: {
-      type: String,
-      enum: Object.values(CookbookStatus),
-      default: CookbookStatus.DRAFT,
-      index: true,
-    },
-
-    pdfUrl: {
-      type: String,
-      trim: true,
-    },
-
-    generationProgress: {
-      type: Number,
-      min: 0,
-      max: 100,
-      default: 0,
-    },
-
-    errorMessage: {
-      type: String,
-      trim: true,
-    },
-
     // Metadata
-    isPublic: {
-      type: Boolean,
-      default: false,
-    },
-
     isActive: {
       type: Boolean,
       default: true,
@@ -138,8 +108,6 @@ const CookbookSchema = new Schema<ICookbook>(
 
 // Indexes for performance
 CookbookSchema.index({ author: 1, isActive: 1, createdAt: -1 });
-CookbookSchema.index({ status: 1, createdAt: -1 });
-CookbookSchema.index({ isPublic: 1, isActive: 1 });
 
 // Virtual for book count
 CookbookSchema.virtual('bookCount').get(function () {

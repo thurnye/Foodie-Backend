@@ -7,10 +7,32 @@ import fileStorageService from './FileStorageService';
 class PdfGenerationService {
   private frontendUrl: string;
   private browser: Browser | null = null;
+  private generationStatus: Map<string, { current: string; total: number; currentStep: number }> = new Map();
 
   constructor() {
     // Get frontend URL from environment or use default
     this.frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  }
+
+  /**
+   * Get generation status for a book
+   */
+  getGenerationStatus(bookId: string) {
+    return this.generationStatus.get(bookId) || null;
+  }
+
+  /**
+   * Update generation status
+   */
+  private updateGenerationStatus(bookId: string, current: string, total: number, currentStep: number) {
+    this.generationStatus.set(bookId, { current, total, currentStep });
+  }
+
+  /**
+   * Clear generation status
+   */
+  private clearGenerationStatus(bookId: string) {
+    this.generationStatus.delete(bookId);
   }
 
   /**
@@ -131,14 +153,31 @@ class PdfGenerationService {
         throw Errors.notFound('Book not found');
       }
 
+      // Update book status to 'generating'
+      await bookService.updateBook(bookId, userId, { status: 'generating' as any });
+      logger.info('📊 Book status updated to generating', { bookId });
+
       // Initialize browser
       browser = await this.initBrowser();
 
       // Array to store all page PDFs
       const pagePdfs: Buffer[] = [];
 
+      // Calculate total pages
+      const totalPages =
+        (book.coverData ? 1 : 0) +
+        (book.introData ? 1 : 0) +
+        (book.tocData ? Math.max(1, Math.ceil(((book.recipe?.length || 0) - 9) / 10) + 1) : 0) +
+        (book.recipe?.length || 0) +
+        (book.extraPageData?.length || 0) +
+        (book.backCoverData ? 1 : 0);
+
+      let currentStep = 0;
+
       // 1. Generate Cover Page PDF (Portrait)
       if (book.coverData) {
+        currentStep++;
+        this.updateGenerationStatus(bookId, 'Front Cover', totalPages, currentStep);
         logger.info('📄 Generating cover page...');
         const paperSize = book.coverData.paperSize || 'A4';
         const coverPdf = await this.generatePagePdf(
@@ -154,6 +193,8 @@ class PdfGenerationService {
 
       // 2. Generate Intro Page PDF (Portrait)
       if (book.introData) {
+        currentStep++;
+        this.updateGenerationStatus(bookId, 'Intro Page', totalPages, currentStep);
         logger.info('📄 Generating intro page...');
         const paperSize = book.introData.paperSize || 'A4';
         const introPdf = await this.generatePagePdf(
@@ -191,6 +232,8 @@ class PdfGenerationService {
 
         // Generate each TOC page separately
         for (let pageIndex = 0; pageIndex < tocPageCount; pageIndex++) {
+          currentStep++;
+          this.updateGenerationStatus(bookId, `Table of Contents (Page ${pageIndex + 1}/${tocPageCount})`, totalPages, currentStep);
           logger.info(`📄 Generating TOC page ${pageIndex + 1}/${tocPageCount}...`);
           const tocPdf = await this.generatePagePdf(
             browser,
@@ -211,6 +254,8 @@ class PdfGenerationService {
       frontExtraPages.sort((a: any, b: any) => a.position - b.position);
 
       for (const extraPage of frontExtraPages) {
+        currentStep++;
+        this.updateGenerationStatus(bookId, `Extra Page: ${extraPage.title}`, totalPages, currentStep);
         logger.info(`📄 Generating front extra page: ${extraPage.title}...`);
         const paperSize = extraPage.paperSize || 'A4';
         const extraPdf = await this.generatePagePdf(
@@ -229,7 +274,10 @@ class PdfGenerationService {
         const sortedRecipes = [...book.recipe].sort((a, b) => a.order - b.order);
 
         for (const recipe of sortedRecipes) {
-          logger.info(`📄 Generating recipe page: ${recipe.basicInfo?.recipeName || 'Recipe'}...`);
+          currentStep++;
+          const recipeName = recipe.basicInfo?.recipeName || 'Recipe';
+          this.updateGenerationStatus(bookId, `Recipe: ${recipeName}`, totalPages, currentStep);
+          logger.info(`📄 Generating recipe page: ${recipeName}...`);
           const paperSize = (recipe as any).paperSize || 'A3'; // Default to A3 for recipes
           const recipePdf = await this.generatePagePdf(
             browser,
@@ -250,6 +298,8 @@ class PdfGenerationService {
       backExtraPages.sort((a: any, b: any) => a.position - b.position);
 
       for (const extraPage of backExtraPages) {
+        currentStep++;
+        this.updateGenerationStatus(bookId, `Extra Page: ${extraPage.title}`, totalPages, currentStep);
         logger.info(`📄 Generating back extra page: ${extraPage.title}...`);
         const paperSize = extraPage.paperSize || 'A4';
         const extraPdf = await this.generatePagePdf(
@@ -265,6 +315,8 @@ class PdfGenerationService {
 
       // 7. Generate Back Cover Page PDF (Portrait)
       if (book.backCoverData) {
+        currentStep++;
+        this.updateGenerationStatus(bookId, 'Back Cover', totalPages, currentStep);
         logger.info('📄 Generating back cover page...');
         const paperSize = book.backCoverData.paperSize || 'A4';
         const backCoverPdf = await this.generatePagePdf(
@@ -283,6 +335,7 @@ class PdfGenerationService {
         throw Errors.badRequest('No pages to generate PDF from');
       }
 
+      this.updateGenerationStatus(bookId, 'Merging pages...', totalPages, totalPages);
       logger.info(`✅ PDF generation completed. Generated ${pagePdfs.length} pages`);
 
       // Merge all PDFs into one using pdf-lib
@@ -314,15 +367,35 @@ class PdfGenerationService {
       logger.info('💾 Saving PDF to file system...');
       const bookUrl = await fileStorageService.savePdf(bookId, pdfBuffer);
 
-      // Update book with PDF URL
+      // Update book with PDF URL and status
       logger.info('📝 Updating book with PDF URL...');
       await bookService.updateBookUrl(bookId, bookUrl);
 
+      // Update book status to 'completed'
+      await bookService.updateBook(bookId, userId, { status: 'completed' as any });
+      logger.info('📊 Book status updated to completed', { bookId });
+
       logger.info('✅ PDF generation completed successfully', { bookUrl });
+
+      // Clear generation status
+      this.clearGenerationStatus(bookId);
 
       return pdfBuffer;
 
     } catch (error: any) {
+      // Update book status to 'failed' and save error message
+      try {
+        await bookService.updateBook(bookId, userId, {
+          status: 'failed' as any,
+          errorMessage: error.message || 'PDF generation failed'
+        });
+        logger.info('📊 Book status updated to failed', { bookId });
+      } catch (updateError) {
+        logger.error('Failed to update book status to failed', { updateError });
+      }
+
+      // Clear generation status on error
+      this.clearGenerationStatus(bookId);
       logger.error('❌ Error generating PDF', {
         error: error.message || error,
         stack: error.stack,

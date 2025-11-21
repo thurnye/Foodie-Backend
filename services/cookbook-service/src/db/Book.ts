@@ -288,6 +288,18 @@ const BookSchema = new Schema<IBook>(
       index: true,
     },
 
+    generationProgress: {
+      type: Number,
+      min: 0,
+      max: 100,
+      default: 0,
+    },
+
+    errorMessage: {
+      type: String,
+      trim: true,
+    },
+
     // Metadata
     isPublic: {
       type: Boolean,

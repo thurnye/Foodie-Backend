@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { logger } from '@foodie/libs';
 import BookService from '../services/BookService';
+import pdfGenerationService from '../services/PdfGenerationService';
 
 class BookController {
   /**
@@ -443,6 +444,38 @@ class BookController {
       res.status(error.statusCode || 500).json({
         success: false,
         message: error.message || 'Failed to publish book',
+      });
+    }
+  }
+
+  /**
+   * Get PDF generation status for a book
+   * GET /api/books/:bookId/generation-status
+   */
+  async getGenerationStatus(req: Request, res: Response): Promise<void> {
+    try {
+      const { bookId } = req.params;
+      const userId = (req as any).user?.userId;
+
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Authentication required.',
+        });
+        return;
+      }
+
+      const status = pdfGenerationService.getGenerationStatus(bookId);
+
+      res.status(200).json({
+        success: true,
+        data: status,
+      });
+    } catch (error: any) {
+      logger.error('Get generation status error', { error });
+      res.status(error.statusCode || 500).json({
+        success: false,
+        message: error.message || 'Failed to get generation status',
       });
     }
   }

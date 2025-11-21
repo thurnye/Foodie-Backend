@@ -17,6 +17,9 @@ router.get('/my', BookController.getMyBooks.bind(BookController));
 // Must be before /:bookId to avoid route conflict
 router.get('/:bookId/render-data', BookController.getBookForRendering.bind(BookController));
 
+// Get PDF generation status
+router.get('/:bookId/generation-status', BookController.getGenerationStatus.bind(BookController));
+
 // Get book by ID
 router.get('/:bookId', BookController.getBookById.bind(BookController));
 

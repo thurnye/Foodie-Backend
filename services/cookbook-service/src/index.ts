@@ -41,7 +41,10 @@ if (process.env.NODE_ENV !== 'production') {
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: [
+      process.env.CORS_ORIGIN || 'http://localhost:3000',
+      'http://localhost:5173', // Vite dev server
+    ],
     credentials: true,
   })
 );
@@ -66,8 +69,17 @@ app.get('/health', (_req: Request, res: Response) => {
   res.json({ success: true, message: 'Cookbook service is healthy' });
 });
 
-// Serve static files (PDF uploads)
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+// Serve static files (PDF uploads) with proper headers for download
+app.use('/uploads', (req: Request, res: Response, next: NextFunction) => {
+  // Set headers for PDF files to enable download
+  if (req.path.endsWith('.pdf')) {
+    const filename = path.basename(req.path);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
+  }
+  next();
+}, express.static(path.join(process.cwd(), 'uploads')));
 
 /* --------------------------------------------
    Routes
