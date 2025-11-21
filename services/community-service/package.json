@@ -1,7 +1,7 @@
 {
-  "name": "@foodie/group-service",
+  "name": "@foodie/community-service",
   "version": "1.0.0",
-  "description": "Community groups and membership service - TODO: Phase 2 implementation",
+  "description": "community and discussion service - TODO: Phase 2 implementation",
   "main": "dist/index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",

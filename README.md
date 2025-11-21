@@ -9,12 +9,12 @@ This project follows a microservices architecture with:
 - **API Gateway** - Central entry point routing requests to services (Port 3000)
 - **Auth Service** - JWT-based authentication & authorization (Port 3001)
 - **User Service** - User profile management (Port 3002)
-- **Recipe Service** - *Phase 2* - Recipe CRUD and cookbook generation (Port 3003)
-- **Event Service** - *Phase 2* - Event creation and management (Port 3004)
-- **Forum Service** - *Phase 2* - Discussion forums (Port 3005)
-- **Group Service** - *Phase 2* - Community groups (Port 3006)
-- **Chat Service** - *Phase 2* - Real-time messaging with Socket.IO (Port 3007)
-- **News Service** - *Phase 2* - News feeds and authors (Port 3008)
+- **Recipe Service** - _Phase 2_ - Recipe CRUD and cookbook generation (Port 3003)
+- **Event Service** - _Phase 2_ - Event creation and management (Port 3004)
+- **community Service** - _Phase 2_ - Discussion forums (Port 3005)
+- **Group Service** - _Phase 2_ - Community groups (Port 3006)
+- **Chat Service** - _Phase 2_ - Real-time messaging with Socket.IO (Port 3007)
+- **News Service** - _Phase 2_ - News feeds and authors (Port 3008)
 
 ## Tech Stack
 
@@ -40,7 +40,7 @@ backend/
 │   ├── user-service/     # ✅ User profiles (IMPLEMENTED)
 │   ├── recipe-service/   # 🔨 Phase 2
 │   ├── event-service/    # 🔨 Phase 2
-│   ├── forum-service/    # 🔨 Phase 2
+│   ├── community-service/    # 🔨 Phase 2
 │   ├── group-service/    # 🔨 Phase 2
 │   ├── chat-service/     # 🔨 Phase 2 (Socket.IO stub ready)
 │   └── news-service/     # 🔨 Phase 2
@@ -59,12 +59,14 @@ backend/
 ## Installation
 
 1. **Install root dependencies**:
+
    ```bash
    cd backend
    npm install
    ```
 
 2. **Install libs dependencies**:
+
    ```bash
    cd libs
    npm install
@@ -73,6 +75,7 @@ backend/
    ```
 
 3. **Install API Gateway dependencies**:
+
    ```bash
    cd api-gateway
    npm install
@@ -80,6 +83,7 @@ backend/
    ```
 
 4. **Install service dependencies**:
+
    ```bash
    cd services/auth-service
    npm install
@@ -89,6 +93,7 @@ backend/
    ```
 
 5. **Create .env files** (copy from .env.example):
+
    ```bash
    cp api-gateway/.env.example api-gateway/.env
    cp services/auth-service/.env.example services/auth-service/.env
@@ -108,6 +113,7 @@ npm run dev
 ```
 
 This starts:
+
 - API Gateway on http://localhost:3000
 - Auth Service on http://localhost:3001
 - User Service on http://localhost:3002
@@ -130,11 +136,13 @@ npm run dev:user
 ### Production Mode (with PM2)
 
 1. **Build all services**:
+
    ```bash
    npm run build
    ```
 
 2. **Start with PM2**:
+
    ```bash
    npm run pm2:start
    ```
@@ -157,10 +165,12 @@ npm run seed
 ```
 
 This creates sample users including:
+
 - `john.doe@example.com` / `Password123`
 - `admin@foodie.com` / `AdminPass123`
 
 To clear existing data before seeding:
+
 ```bash
 CLEAR_DB=true npm run seed
 ```
@@ -198,6 +208,7 @@ CLEAR_DB=true npm run seed
 ### Using cURL
 
 **Register a new user**:
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/register \
   -H "Content-Type: application/json" \
@@ -211,6 +222,7 @@ curl -X POST http://localhost:3000/api/auth/register \
 ```
 
 **Login**:
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
@@ -222,12 +234,14 @@ curl -X POST http://localhost:3000/api/auth/login \
 ```
 
 **Get current user** (use token from login response):
+
 ```bash
 curl -X GET http://localhost:3000/api/auth/me \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
 **Get user profile**:
+
 ```bash
 curl -X GET http://localhost:3000/api/user/USER_ID
 ```
@@ -241,6 +255,7 @@ curl -X GET http://localhost:3000/api/user/USER_ID
 ## Environment Variables
 
 ### API Gateway (.env)
+
 ```env
 PORT=3000
 NODE_ENV=development
@@ -251,6 +266,7 @@ CORS_ORIGIN=http://localhost:3000
 ```
 
 ### Auth Service (.env)
+
 ```env
 PORT=3001
 MONGODB_URI=mongodb://localhost:27017/FoodieBlog
@@ -261,6 +277,7 @@ JWT_REFRESH_EXPIRES_IN=7d
 ```
 
 ### User Service (.env)
+
 ```env
 PORT=3002
 MONGODB_URI=mongodb://localhost:27017/FoodieBlog
@@ -290,10 +307,12 @@ JWT_ACCESS_SECRET=your-access-secret
 ## Logging
 
 Logs are stored in:
+
 - `logs/error.log` - Error logs
 - `logs/combined.log` - All logs
 
 Logs include:
+
 - Request ID for tracing
 - User info for authenticated requests
 - Timestamps
@@ -305,7 +324,7 @@ The following services are scaffolded with TODO comments:
 
 - **Recipe Service**: Recipe CRUD, reviews, cookbook generation
 - **Event Service**: Event creation, RSVP, management
-- **Forum Service**: Discussion threads, replies, moderation
+- **community Service**: Discussion threads, replies, moderation
 - **Group Service**: Community groups, membership, moderation
 - **Chat Service**: Real-time messaging with Socket.IO
 - **News Service**: News feeds, author management
@@ -313,18 +332,22 @@ The following services are scaffolded with TODO comments:
 ## Troubleshooting
 
 ### MongoDB Connection Error
+
 - Ensure MongoDB is running: `mongod --dbpath /path/to/data`
 - Check connection string in .env files
 
 ### Port Already in Use
+
 - Kill process: `lsof -ti:3000 | xargs kill -9`
 - Or change port in .env files
 
 ### Module Not Found Error
+
 - Run `npm install` in all service directories
 - Build libs: `cd libs && npm run build`
 
 ### Services Not Starting
+
 - Check logs: `pm2 logs`
 - Verify .env files exist and are configured
 - Ensure MongoDB is accessible

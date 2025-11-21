@@ -19,6 +19,7 @@ import eventRoutes from './routes/events';
 import reviewRoutes from './routes/reviews';
 import cookbookRoutes from './routes/cookbooks';
 import bookRoutes from './routes/books';
+import communityRoutes from './routes/community';
 
 // Utilities
 import { healthCheck } from './health';
@@ -48,6 +49,7 @@ app.use('/api/review', reviewRoutes);
 app.use('/api/event', eventRoutes);
 app.use('/api/cookbook', cookbookRoutes);
 app.use('/api/books', bookRoutes);
+app.use('/api/community', communityRoutes);
 
 // ---Apply parsers AFTER proxy routes for local-only endpoints ---
 app.use(express.json());

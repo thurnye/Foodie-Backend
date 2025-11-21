@@ -89,8 +89,8 @@ module.exports = {
       },
     },
     {
-      name: 'forum-service',
-      script: 'services/forum-service/dist/index.js',
+      name: 'community-service',
+      script: 'services/community-service/dist/index.js',
       cwd: './',
       instances: 1,
       autorestart: true,

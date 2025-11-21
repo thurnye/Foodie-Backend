@@ -78,10 +78,40 @@ const CookbookSchema = new Schema<ICookbook>(
       trim: true,
     },
 
+    // PDF Generation
+    status: {
+      type: String,
+      enum: Object.values(CookbookStatus),
+      default: CookbookStatus.DRAFT,
+    },
+
+    generationProgress: {
+      type: Number,
+      min: 0,
+      max: 100,
+      default: 0,
+    },
+
+    pdfUrl: {
+      type: String,
+      trim: true,
+    },
+
+    errorMessage: {
+      type: String,
+      trim: true,
+    },
+
     // Metadata
     isActive: {
       type: Boolean,
       default: true,
+      index: true,
+    },
+
+    isPublic: {
+      type: Boolean,
+      default: false,
       index: true,
     },
 

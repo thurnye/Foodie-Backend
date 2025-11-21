@@ -8,41 +8,41 @@ const router = Router();
  */
 
 // Create a new book
-router.post('/', BookController.createBook.bind(BookController));
+router.post('/', BookController.createBook);
 
 // Get user's books
-router.get('/my', BookController.getMyBooks.bind(BookController));
+router.get('/my', BookController.getMyBooks);
 
 // Get book for PDF rendering (unauthenticated endpoint for internal use)
 // Must be before /:bookId to avoid route conflict
-router.get('/:bookId/render-data', BookController.getBookForRendering.bind(BookController));
+router.get('/:bookId/render-data', BookController.getBookForRendering);
 
 // Get PDF generation status
-router.get('/:bookId/generation-status', BookController.getGenerationStatus.bind(BookController));
+router.get('/:bookId/generation-status', BookController.getGenerationStatus);
 
 // Get book by ID
-router.get('/:bookId', BookController.getBookById.bind(BookController));
+router.get('/:bookId', BookController.getBookById);
 
 // Update book
-router.put('/:bookId', BookController.updateBook.bind(BookController));
+router.put('/:bookId', BookController.updateBook);
 
 // Delete book
-router.delete('/:bookId', BookController.deleteBook.bind(BookController));
+router.delete('/:bookId', BookController.deleteBook);
 
 // Page Management Routes
 // Add page to book
-router.post('/:bookId/pages', BookController.addPage.bind(BookController));
+router.post('/:bookId/pages', BookController.addPage);
 
 // Reorder pages in book (must be before /:pageId routes to avoid route conflict)
-router.put('/:bookId/pages/reorder', BookController.reorderPages.bind(BookController));
+router.put('/:bookId/pages/reorder', BookController.reorderPages);
 
 // Update page in book
-router.put('/:bookId/pages/:pageId', BookController.updatePage.bind(BookController));
+router.put('/:bookId/pages/:pageId', BookController.updatePage);
 
 // Delete page from book
-router.delete('/:bookId/pages/:pageId', BookController.deletePage.bind(BookController));
+router.delete('/:bookId/pages/:pageId', BookController.deletePage);
 
 // Publish book
-router.post('/:bookId/publish', BookController.publishBook.bind(BookController));
+router.post('/:bookId/publish', BookController.publishBook);
 
 export default router;

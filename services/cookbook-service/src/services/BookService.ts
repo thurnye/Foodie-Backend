@@ -34,6 +34,7 @@ interface UpdateBookData {
   status?: BookStatus;
   isPublic?: boolean;
   layout?: string; // For backward compatibility with old schema
+  errorMessage?: string; // Error message for failed PDF generation
 }
 
 interface CreatePageData {
