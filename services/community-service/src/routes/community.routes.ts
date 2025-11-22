@@ -14,6 +14,9 @@ router.put('/groups/:groupId', GroupController.updateGroup);
 router.delete('/groups/:groupId', GroupController.deleteGroup);
 router.post('/groups/:groupId/join', GroupController.joinGroup);
 router.post('/groups/:groupId/leave', GroupController.leaveGroup);
+router.delete('/groups/:groupId/join-request', GroupController.cancelJoinRequest);
+router.post('/groups/:groupId/join-request/:userId/approve', GroupController.approveJoinRequest);
+router.post('/groups/:groupId/join-request/:userId/reject', GroupController.rejectJoinRequest);
 
 // ==================== POST ROUTES ====================
 router.get('/posts', PostController.getAllPosts);

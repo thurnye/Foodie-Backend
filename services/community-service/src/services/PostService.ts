@@ -27,6 +27,8 @@ interface GetPostsFilters {
   tags?: string;
   sort?: 'newest' | 'popular' | 'trending';
   isPinned?: boolean;
+  page?: number;
+  limit?: number;
 }
 
 interface PostWithUser {
@@ -55,7 +57,7 @@ class PostService {
    */
   async getAllPosts(filters: GetPostsFilters = {}): Promise<PostWithUser[]> {
     try {
-      const { groupId, authorId, search, tags, sort = 'newest', isPinned } = filters;
+      const { groupId, authorId, search, tags, sort = 'newest', isPinned, page = 1, limit = 10 } = filters;
 
       let query: any = {};
 
@@ -99,9 +101,16 @@ class PostService {
           sortQuery = { isPinned: -1, createdAt: -1 };
       }
 
+      // Calculate skip for pagination
+      const skip = (page - 1) * limit;
+
       const posts = await Post.find(query)
         .sort(sortQuery)
+        .skip(skip)
+        .limit(limit)
         .lean();
+
+        console.log('POST::', posts)
 
       // Fetch user data for authors
       const postsWithUsers = await Promise.all(

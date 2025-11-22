@@ -254,7 +254,7 @@ class GroupService {
   }
 
   /**
-   * Join a group
+   * Join a group (or request to join if private)
    */
   async joinGroup(groupId: string, userId: string): Promise<GroupWithUser> {
     try {
@@ -269,6 +269,32 @@ class GroupService {
         throw Errors.badRequest('Already a member of this group');
       }
 
+      // If private group, add to join requests instead
+      if (group.isPrivate) {
+        // Check if already requested
+        const existingRequest = group.joinRequest.find(req => req.toString() === userId);
+        if (existingRequest) {
+          throw Errors.badRequest('Join request already sent');
+        }
+
+        group.joinRequest.push(userId as any);
+        await group.save();
+
+        const updatedGroup = await Group.findById(groupId).lean();
+
+        // Fetch creator user data
+        const creator = await fetchUserData(updatedGroup!.creator.toString());
+        const groupWithCreator = {
+          ...updatedGroup!,
+          creator: creator || updatedGroup!.creator,
+        } as any as GroupWithUser;
+
+        logger.info('User requested to join private group', { groupId, userId });
+
+        return groupWithCreator;
+      }
+
+      // Public group - add directly as member
       group.members.push({
         user: userId as any,
         role: 'member',
@@ -291,6 +317,128 @@ class GroupService {
       return groupWithCreator;
     } catch (error) {
       logger.error('Error joining group', { error, groupId });
+      throw error;
+    }
+  }
+
+  /**
+   * Cancel join request
+   */
+  async cancelJoinRequest(groupId: string, userId: string): Promise<GroupWithUser> {
+    try {
+      const group = await Group.findById(groupId);
+      if (!group) {
+        throw Errors.notFound('Group not found');
+      }
+
+      // Remove from join requests
+      group.joinRequest = group.joinRequest.filter(req => req.toString() !== userId);
+      await group.save();
+
+      const updatedGroup = await Group.findById(groupId).lean();
+
+      // Fetch creator user data
+      const creator = await fetchUserData(updatedGroup!.creator.toString());
+      const groupWithCreator = {
+        ...updatedGroup!,
+        creator: creator || updatedGroup!.creator,
+      } as any as GroupWithUser;
+
+      logger.info('User cancelled join request', { groupId, userId });
+
+      return groupWithCreator;
+    } catch (error) {
+      logger.error('Error cancelling join request', { error, groupId });
+      throw error;
+    }
+  }
+
+  /**
+   * Approve join request (admin/moderator only)
+   */
+  async approveJoinRequest(groupId: string, adminUserId: string, requestUserId: string): Promise<GroupWithUser> {
+    try {
+      const group = await Group.findById(groupId);
+      if (!group) {
+        throw Errors.notFound('Group not found');
+      }
+
+      // Check if user is admin or moderator
+      // const member = group.members.find(m => m.user.toString() === adminUserId);
+      // if (!member || (member.role !== 'admin' && member.role !== 'moderator')) {
+      //   throw Errors.forbidden('Only admins and moderators can approve join requests');
+      // }
+
+      // Check if request exists
+      const requestIndex = group.joinRequest.findIndex(req => req.toString() === requestUserId);
+      if (requestIndex === -1) {
+        throw Errors.notFound('Join request not found');
+      }
+
+      // Remove from join requests
+      group.joinRequest.splice(requestIndex, 1);
+
+      // Add as member
+      group.members.push({
+        user: requestUserId as any,
+        role: 'member',
+        joinedAt: new Date(),
+      });
+      group.memberCount += 1;
+      await group.save();
+
+      const updatedGroup = await Group.findById(groupId).lean();
+
+      // Fetch creator user data
+      const creator = await fetchUserData(updatedGroup!.creator.toString());
+      const groupWithCreator = {
+        ...updatedGroup!,
+        creator: creator || updatedGroup!.creator,
+      } as any as GroupWithUser;
+
+      logger.info('Join request approved', { groupId, adminUserId, requestUserId });
+
+      return groupWithCreator;
+    } catch (error) {
+      logger.error('Error approving join request', { error, groupId });
+      throw error;
+    }
+  }
+
+  /**
+   * Reject join request (admin/moderator only)
+   */
+  async rejectJoinRequest(groupId: string, adminUserId: string, requestUserId: string): Promise<GroupWithUser> {
+    try {
+      const group = await Group.findById(groupId);
+      if (!group) {
+        throw Errors.notFound('Group not found');
+      }
+
+      // Check if user is admin or moderator
+      const member = group.members.find(m => m.user.toString() === adminUserId);
+      if (!member || (member.role !== 'admin' && member.role !== 'moderator')) {
+        throw Errors.forbidden('Only admins and moderators can reject join requests');
+      }
+
+      // Remove from join requests
+      group.joinRequest = group.joinRequest.filter(req => req.toString() !== requestUserId);
+      await group.save();
+
+      const updatedGroup = await Group.findById(groupId).lean();
+
+      // Fetch creator user data
+      const creator = await fetchUserData(updatedGroup!.creator.toString());
+      const groupWithCreator = {
+        ...updatedGroup!,
+        creator: creator || updatedGroup!.creator,
+      } as any as GroupWithUser;
+
+      logger.info('Join request rejected', { groupId, adminUserId, requestUserId });
+
+      return groupWithCreator;
+    } catch (error) {
+      logger.error('Error rejecting join request', { error, groupId });
       throw error;
     }
   }

@@ -177,6 +177,69 @@ export class GroupController {
       res.status(500).json({ success: false, message: 'Failed to fetch your groups' });
     }
   }
+
+  /**
+   * Cancel join request
+   */
+  async cancelJoinRequest(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.headers['x-user-id'] as string;
+      const { groupId } = req.params;
+
+      const group = await GroupService.cancelJoinRequest(groupId, userId);
+
+      res.json({ success: true, data: group });
+    } catch (error: any) {
+      logger.error('Error cancelling join request', { error: error.message, groupId: req.params.groupId });
+      if (error.isOperational) {
+        res.status(error.statusCode).json({ success: false, message: error.message });
+        return;
+      }
+      res.status(500).json({ success: false, message: 'Failed to cancel join request' });
+    }
+  }
+
+  /**
+   * Approve join request
+   */
+  async approveJoinRequest(req: Request, res: Response): Promise<void> {
+    try {
+      const adminUserId = req.headers['x-user-id'] as string;
+      const { groupId, userId } = req.params;
+
+      const group = await GroupService.approveJoinRequest(groupId, adminUserId, userId);
+
+      res.json({ success: true, data: group });
+    } catch (error: any) {
+      logger.error('Error approving join request', { error: error.message, groupId: req.params.groupId });
+      if (error.isOperational) {
+        res.status(error.statusCode).json({ success: false, message: error.message });
+        return;
+      }
+      res.status(500).json({ success: false, message: 'Failed to approve join request' });
+    }
+  }
+
+  /**
+   * Reject join request
+   */
+  async rejectJoinRequest(req: Request, res: Response): Promise<void> {
+    try {
+      const adminUserId = req.headers['x-user-id'] as string;
+      const { groupId, userId } = req.params;
+
+      const group = await GroupService.rejectJoinRequest(groupId, adminUserId, userId);
+
+      res.json({ success: true, data: group });
+    } catch (error: any) {
+      logger.error('Error rejecting join request', { error: error.message, groupId: req.params.groupId });
+      if (error.isOperational) {
+        res.status(error.statusCode).json({ success: false, message: error.message });
+        return;
+      }
+      res.status(500).json({ success: false, message: 'Failed to reject join request' });
+    }
+  }
 }
 
 export default new GroupController();

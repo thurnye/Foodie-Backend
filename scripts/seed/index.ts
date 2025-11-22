@@ -35,6 +35,17 @@ const User = mongoose.model('User', UserSchema);
  */
 const sampleUsers = [
   {
+    email: 'testprogram404@gmail.com',
+    password: 'Password123!',
+    firstName: 'Admin',
+    lastName: 'Food-Admin',
+    username: 'johndoe',
+    bio: 'Food enthusiast and home chef',
+    role: 'admin',
+    reputation: 100,
+    isEmailVerified: true,
+  },
+  {
     email: 'john.doe@example.com',
     password: 'Password123',
     firstName: 'John',
@@ -63,7 +74,7 @@ const sampleUsers = [
     lastName: 'User',
     username: 'admin',
     bio: 'Platform administrator',
-    role: 'admin',
+    role: 'user',
     reputation: 500,
     isEmailVerified: true,
   },

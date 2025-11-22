@@ -8,15 +8,17 @@ export class PostController {
    */
   async getAllPosts(req: Request, res: Response): Promise<void> {
     try {
-      const { groupId, authorId, search, tags, sort = 'newest', isPinned } = req.query;
+      const { groupId, authorId, search, tags, sort = 'newest', isPinned, page, limit } = req.query;
 
       const posts = await PostService.getAllPosts({
         groupId: groupId as string,
         authorId: authorId as string,
         search: search as string,
         tags: tags as string,
-        sort: sort as 'newest' | 'popular' | 'trending',
+        // sort: sort as 'newest' | 'popular' | 'trending',
         isPinned: isPinned === 'true' ? true : isPinned === 'false' ? false : undefined,
+        page: page ? parseInt(page as string) : 1,
+        limit: limit ? parseInt(limit as string) : 10,
       });
 
       res.json({ success: true, data: posts });
@@ -57,6 +59,8 @@ export class PostController {
       }
 
       const { groupId, title, content, media, tags } = req.body;
+
+      console.log('POST::::', { groupId, title, content, media, tags })
 
       const post = await PostService.createPost(userId, {
         groupId,

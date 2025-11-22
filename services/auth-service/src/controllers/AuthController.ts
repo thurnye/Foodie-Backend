@@ -53,16 +53,20 @@ export const register = async (
       emailVerificationExpires,
     });
 
-    logger.info('User registered', { userId: user._id, email: user.email });
+    logger.info('User registered', { userId: user._id, email: user.email, _id: user._id });
 
     // TODO: Send verification email
 
     success(
       res,
       {
-        userId: user._id,
+         id: user._id,
         email: user.email,
         username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        bio: user.bio,
+        avatar: user.avatar,
       },
       'Registration successful. Please check your email to verify your account.',
       undefined,
@@ -128,9 +132,13 @@ export const login = async (
     success(
       res,
       {
-        userId: user._id,
+        id: user._id,
         email: user.email,
         username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        bio: user.bio,
+        avatar: user.avatar,
         role: user.role,
         accessToken,
       },

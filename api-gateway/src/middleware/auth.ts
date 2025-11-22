@@ -40,11 +40,15 @@ export const optionalAuth = (req: Request, _res: Response, next: NextFunction) =
 
     if (token) {
       const payload = verifyAccessToken(token);
+      console.log('[OptionalAuth] Token verified, payload:', payload);
       (req as any).user = payload;
+    } else {
+      console.log('[OptionalAuth] No token found in request headers');
     }
 
     next();
   } catch (error) {
+    console.log('[OptionalAuth] Token verification failed:', error);
     // Token was provided but invalid - continue anyway for optional auth
     next();
   }

@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface IGroupMember {
-  user: mongoose.Types.ObjectId;
+  user: Types.ObjectId;
   role: 'admin' | 'moderator' | 'member';
   joinedAt: Date;
 }
@@ -12,8 +12,9 @@ export interface IGroup extends Document {
   coverImage?: string;
   icon?: string;
   isPrivate: boolean;
-  creator: mongoose.Types.ObjectId;
+  creator: Types.ObjectId;
   members: IGroupMember[];
+  joinRequest: Types.ObjectId[];
   memberCount: number;
   postCount: number;
   tags: string[];
@@ -84,6 +85,10 @@ const GroupSchema = new Schema<IGroup>(
       type: String,
       trim: true,
     }],
+    joinRequest: [{
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    }]
   },
   {
     timestamps: true,
