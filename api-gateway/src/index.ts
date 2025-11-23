@@ -41,7 +41,11 @@ app.use(defaultRateLimit);
 // --- Extract user from JWT token (optional) ---
 app.use(optionalAuth);
 
-// --- Proxy microservice routes BEFORE body parsers ---
+// --- Apply body parsers BEFORE proxy routes (needed for header forwarding) ---
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// --- Proxy microservice routes ---
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/recipe', recipeRoutes);
@@ -50,10 +54,6 @@ app.use('/api/event', eventRoutes);
 app.use('/api/cookbook', cookbookRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/api/community', communityRoutes);
-
-// ---Apply parsers AFTER proxy routes for local-only endpoints ---
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // Health & Docs
 app.get('/health', healthCheck);

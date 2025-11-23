@@ -86,6 +86,8 @@ export class PostController {
    */
   async updatePost(req: Request, res: Response): Promise<void> {
     try {
+      console.log('[PostController] All headers:', req.headers);
+      console.log('[PostController] x-user-id header:', req.headers['x-user-id']);
       const userId = req.headers['x-user-id'] as string;
       const { postId } = req.params;
       const { title, content, media, tags } = req.body;

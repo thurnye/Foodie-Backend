@@ -177,6 +177,8 @@ class PostService {
         throw Errors.forbidden('You must be a member of the group to post');
       }
 
+      console.log(media)
+
       const post = await Post.create({
         group: groupId,
         author: userId,
@@ -217,6 +219,8 @@ class PostService {
       if (!post) {
         throw Errors.notFound('Post not found');
       }
+
+      console.log('author:::', userId)
 
       // Check if user is the author
       if (post.author.toString() !== userId) {
