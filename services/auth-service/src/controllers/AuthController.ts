@@ -205,7 +205,17 @@ export const refresh = async (
 
     logger.info('Token refreshed', { userId: user._id });
 
-    success(res, { accessToken }, 'Token refreshed successfully');
+    success(res, {
+        id: user._id,
+        email: user.email,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        bio: user.bio,
+        avatar: user.avatar,
+        role: user.role,
+        accessToken,
+      }, 'Token refreshed successfully');
   } catch (error) {
     logger.error('Token refresh error', { error });
     fail(res, 'Invalid or expired refresh token', 401);
