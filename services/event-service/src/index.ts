@@ -1,75 +1,126 @@
-/**
- * Event Service - Phase 2 Implementation
- *
- * TODO: Implement the following features:
- *
- * 1. Event CRUD Operations:
- *    - POST /api/event - Create new event
- *    - POST /api/event/query - List/search events
- *    - POST /api/event/user/:userId - Get user's events
- *    - GET /api/event/:id - Get event details
- *    - PUT /api/event/:id - Update event
- *    - DELETE /api/event/:id - Delete event
- *
- * 2. Event Participation:
- *    - POST /api/event/:id/join - Join an event
- *    - POST /api/event/:id/leave - Leave an event
- *    - GET /api/event/:id/participants - Get event participants
- *    - POST /api/event/:id/invite - Invite users to event
- *
- * 3. Database Models:
- *    - Event schema (title, description, date, location, capacity, etc.)
- *    - EventParticipant schema (userId, eventId, status)
- *    - EventCategory schema
- *
- * 4. Features to implement:
- *    - Event types (cooking class, food festival, meetup, etc.)
- *    - Event location (physical address or virtual/online)
- *    - Event capacity and RSVP management
- *    - Event images and media
- *    - Event reminders and notifications
- *    - Event calendar integration
- *    - Event search by location, date, category
- *    - Featured/promoted events
- *    - Past events archive
- *
- * 5. Validation:
- *    - Event date validation (must be future date)
- *    - Capacity validation
- *    - Location validation
- *
- * 6. Authorization:
- *    - Event creators can edit/delete their events
- *    - Participants can join/leave events
- *    - Admin can moderate all events
- *
- * 7. Notifications:
- *    - Notify participants of event updates
- *    - Reminder notifications before events
- *    - Cancellation notifications
- */
+import express, { Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
+import helmet from 'helmet';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { execSync } from 'child_process';
+import { logger, mapErrorToResponse } from '@foodie/libs';
+import eventRoutes from './routes/event.routes';
+import { userContextMiddleware } from './middleware/userContext';
 
-import express from 'express';
-import { logger } from '@foodie/libs';
+// Load environment variables
+dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3004;
+const PORT = Number(process.env.PORT) || 3006;
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/FoodieBlog';
 
-app.use(express.json());
+/* --------------------------------------------
+    Kill existing process on same port (dev only)
+--------------------------------------------- */
+if (process.env.NODE_ENV !== 'production') {
+  try {
+    execSync(`lsof -ti:${PORT} | xargs kill -9`, { stdio: 'ignore' });
+    console.log(` Cleared port ${PORT} before starting server`);
+  } catch {
+    // ignore if port is free
+  }
+}
 
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK', service: 'event-service', message: 'TODO: Phase 2 implementation' });
+/* --------------------------------------------
+    Middleware
+--------------------------------------------- */
+app.use(helmet());
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    credentials: true,
+  })
+);
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Extract user context from API Gateway headers
+app.use(userContextMiddleware);
+
+// Request logging
+app.use((req: Request, _res: Response, next: NextFunction) => {
+  logger.info('Event Service: Incoming request', {
+    method: req.method,
+    path: req.path,
+    ip: req.ip,
+  });
+  next();
 });
 
-app.all('*', (req, res) => {
-  res.status(501).json({
+// Health check
+app.get('/health', (_req: Request, res: Response) => {
+  res.json({ success: true, message: 'Event service is healthy' });
+});
+
+/* --------------------------------------------
+   Routes
+--------------------------------------------- */
+app.use('/api/event', eventRoutes);
+
+// Legacy support
+app.use('/event', eventRoutes);
+
+/* --------------------------------------------
+   Error Handler
+--------------------------------------------- */
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  logger.error('Unhandled error', {
+    error: err.message || err,
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+  });
+
+  const errorResponse = mapErrorToResponse(err);
+  res.status(errorResponse.statusCode).json({
     success: false,
-    message: 'Event service not yet implemented - Phase 2',
+    message: errorResponse.message,
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 });
 
-app.listen(PORT, () => {
-  logger.info(`Event service (stub) running on port ${PORT}`);
+// 404 handler
+app.use((req: Request, res: Response) => {
+  res.status(404).json({
+    success: false,
+    message: `Cannot ${req.method} ${req.path}`,
+  });
+});
+
+/* --------------------------------------------
+   Database Connection & Server Start
+--------------------------------------------- */
+mongoose
+  .connect(MONGODB_URI)
+  .then(() => {
+    logger.info('Event Service: Connected to MongoDB', {
+      database: MONGODB_URI,
+    });
+
+    app.listen(PORT, () => {
+      logger.info(`Event service running on port ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    logger.error('Event Service: MongoDB connection error', {
+      error: error.message,
+      stack: error.stack,
+    });
+    process.exit(1);
+  });
+
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  logger.info('SIGTERM received, closing server gracefully');
+  await mongoose.connection.close();
+  logger.info('Server and database connections closed');
+  process.exit(0);
 });
 
 export default app;

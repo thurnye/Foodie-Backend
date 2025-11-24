@@ -1,7 +1,7 @@
 {
   "name": "@foodie/event-service",
   "version": "1.0.0",
-  "description": "Event creation and management service - TODO: Phase 2 implementation",
+  "description": "event service",
   "main": "dist/index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",

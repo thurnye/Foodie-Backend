@@ -12,6 +12,7 @@ export const healthCheck = async (_req: Request, res: Response) => {
     'user-service': config.USER_SERVICE_URL,
     'recipe-service': config.RECIPE_SERVICE_URL,
     'event-service': config.EVENT_SERVICE_URL,
+    'community-service': config.COMMUNITY_SERVICE_URL,
   };
 
   const serviceHealth: any = {};
