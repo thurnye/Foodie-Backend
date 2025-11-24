@@ -1,17 +1,9 @@
 import axios from 'axios';
 import { logger } from '@foodie/libs';
+import { UserData } from '../types/event.services.types';
 
 const USER_SERVICE_URL =
   process.env.USER_SERVICE_URL || 'http://localhost:3002';
-
-export interface UserData {
-  _id?: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  avatar?: string;
-  bio?: string;
-}
 
 /**
  * Fetch user data from user-service

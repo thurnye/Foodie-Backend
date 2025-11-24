@@ -49,9 +49,9 @@ export class EventController {
   async getEventById(req: Request, res: Response): Promise<void> {
     try {
       const { eventId } = req.params;
-      const userId = req.headers['x-user-id'] as string;
+      // const userId = req.headers['x-user-id'] as string;
 
-      const event = await EventService.getEventById(eventId, userId);
+      const event = await EventService.getEventById(eventId);
 
       res.json({ success: true, data: event });
     } catch (error: any) {
