@@ -26,11 +26,16 @@ const optionalAuth = (req, _res, next) => {
             req.headers['x-access-token'];
         if (token) {
             const payload = (0, libs_1.verifyAccessToken)(token);
+            console.log('[OptionalAuth] Token verified, payload:', payload);
             req.user = payload;
+        }
+        else {
+            console.log('[OptionalAuth] No token found in request headers');
         }
         next();
     }
     catch (error) {
+        console.log('[OptionalAuth] Token verification failed:', error);
         next();
     }
 };

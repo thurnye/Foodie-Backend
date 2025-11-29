@@ -39,6 +39,7 @@ router.use(
       }
     },
     onError: (_err, _req, res: any) => {
+      console.log("ERROR::::=======", _err)
       res.status(503).json({
         success: false,
         data: null,

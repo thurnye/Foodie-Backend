@@ -73,11 +73,10 @@ module.exports = {
         PORT: 3003,
       },
     },
-    // Phase 2 services (commented out until implemented)
-    /*
+    
     {
-      name: 'event-service',
-      script: 'services/event-service/dist/index.js',
+      name: 'cookbook-service',
+      script: 'services/cookbook-service/dist/index.js',
       cwd: './',
       instances: 1,
       autorestart: true,
@@ -101,9 +100,9 @@ module.exports = {
         PORT: 3005,
       },
     },
-    {
-      name: 'group-service',
-      script: 'services/group-service/dist/index.js',
+     {
+      name: 'event-service',
+      script: 'services/event-service/dist/index.js',
       cwd: './',
       instances: 1,
       autorestart: true,
@@ -115,8 +114,8 @@ module.exports = {
       },
     },
     {
-      name: 'chat-service',
-      script: 'services/chat-service/dist/index.js',
+      name: 'communication-service',
+      script: 'services/communication-service/dist/index.js',
       cwd: './',
       instances: 1,
       autorestart: true,
@@ -124,22 +123,35 @@ module.exports = {
       max_memory_restart: '300M',
       env: {
         NODE_ENV: 'development',
-        PORT: 3007,
+        PORT: 3009,
       },
     },
-    {
-      name: 'news-service',
-      script: 'services/news-service/dist/index.js',
-      cwd: './',
-      instances: 1,
-      autorestart: true,
-      watch: false,
-      max_memory_restart: '300M',
-      env: {
-        NODE_ENV: 'development',
-        PORT: 3008,
-      },
-    },
-    */
+    // {
+    //   name: 'chat-service',
+    //   script: 'services/chat-service/dist/index.js',
+    //   cwd: './',
+    //   instances: 1,
+    //   autorestart: true,
+    //   watch: false,
+    //   max_memory_restart: '300M',
+    //   env: {
+    //     NODE_ENV: 'development',
+    //     PORT: 3007,
+    //   },
+    // },
+    // {
+    //   name: 'news-service',
+    //   script: 'services/news-service/dist/index.js',
+    //   cwd: './',
+    //   instances: 1,
+    //   autorestart: true,
+    //   watch: false,
+    //   max_memory_restart: '300M',
+    //   env: {
+    //     NODE_ENV: 'development',
+    //     PORT: 3008,
+    //   },
+    // },
+    
   ],
 };

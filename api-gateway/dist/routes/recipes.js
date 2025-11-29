@@ -12,6 +12,7 @@ router.use('/', (0, http_proxy_middleware_1.createProxyMiddleware)({
         '^/api/review': '/api/review',
     },
     onProxyReq: (proxyReq, req) => {
+        console.log('Forwarding===========================');
         if (req.requestId) {
             proxyReq.setHeader('x-request-id', req.requestId);
         }
@@ -21,6 +22,7 @@ router.use('/', (0, http_proxy_middleware_1.createProxyMiddleware)({
         }
     },
     onError: (_err, _req, res) => {
+        console.log("ERROR::::=======", _err);
         res.status(503).json({
             success: false,
             data: null,

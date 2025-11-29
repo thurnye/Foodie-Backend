@@ -73,6 +73,8 @@ export const listRecipes = async (req: Request, res: Response, next: NextFunctio
     const queryParams = req.body; // POST body for filters
     console.log('Query Params:', queryParams);
 
+    console.log('GETTING RECIPES:========================')
+
     const { recipes, total } = await RecipeService.getRecipes(queryParams);
 
     const page = parseInt(queryParams.page) || 1;

@@ -12,6 +12,7 @@ const healthCheck = async (_req, res) => {
         'user-service': config_1.default.USER_SERVICE_URL,
         'recipe-service': config_1.default.RECIPE_SERVICE_URL,
         'event-service': config_1.default.EVENT_SERVICE_URL,
+        'community-service': config_1.default.COMMUNITY_SERVICE_URL,
     };
     const serviceHealth = {};
     for (const [name, url] of Object.entries(services)) {

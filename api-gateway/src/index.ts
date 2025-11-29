@@ -20,6 +20,7 @@ import reviewRoutes from './routes/reviews';
 import cookbookRoutes from './routes/cookbooks';
 import bookRoutes from './routes/books';
 import communityRoutes from './routes/community';
+import communicationRoutes from './routes/communication';
 
 // Utilities
 import { healthCheck } from './health';
@@ -54,6 +55,7 @@ app.use('/api/event', eventRoutes);
 app.use('/api/cookbook', cookbookRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/api/community', communityRoutes);
+app.use('/api/communication', communicationRoutes);
 
 // Health & Docs
 app.get('/health', healthCheck);

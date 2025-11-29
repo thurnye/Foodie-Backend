@@ -22,8 +22,8 @@ router.use(
       }
       // Forward user info from auth middleware
       if (req.user) {
-        console.log('[Community Proxy] req.user:', req.user);
-        console.log('[Community Proxy] Setting x-user-id:', req.user.userId);
+        // console.log('[Community Proxy] req.user:', req.user);
+        // console.log('[Community Proxy] Setting x-user-id:', req.user.userId);
         proxyReq.setHeader('x-user-id', req.user.userId);
         proxyReq.setHeader('x-user-email', req.user.email);
       } else {

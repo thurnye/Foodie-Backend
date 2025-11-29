@@ -6,7 +6,7 @@ export interface IReaction {
 }
 
 export interface IReview extends Document {
-  _id: string;
+ _id: mongoose.Types.ObjectId;
   review: string;
   rating: number;
   userId: mongoose.Types.ObjectId;

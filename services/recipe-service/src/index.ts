@@ -16,6 +16,7 @@ import { userContextMiddleware } from './middleware/userContext';
 
 // Load environment variables
 dotenv.config();
+console.log('RECIPE HIT=======================')
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3003;
@@ -52,6 +53,7 @@ app.use(userContextMiddleware);
 
 // Request logging
 app.use((req: Request, _res: Response, next: NextFunction) => {
+  console.log('RECIPE SERVICE::::===', req)
   logger.info('Recipe Service: Incoming request', {
     method: req.method,
     path: req.path,

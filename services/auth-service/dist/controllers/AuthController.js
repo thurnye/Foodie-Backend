@@ -35,11 +35,15 @@ const register = async (req, res, _next) => {
             emailVerificationToken,
             emailVerificationExpires,
         });
-        libs_1.logger.info('User registered', { userId: user._id, email: user.email });
+        libs_1.logger.info('User registered', { userId: user._id, email: user.email, _id: user._id });
         (0, libs_1.success)(res, {
-            userId: user._id,
+            id: user._id,
             email: user.email,
             username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            bio: user.bio,
+            avatar: user.avatar,
         }, 'Registration successful. Please check your email to verify your account.', undefined, 201);
     }
     catch (error) {
@@ -73,9 +77,13 @@ const login = async (req, res, _next) => {
         res.setHeader('x-access-token', accessToken);
         libs_1.logger.info('User logged in', { userId: user._id, email: user.email });
         (0, libs_1.success)(res, {
-            userId: user._id,
+            id: user._id,
             email: user.email,
             username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            bio: user.bio,
+            avatar: user.avatar,
             role: user.role,
             accessToken,
         }, 'Login successful');
@@ -111,7 +119,17 @@ const refresh = async (req, res, _next) => {
         });
         res.setHeader('x-access-token', accessToken);
         libs_1.logger.info('Token refreshed', { userId: user._id });
-        (0, libs_1.success)(res, { accessToken }, 'Token refreshed successfully');
+        (0, libs_1.success)(res, {
+            id: user._id,
+            email: user.email,
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            bio: user.bio,
+            avatar: user.avatar,
+            role: user.role,
+            accessToken,
+        }, 'Token refreshed successfully');
     }
     catch (error) {
         libs_1.logger.error('Token refresh error', { error });

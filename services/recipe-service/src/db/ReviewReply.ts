@@ -6,7 +6,7 @@ export interface IReaction {
 }
 
 export interface IReviewReply extends Document {
-  _id: string;
+  _id: mongoose.Types.ObjectId;
   review: string;
   userId: mongoose.Types.ObjectId;
   parentReviewId: mongoose.Types.ObjectId;
@@ -57,10 +57,12 @@ const ReviewReplySchema = new Schema<IReviewReply>(
       ref: 'ReviewReplies',
       index: true,
     },
-    likes: [{
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-    }],
+    likes: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
     reactions: [ReactionSchema],
   },
   {
@@ -73,6 +75,9 @@ ReviewReplySchema.index({ parentReviewId: 1, createdAt: 1 });
 // Index for querying nested replies
 ReviewReplySchema.index({ parentReplyId: 1, createdAt: 1 });
 
-const ReviewReply = mongoose.model<IReviewReply>('ReviewReplies', ReviewReplySchema);
+const ReviewReply = mongoose.model<IReviewReply>(
+  'ReviewReplies',
+  ReviewReplySchema
+);
 
 export default ReviewReply;

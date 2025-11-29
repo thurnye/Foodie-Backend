@@ -34,7 +34,7 @@ export interface IMethod {
 }
 
 export interface IRecipe extends Document {
-  _id: string;
+  _id: mongoose.Types.ObjectId;
   basicInfo: {
     recipeName: string;
     duration: IValueLabel;
