@@ -76,6 +76,40 @@ export const getProfile = async (
 };
 
 /**
+ * Get user profile by Email
+ */
+export const getProfileByEmail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { email } = req.params;
+    console.log('USER EMAIL:::=====', email)
+
+    const user = await UserService.getUserByEmail(email);
+
+    success(res, {
+      userId: user._id,
+      email: user.email,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      bio: user.bio,
+      avatar: user.avatar,
+      slogan: user.slogan,
+      role: user.role,
+      reputation: user.reputation,
+      isEmailVerified: user.isEmailVerified,
+      createdAt: user.createdAt,
+    });
+  } catch (error) {
+    logger.error('Get profile error', { error });
+    next(error);
+  }
+};
+
+/**
  * Update user profile
  */
 export const editProfile = async (

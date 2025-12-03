@@ -192,6 +192,39 @@ export class TeamController {
       res.status(500).json({ success: false, error: 'Failed to remove member from team' });
     }
   }
+
+  /**
+   * Invite member to team by email
+   */
+  async inviteMemberByEmail(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.headers['x-user-id'] as string;
+      if (!userId) {
+        throw Errors.unauthorized('User not authenticated');
+      }
+
+      const { teamId } = req.params;
+      const { email } = req.body;
+
+      if (!email) {
+        throw Errors.badRequest('Email is required');
+      }
+
+      const team = await TeamService.inviteMemberByEmail(teamId, userId, email);
+
+      res.json({ success: true, data: team });
+    } catch (error: any) {
+      logger.error('Error inviting member to team', {
+        error: error.message,
+        teamId: req.params.teamId,
+      });
+      if (error.isOperational) {
+        res.status(error.statusCode).json({ success: false, error: error.message });
+        return;
+      }
+      res.status(500).json({ success: false, error: 'Failed to invite member to team' });
+    }
+  }
 }
 
 export default new TeamController();

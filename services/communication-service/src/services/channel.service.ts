@@ -41,7 +41,6 @@ class ChannelService {
       const channel = await Channel.findById(channelId)
         .populate('teamId')
         .populate('lastMessage')
-        .populate('members', 'name email avatar')
         .lean();
 
       if (!channel) throw Errors.notFound('Channel not found');
@@ -101,7 +100,6 @@ class ChannelService {
 
       const populatedChannel = await Channel.findById(channel._id)
         .populate('teamId')
-        .populate('members', 'name email avatar')
         .lean();
 
       return populatedChannel;
@@ -143,7 +141,6 @@ class ChannelService {
       const updatedChannel = await Channel.findById(channelId)
         .populate('teamId')
         .populate('lastMessage')
-        .populate('members', 'name email avatar')
         .lean();
 
       return updatedChannel;
@@ -213,7 +210,6 @@ class ChannelService {
 
       const updatedChannel = await Channel.findById(channelId)
         .populate('teamId')
-        .populate('members', 'name email avatar')
         .lean();
 
       return updatedChannel;
@@ -246,7 +242,6 @@ class ChannelService {
 
       const updatedChannel = await Channel.findById(channelId)
         .populate('teamId')
-        .populate('members', 'name email avatar')
         .lean();
 
       return updatedChannel;

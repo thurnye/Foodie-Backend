@@ -5,12 +5,12 @@ const router = Router();
 const messageController = new MessageController();
 
 // Message routes
-router.post('/', messageController.createMessage);
-router.get('/channel/:channelId', messageController.getChannelMessages);
-router.get('/conversation/:conversationId', messageController.getConversationMessages);
-router.put('/:messageId', messageController.updateMessage);
-router.delete('/:messageId', messageController.deleteMessage);
-router.post('/:messageId/reactions', messageController.addReaction);
-router.delete('/:messageId/reactions/:emoji', messageController.addReaction);
+router.post('/', messageController.createMessage.bind(messageController));
+router.get('/channel/:channelId', messageController.getChannelMessages.bind(messageController));
+router.get('/conversation/:conversationId', messageController.getConversationMessages.bind(messageController));
+router.put('/:messageId', messageController.updateMessage.bind(messageController));
+router.delete('/:messageId', messageController.deleteMessage.bind(messageController));
+router.post('/:messageId/reactions', messageController.addReaction.bind(messageController));
+router.delete('/:messageId/reactions/:emoji', messageController.addReaction.bind(messageController));
 
 export default router;

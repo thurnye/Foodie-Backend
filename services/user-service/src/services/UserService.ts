@@ -34,15 +34,23 @@ export class UserService {
   /**
    * Get user by email
    */
-  async getUserByEmail(email: string): Promise<IUser | null> {
-    return User.findOne({ email });
+  async getUserByEmail(email: string): Promise<IUser> {
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw Errors.notFound('User not found');
+    }
+    return user;
   }
 
   /**
    * Get user by username
    */
-  async getUserByUsername(username: string): Promise<IUser | null> {
-    return User.findOne({ username });
+  async getUserByUsername(username: string): Promise<IUser> {
+    const user = await User.findOne({ username });
+    if (!user) {
+      throw Errors.notFound('User not found');
+    }
+    return user;
   }
 
   /**

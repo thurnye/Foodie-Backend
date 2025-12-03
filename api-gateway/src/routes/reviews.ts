@@ -22,6 +22,14 @@ router.use(
       if (req.user) {
         proxyReq.setHeader('x-user-id', req.user.userId);
       }
+
+      // Re-stream parsed body for POST/PUT/PATCH requests
+      if (req.body && (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH')) {
+        const bodyData = JSON.stringify(req.body);
+        proxyReq.setHeader('Content-Type', 'application/json');
+        proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+        proxyReq.write(bodyData);
+      }
     },
     onError: (_err, _req, res: any) => {
       res.status(503).json({
