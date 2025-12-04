@@ -10,6 +10,14 @@ export interface IUser extends Document {
   username?: string;
   bio?: string;
   avatar?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  phoneNumber?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postalCode?: string;
   isEmailVerified: boolean;
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;
@@ -58,6 +66,30 @@ const UserSchema = new Schema<IUser>(
       maxlength: 500,
     },
     avatar: {
+      type: String,
+    },
+    dateOfBirth: {
+      type: String,
+    },
+    gender: {
+      type: String,
+    },
+    phoneNumber: {
+      type: String,
+    },
+    address: {
+      type: String,
+    },
+    city: {
+      type: String,
+    },
+    state: {
+      type: String,
+    },
+    country: {
+      type: String,
+    },
+    postalCode: {
       type: String,
     },
     slogan: {

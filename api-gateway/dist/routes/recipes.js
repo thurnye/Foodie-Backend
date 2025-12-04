@@ -20,6 +20,13 @@ router.use('/', (0, http_proxy_middleware_1.createProxyMiddleware)({
             proxyReq.setHeader('x-user-id', req.user.userId);
             proxyReq.setHeader('x-user-email', req.user.email);
         }
+        if (req.body && (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH')) {
+            const bodyData = JSON.stringify(req.body);
+            proxyReq.setHeader('Content-Type', 'application/json');
+            proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+            proxyReq.write(bodyData);
+        }
+        console.log('Forwarding ENDs===========================');
     },
     onError: (_err, _req, res) => {
         console.log("ERROR::::=======", _err);

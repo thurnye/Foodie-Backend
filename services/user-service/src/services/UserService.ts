@@ -15,6 +15,14 @@ export class UserService {
     lastName?: string;
     username?: string;
     bio?: string;
+    dateOfBirth?: string;
+    gender?: string;
+    phoneNumber?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string;
   }): Promise<IUser> {
     const user = await User.create(data);
     return user;
@@ -64,6 +72,14 @@ export class UserService {
       username?: string;
       bio?: string;
       avatar?: string;
+      dateOfBirth?: string;
+      gender?: string;
+      phoneNumber?: string;
+      address?: string;
+      city?: string;
+      state?: string;
+      country?: string;
+      postalCode?: string;
     }
   ): Promise<IUser> {
     // Check if username is being updated and if it's already taken

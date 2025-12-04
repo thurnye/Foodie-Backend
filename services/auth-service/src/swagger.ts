@@ -47,6 +47,12 @@ export const swaggerSpec = {
         tags: ['Authentication'],
       },
     },
+    '/me': {
+      get: {
+        summary: 'get Current user',
+        tags: ['Authentication'],
+      },
+    },
     // TODO: Add more endpoints
   },
 };

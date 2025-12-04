@@ -7,6 +7,9 @@ const authenticate = (req, res, next) => {
     try {
         const token = req.headers['authorization']?.replace('Bearer ', '') ||
             req.headers['x-access-token'];
+        console.log('TOKEN:::', token);
+        console.log('Authentication Token:::', req.headers['authorization']);
+        console.log('x-access-token:::', req.headers['x-access-token']);
         if (!token) {
             (0, libs_2.fail)(res, 'Access token required', 401);
             return;
@@ -24,6 +27,10 @@ const optionalAuth = (req, _res, next) => {
     try {
         const token = req.headers['authorization']?.replace('Bearer ', '') ||
             req.headers['x-access-token'];
+        console.log(" req.headers:::", JSON.stringify(req.header));
+        console.log('TOKEN:::', token);
+        console.log('Authentication Token:::', req.headers['authorization']);
+        console.log('x-access-token:::', req.headers['x-access-token']);
         if (token) {
             const payload = (0, libs_1.verifyAccessToken)(token);
             console.log('[OptionalAuth] Token verified, payload:', payload);

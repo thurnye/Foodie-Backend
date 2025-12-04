@@ -4,7 +4,6 @@ import {
   login,
   refresh,
   logout,
-  me,
   verifyEmail,
   resendVerification,
   requestPasswordReset,
@@ -28,8 +27,6 @@ router.post('/refresh', refresh);
 // POST /logout - Logout user
 router.post('/logout', logout);
 
-// GET /me - Get current user profile
-router.get('/me', me);
 
 // POST /verify-email - Verify email address
 router.post('/verify-email', verifyEmail);

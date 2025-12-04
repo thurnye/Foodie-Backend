@@ -5,7 +5,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { logger, mapErrorToResponse } from '@foodie/libs';
 import { healthCheck } from './health';
-import profileRoutes from './routes/profile';
+import profileRoutes from './routes/profile.route';
 
 // Load environment variables
 dotenv.config();

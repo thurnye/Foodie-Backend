@@ -259,46 +259,7 @@ export const logout = async (
   }
 };
 
-/**
- * Get current user
- */
-export const me = async (
-  req: Request,
-  res: Response,
-  _next: NextFunction
-): Promise<void> => {
-  try {
-    // User ID is set by auth middleware
-    const userId = (req as any).user?.userId;
 
-    if (!userId) {
-      fail(res, 'Unauthorized', 401);
-      return;
-    }
-
-    const user = await User.findById(userId);
-    if (!user) {
-      fail(res, 'User not found', 404);
-      return;
-    }
-
-    success(res, {
-      userId: user._id,
-      email: user.email,
-      username: user.username,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      bio: user.bio,
-      avatar: user.avatar,
-      role: user.role,
-      reputation: user.reputation,
-      isEmailVerified: user.isEmailVerified,
-    });
-  } catch (error) {
-    logger.error('Get user error', { error });
-    _next(error);
-  }
-};
 
 /**
  * Verify email
@@ -482,8 +443,11 @@ export const changePassword = async (
   _next: NextFunction
 ): Promise<void> => {
   try {
-    const userId = (req as any).user?.userId;
+    const userId = req.headers['x-user-id'] as string;
     const { oldPassword, newPassword } = req.body;
+
+    console.log("CHANGE PASSWORD BODY:::", req.body)
+    console.log("CHANGE PASSWORD BODY userId:::", userId)
 
     if (!userId) {
       fail(res, 'Unauthorized', 401);

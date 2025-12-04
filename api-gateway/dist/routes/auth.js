@@ -12,8 +12,13 @@ router.use('/', rateLimit_1.authRateLimit, (0, http_proxy_middleware_1.createPro
         '^/api/auth': '',
     },
     onProxyReq: (proxyReq, req) => {
+        console.log('Forwarding===========================');
         if (req.requestId) {
             proxyReq.setHeader('x-request-id', req.requestId);
+        }
+        if (req.user) {
+            proxyReq.setHeader('x-user-id', req.user.userId);
+            proxyReq.setHeader('x-user-email', req.user.email);
         }
         if (req.body && (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH')) {
             const bodyData = JSON.stringify(req.body);
@@ -21,6 +26,7 @@ router.use('/', rateLimit_1.authRateLimit, (0, http_proxy_middleware_1.createPro
             proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
             proxyReq.write(bodyData);
         }
+        console.log('Forwarding ENDs===========================');
     },
     onError: (_err, _req, res) => {
         res.status(503).json({

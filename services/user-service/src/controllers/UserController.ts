@@ -76,6 +76,47 @@ export const getProfile = async (
 };
 
 /**
+ * Get user profile by ID
+ */
+export const getMyProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const userId = req.headers['x-user-id'] as string;
+
+    const user = await UserService.getUserById(userId);
+
+    success(res, {
+      userId: user._id,
+      email: user.email,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      bio: user.bio,
+      avatar: user.avatar,
+      slogan: user.slogan,
+      dateOfBirth: user.dateOfBirth,
+      gender: user.gender,
+      phoneNumber: user.phoneNumber,
+      address: user.address,
+      city: user.city,
+      state: user.state,
+      country: user.country,
+      postalCode: user.postalCode,
+      role: user.role,
+      reputation: user.reputation,
+      isEmailVerified: user.isEmailVerified,
+      createdAt: user.createdAt,
+    });
+  } catch (error) {
+    logger.error('Get profile error', { error });
+    next(error);
+  }
+};
+
+/**
  * Get user profile by Email
  */
 export const getProfileByEmail = async (
@@ -85,7 +126,6 @@ export const getProfileByEmail = async (
 ): Promise<void> => {
   try {
     const { email } = req.params;
-    console.log('USER EMAIL:::=====', email)
 
     const user = await UserService.getUserByEmail(email);
 
@@ -119,14 +159,28 @@ export const editProfile = async (
 ): Promise<void> => {
   try {
     // User ID should come from authenticated user
-    const userId = (req as any).user?.userId;
+    const userId = req.headers['x-user-id'] as string;
 
     if (!userId) {
       fail(res, 'Unauthorized', 401);
       return;
     }
 
-    const { firstName, lastName, username, bio, avatar } = req.body;
+    const {
+      firstName,
+      lastName,
+      username,
+      bio,
+      avatar,
+      dateOfBirth,
+      gender,
+      phoneNumber,
+      address,
+      city,
+      state,
+      country,
+      postalCode,
+    } = req.body;
 
     const user = await UserService.updateProfile(userId, {
       firstName,
@@ -134,6 +188,14 @@ export const editProfile = async (
       username,
       bio,
       avatar,
+      dateOfBirth,
+      gender,
+      phoneNumber,
+      address,
+      city,
+      state,
+      country,
+      postalCode,
     });
 
     logger.info('User profile updated', { userId: user._id });
@@ -148,6 +210,14 @@ export const editProfile = async (
         lastName: user.lastName,
         bio: user.bio,
         avatar: user.avatar,
+        dateOfBirth: user.dateOfBirth,
+        gender: user.gender,
+        phoneNumber: user.phoneNumber,
+        address: user.address,
+        city: user.city,
+        state: user.state,
+        country: user.country,
+        postalCode: user.postalCode,
       },
       'Profile updated successfully'
     );

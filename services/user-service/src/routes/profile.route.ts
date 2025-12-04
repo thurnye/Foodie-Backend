@@ -6,6 +6,7 @@ import {
   deleteProfile,
   getUsers,
   getProfileByEmail,
+  getMyProfile,
 } from '../controllers/UserController';
 import { validate } from '@foodie/libs';
 import { createProfileSchema, editProfileSchema } from '../utils/validators';
@@ -23,6 +24,9 @@ router.get('/', getUsers);
 
 // GET /email/:email - Get user profile by email
 router.get('/email/:email', getProfileByEmail);
+
+// GET /:id - Get user profile by ID
+router.get('/me', getMyProfile);
 
 // GET /:id - Get user profile by ID
 router.get('/:id', getProfile);

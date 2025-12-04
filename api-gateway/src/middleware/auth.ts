@@ -6,11 +6,20 @@ import { fail } from '@foodie/libs';
  * JWT authentication middleware
  * Verifies the access token and attaches user info to request
  */
-export const authenticate = (req: Request, res: Response, next: NextFunction): void => {
+export const authenticate = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
   try {
     // Get token from header
-    const token = req.headers['authorization']?.replace('Bearer ', '') ||
-                  req.headers['x-access-token'] as string;
+    const token =
+      req.headers['authorization']?.replace('Bearer ', '') ||
+      (req.headers['x-access-token'] as string);
+
+    console.log('TOKEN:::', token);
+    console.log('Authentication Token:::', req.headers['authorization']);
+    console.log('x-access-token:::', req.headers['x-access-token']);
 
     if (!token) {
       fail(res, 'Access token required', 401);
@@ -33,10 +42,21 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
  * Optional authentication - doesn't fail if token is missing
  * But validates if present
  */
-export const optionalAuth = (req: Request, _res: Response, next: NextFunction) => {
+export const optionalAuth = (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
   try {
-    const token = req.headers['authorization']?.replace('Bearer ', '') ||
-                  req.headers['x-access-token'] as string;
+    const token =
+      req.headers['authorization']?.replace('Bearer ', '') ||
+      (req.headers['x-access-token'] as string);
+
+      console.log(" req.headers:::", JSON.stringify(req.header))
+
+    console.log('TOKEN:::', token);
+    console.log('Authentication Token:::', req.headers['authorization']);
+    console.log('x-access-token:::', req.headers['x-access-token']);
 
     if (token) {
       const payload = verifyAccessToken(token);
