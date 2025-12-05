@@ -16,9 +16,8 @@ const configSchema = joi_1.default.object({
     RECIPE_SERVICE_URL: joi_1.default.string().uri().required(),
     EVENT_SERVICE_URL: joi_1.default.string().uri().required(),
     COMMUNITY_SERVICE_URL: joi_1.default.string().uri().required(),
-    GROUP_SERVICE_URL: joi_1.default.string().uri().required(),
-    CHAT_SERVICE_URL: joi_1.default.string().uri().required(),
-    NEWS_SERVICE_URL: joi_1.default.string().uri().required(),
+    COMMUNICATION_SERVICE_URL: joi_1.default.string().uri().required(),
+    COOKBOOK_SERVICE_URL: joi_1.default.string().uri().required(),
     JWT_ACCESS_SECRET: joi_1.default.string().required(),
     CORS_ORIGIN: joi_1.default.string().required(),
     LOG_LEVEL: joi_1.default.string()

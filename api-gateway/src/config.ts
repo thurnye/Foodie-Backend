@@ -19,9 +19,8 @@ const configSchema = Joi.object({
   RECIPE_SERVICE_URL: Joi.string().uri().required(),
   EVENT_SERVICE_URL: Joi.string().uri().required(),
   COMMUNITY_SERVICE_URL: Joi.string().uri().required(),
-  GROUP_SERVICE_URL: Joi.string().uri().required(),
-  CHAT_SERVICE_URL: Joi.string().uri().required(),
-  NEWS_SERVICE_URL: Joi.string().uri().required(),
+  COMMUNICATION_SERVICE_URL: Joi.string().uri().required(),
+  COOKBOOK_SERVICE_URL: Joi.string().uri().required(),
 
   // JWT
   JWT_ACCESS_SECRET: Joi.string().required(),
