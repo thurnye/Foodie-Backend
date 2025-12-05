@@ -1,6 +1,9 @@
 import { Document, Types } from 'mongoose';
 export declare enum BookStatus {
     DRAFT = "draft",
+    GENERATING = "generating",
+    COMPLETED = "completed",
+    FAILED = "failed",
     PUBLISHED = "published",
     ARCHIVED = "archived"
 }
@@ -147,6 +150,8 @@ export interface IBook extends Document {
     sections?: IBookSection[];
     bookUrl?: string;
     status: BookStatus;
+    generationProgress?: number;
+    errorMessage?: string;
     isPublic: boolean;
     isActive: boolean;
     publishedAt?: Date;

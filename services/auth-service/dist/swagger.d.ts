@@ -52,6 +52,12 @@ export declare const swaggerSpec: {
                 tags: string[];
             };
         };
+        '/me': {
+            get: {
+                summary: string;
+                tags: string[];
+            };
+        };
     };
 };
 //# sourceMappingURL=swagger.d.ts.map

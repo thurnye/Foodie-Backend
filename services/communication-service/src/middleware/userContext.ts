@@ -8,7 +8,7 @@ import { Errors } from '@foodie/libs';
  * - x-user-email: User email
  * - x-user-name: User name
  */
-export const userContext = (req: Request, res: Response, next: NextFunction): void => {
+export const userContext = (req: Request, _res: Response, next: NextFunction): void => {
   try {
     const userId = req.headers['x-user-id'] as string;
     const userEmail = req.headers['x-user-email'] as string;

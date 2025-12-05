@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const recipeClient_1 = require("./../utils/recipeClient");
+const userClient_1 = require("../utils/userClient");
 const mongoose_1 = require("mongoose");
 const libs_1 = require("@foodie/libs");
 const Book_1 = __importDefault(require("../db/Book"));
@@ -230,14 +231,26 @@ class BookService {
             }
             await this.ensureRequiredPages(book);
             const cookbook = book.cookbook;
+            let authorData = null;
+            if (cookbook && cookbook.author) {
+                authorData = await (0, userClient_1.fetchUserData)(cookbook.author.toString());
+            }
             if (userId) {
-                const isAuthor = cookbook.author?.toString() === userId;
+                const authorId = authorData?._id || cookbook?.author;
+                const isAuthor = authorId?.toString() === userId;
                 if (!isAuthor && !book.isPublic) {
                     throw libs_1.Errors.forbidden('You do not have permission to access this book');
                 }
             }
             else if (!book.isPublic) {
                 throw libs_1.Errors.forbidden('This book is private');
+            }
+            if (authorData) {
+                const bookObj = book.toObject();
+                if (bookObj.cookbook && typeof bookObj.cookbook === 'object') {
+                    bookObj.cookbook.author = authorData;
+                }
+                return bookObj;
             }
             return book;
         }
@@ -256,6 +269,30 @@ class BookService {
                 throw libs_1.Errors.notFound('Book not found');
             }
             await this.ensureRequiredPages(book);
+            const cookbook = book.cookbook;
+            console.log('📚 Cookbook data before fetching author:', {
+                cookbookId: cookbook?._id,
+                authorId: cookbook?.author,
+                authorType: typeof cookbook?.author,
+            });
+            if (cookbook && cookbook.author) {
+                const authorData = await (0, userClient_1.fetchUserData)(cookbook.author.toString());
+                console.log('👤 Author data fetched from user-service:', authorData);
+                if (authorData) {
+                    const bookObj = book.toObject();
+                    if (bookObj.cookbook && typeof bookObj.cookbook === 'object') {
+                        bookObj.cookbook.author = authorData;
+                    }
+                    console.log('✅ Author data attached to cookbook:', bookObj.cookbook?.author);
+                    return bookObj;
+                }
+                else {
+                    console.log('❌ No author data returned from user-service');
+                }
+            }
+            else {
+                console.log('❌ No cookbook or author found in book');
+            }
             return book;
         }
         catch (error) {
@@ -528,7 +565,7 @@ class BookService {
             const pageType = updates.pageType;
             if (!pageType || pageType === book_types_1.PageType.RECIPE) {
                 console.log("Book's recipe pages:", book.recipe);
-                const recipePage = book.recipe?.find((r) => r._id.toString() === pageId.toString());
+                const recipePage = book.recipe?.find((r) => r.pageId === pageId);
                 console.log('🔍 Recipe page found:', recipePage);
                 if (recipePage) {
                     if (updates.position !== undefined)

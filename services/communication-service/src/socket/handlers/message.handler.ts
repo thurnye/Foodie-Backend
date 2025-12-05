@@ -1,5 +1,5 @@
 import { Server, Socket } from 'socket.io';
-import { MessageService } from '../../services/message.service';
+import MessageService from '../../services/message.service';
 import { logger } from '@foodie/libs';
 
 export const registerMessageHandlers = (io: Server, socket: Socket): void => {

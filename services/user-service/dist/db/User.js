@@ -70,6 +70,30 @@ const UserSchema = new mongoose_1.Schema({
     avatar: {
         type: String,
     },
+    dateOfBirth: {
+        type: String,
+    },
+    gender: {
+        type: String,
+    },
+    phoneNumber: {
+        type: String,
+    },
+    address: {
+        type: String,
+    },
+    city: {
+        type: String,
+    },
+    state: {
+        type: String,
+    },
+    country: {
+        type: String,
+    },
+    postalCode: {
+        type: String,
+    },
     slogan: {
         type: String,
     },

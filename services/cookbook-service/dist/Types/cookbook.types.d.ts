@@ -75,12 +75,12 @@ export interface ICookbook extends Document {
     };
     authorBio?: string;
     authorImage?: string;
-    status: CookbookStatus;
-    pdfUrl?: string;
+    status?: CookbookStatus;
     generationProgress?: number;
+    pdfUrl?: string;
     errorMessage?: string;
-    isPublic: boolean;
     isActive: boolean;
+    isPublic?: boolean;
     pageCount?: number;
     fileSize?: number;
     lastGeneratedAt?: Date;

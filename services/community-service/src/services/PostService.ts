@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 import { Errors, logger } from '@foodie/libs';
-import { Post, IPost, IPostMedia, ReactionType } from '../models/Post.model';
+import { Post, IPostMedia, ReactionType } from '../models/Post.model';
 import { Group } from '../models/Group.model';
 import { Comment } from '../models/Comment.model';
 import { fetchUserData, UserData } from '../utils/userClient';

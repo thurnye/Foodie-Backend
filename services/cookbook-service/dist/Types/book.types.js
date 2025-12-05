@@ -4,6 +4,9 @@ exports.PageLayoutFormat = exports.PageType = exports.BookStatus = void 0;
 var BookStatus;
 (function (BookStatus) {
     BookStatus["DRAFT"] = "draft";
+    BookStatus["GENERATING"] = "generating";
+    BookStatus["COMPLETED"] = "completed";
+    BookStatus["FAILED"] = "failed";
     BookStatus["PUBLISHED"] = "published";
     BookStatus["ARCHIVED"] = "archived";
 })(BookStatus || (exports.BookStatus = BookStatus = {}));

@@ -69,7 +69,7 @@ app.use('/community', communityRoutes);
 /* --------------------------------------------
    Error Handler
 --------------------------------------------- */
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
   logger.error('Unhandled error', {
     error: err.message || err,
     stack: err.stack,

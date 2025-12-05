@@ -1,6 +1,6 @@
 import mongoose, { Document } from 'mongoose';
 export interface IUser extends Document {
-    _id: string;
+    _id: mongoose.Types.ObjectId;
     email: string;
     password: string;
     firstName?: string;
@@ -8,6 +8,14 @@ export interface IUser extends Document {
     username?: string;
     bio?: string;
     avatar?: string;
+    dateOfBirth?: string;
+    gender?: string;
+    phoneNumber?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string;
     isEmailVerified: boolean;
     emailVerificationToken?: string;
     emailVerificationExpires?: Date;
@@ -21,7 +29,7 @@ export interface IUser extends Document {
     slogan: string;
 }
 declare const User: mongoose.Model<IUser, {}, {}, {}, mongoose.Document<unknown, {}, IUser, {}, {}> & IUser & Required<{
-    _id: string;
+    _id: mongoose.Types.ObjectId;
 }> & {
     __v: number;
 }, any>;

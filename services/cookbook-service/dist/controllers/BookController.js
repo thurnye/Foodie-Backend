@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const libs_1 = require("@foodie/libs");
 const BookService_1 = __importDefault(require("../services/BookService"));
+const PdfGenerationService_1 = __importDefault(require("../services/PdfGenerationService"));
 class BookController {
     async createBook(req, res) {
         try {
@@ -348,6 +349,31 @@ class BookController {
             res.status(error.statusCode || 500).json({
                 success: false,
                 message: error.message || 'Failed to publish book',
+            });
+        }
+    }
+    async getGenerationStatus(req, res) {
+        try {
+            const { bookId } = req.params;
+            const userId = req.user?.userId;
+            if (!userId) {
+                res.status(401).json({
+                    success: false,
+                    message: 'Authentication required.',
+                });
+                return;
+            }
+            const status = PdfGenerationService_1.default.getGenerationStatus(bookId);
+            res.status(200).json({
+                success: true,
+                data: status,
+            });
+        }
+        catch (error) {
+            libs_1.logger.error('Get generation status error', { error });
+            res.status(error.statusCode || 500).json({
+                success: false,
+                message: error.message || 'Failed to get generation status',
             });
         }
     }

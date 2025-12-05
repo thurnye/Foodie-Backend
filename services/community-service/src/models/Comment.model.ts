@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { IReaction, IVote, ReactionType } from './Post.model';
+import { IReaction, IVote } from './Post.model';
 
 export interface IComment extends Document {
   post: mongoose.Types.ObjectId;

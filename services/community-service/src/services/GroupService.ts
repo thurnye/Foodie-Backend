@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 import { Errors, logger } from '@foodie/libs';
-import { Group, IGroup } from '../models/Group.model';
+import { Group } from '../models/Group.model';
 import { Post } from '../models/Post.model';
 import { fetchUserData, UserData } from '../utils/userClient';
 
@@ -58,7 +58,7 @@ class GroupService {
    */
   async getAllGroups(filters: GetGroupsFilters = {}): Promise<GroupWithUser[]> {
     try {
-      const { search, tags, isPrivate, sort = 'newest' } = filters;
+      const { search, tags, isPrivate: _isPrivate, sort = 'newest' } = filters;
 
       let query: any = {};
 

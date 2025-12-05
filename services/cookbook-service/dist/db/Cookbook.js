@@ -63,11 +63,6 @@ const CookbookSchema = new mongoose_1.Schema({
         type: String,
         enum: Object.values(cookbook_types_1.CookbookStatus),
         default: cookbook_types_1.CookbookStatus.DRAFT,
-        index: true,
-    },
-    pdfUrl: {
-        type: String,
-        trim: true,
     },
     generationProgress: {
         type: Number,
@@ -75,17 +70,22 @@ const CookbookSchema = new mongoose_1.Schema({
         max: 100,
         default: 0,
     },
+    pdfUrl: {
+        type: String,
+        trim: true,
+    },
     errorMessage: {
         type: String,
         trim: true,
     },
-    isPublic: {
-        type: Boolean,
-        default: false,
-    },
     isActive: {
         type: Boolean,
         default: true,
+        index: true,
+    },
+    isPublic: {
+        type: Boolean,
+        default: false,
         index: true,
     },
     pageCount: {
@@ -105,8 +105,6 @@ const CookbookSchema = new mongoose_1.Schema({
     toObject: { virtuals: true },
 });
 CookbookSchema.index({ author: 1, isActive: 1, createdAt: -1 });
-CookbookSchema.index({ status: 1, createdAt: -1 });
-CookbookSchema.index({ isPublic: 1, isActive: 1 });
 CookbookSchema.virtual('bookCount').get(function () {
     return this.books?.length || 0;
 });

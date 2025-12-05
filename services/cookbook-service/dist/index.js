@@ -29,7 +29,10 @@ if (process.env.NODE_ENV !== 'production') {
 }
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: [
+        process.env.CORS_ORIGIN || 'http://localhost:3000',
+        'http://localhost:5173',
+    ],
     credentials: true,
 }));
 app.use(express_1.default.json({ limit: '10mb' }));
@@ -46,7 +49,15 @@ app.use((req, _res, next) => {
 app.get('/health', (_req, res) => {
     res.json({ success: true, message: 'Cookbook service is healthy' });
 });
-app.use('/uploads', express_1.default.static(path_1.default.join(process.cwd(), 'uploads')));
+app.use('/uploads', (req, res, next) => {
+    if (req.path.endsWith('.pdf')) {
+        const filename = path_1.default.basename(req.path);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
+    }
+    next();
+}, express_1.default.static(path_1.default.join(process.cwd(), 'uploads')));
 app.use('/api/cookbook', cookbook_routes_1.default);
 app.use('/api/books', book_routes_1.default);
 app.use('/api/cookbook/pdf', pdf_routes_1.default);

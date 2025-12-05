@@ -9,7 +9,6 @@ router.post('/register', (0, libs_1.validate)(validators_1.registerSchema), Auth
 router.post('/login', (0, libs_1.validate)(validators_1.loginSchema), AuthController_1.login);
 router.post('/refresh', AuthController_1.refresh);
 router.post('/logout', AuthController_1.logout);
-router.get('/me', AuthController_1.me);
 router.post('/verify-email', AuthController_1.verifyEmail);
 router.post('/resend-verification', AuthController_1.resendVerification);
 router.post('/reset-request', AuthController_1.requestPasswordReset);

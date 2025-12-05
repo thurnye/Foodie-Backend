@@ -19,10 +19,18 @@ class UserService {
         return user;
     }
     async getUserByEmail(email) {
-        return User_1.default.findOne({ email });
+        const user = await User_1.default.findOne({ email });
+        if (!user) {
+            throw libs_1.Errors.notFound('User not found');
+        }
+        return user;
     }
     async getUserByUsername(username) {
-        return User_1.default.findOne({ username });
+        const user = await User_1.default.findOne({ username });
+        if (!user) {
+            throw libs_1.Errors.notFound('User not found');
+        }
+        return user;
     }
     async updateProfile(userId, updates) {
         if (updates.username) {

@@ -11,6 +11,7 @@ declare class BookController {
     deletePage(req: Request, res: Response): Promise<void>;
     reorderPages(req: Request, res: Response): Promise<void>;
     publishBook(req: Request, res: Response): Promise<void>;
+    getGenerationStatus(req: Request, res: Response): Promise<void>;
 }
 declare const _default: BookController;
 export default _default;

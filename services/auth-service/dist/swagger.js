@@ -45,6 +45,12 @@ exports.swaggerSpec = {
                 tags: ['Authentication'],
             },
         },
+        '/me': {
+            get: {
+                summary: 'get Current user',
+                tags: ['Authentication'],
+            },
+        },
     },
 };
 //# sourceMappingURL=swagger.js.map

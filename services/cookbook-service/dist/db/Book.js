@@ -261,6 +261,16 @@ const BookSchema = new mongoose_1.Schema({
         default: book_types_1.BookStatus.DRAFT,
         index: true,
     },
+    generationProgress: {
+        type: Number,
+        min: 0,
+        max: 100,
+        default: 0,
+    },
+    errorMessage: {
+        type: String,
+        trim: true,
+    },
     isPublic: {
         type: Boolean,
         default: false,

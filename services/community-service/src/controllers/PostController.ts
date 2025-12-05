@@ -8,7 +8,7 @@ export class PostController {
    */
   async getAllPosts(req: Request, res: Response): Promise<void> {
     try {
-      const { groupId, authorId, search, tags, sort = 'newest', isPinned, page, limit } = req.query;
+      const { groupId, authorId, search, tags, sort: _sort = 'newest', isPinned, page, limit } = req.query;
 
       const posts = await PostService.getAllPosts({
         groupId: groupId as string,

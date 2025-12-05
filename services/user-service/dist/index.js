@@ -10,7 +10,7 @@ const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const libs_1 = require("@foodie/libs");
 const health_1 = require("./health");
-const profile_1 = __importDefault(require("./routes/profile"));
+const profile_route_1 = __importDefault(require("./routes/profile.route"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3002;
@@ -31,7 +31,7 @@ app.use((req, _res, next) => {
     next();
 });
 app.get('/health', health_1.healthCheck);
-app.use('/', profile_1.default);
+app.use('/', profile_route_1.default);
 app.use((_req, res) => {
     res.status(404).json({
         success: false,

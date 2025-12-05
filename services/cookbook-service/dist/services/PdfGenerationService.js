@@ -11,8 +11,18 @@ const FileStorageService_1 = __importDefault(require("./FileStorageService"));
 class PdfGenerationService {
     frontendUrl;
     browser = null;
+    generationStatus = new Map();
     constructor() {
         this.frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    }
+    getGenerationStatus(bookId) {
+        return this.generationStatus.get(bookId) || null;
+    }
+    updateGenerationStatus(bookId, current, total, currentStep) {
+        this.generationStatus.set(bookId, { current, total, currentStep });
+    }
+    clearGenerationStatus(bookId) {
+        this.generationStatus.delete(bookId);
     }
     async initBrowser() {
         if (!this.browser) {
@@ -86,29 +96,57 @@ class PdfGenerationService {
             if (!book) {
                 throw libs_1.Errors.notFound('Book not found');
             }
+            await BookService_1.default.updateBook(bookId, userId, { status: 'generating' });
+            libs_1.logger.info('📊 Book status updated to generating', { bookId });
             browser = await this.initBrowser();
             const pagePdfs = [];
+            const totalPages = (book.coverData ? 1 : 0) +
+                (book.introData ? 1 : 0) +
+                (book.tocData ? Math.max(1, Math.ceil(((book.recipe?.length || 0) - 9) / 10) + 1) : 0) +
+                (book.recipe?.length || 0) +
+                (book.extraPageData?.length || 0) +
+                (book.backCoverData ? 1 : 0);
+            let currentStep = 0;
             if (book.coverData) {
+                currentStep++;
+                this.updateGenerationStatus(bookId, 'Front Cover', totalPages, currentStep);
                 libs_1.logger.info('📄 Generating cover page...');
                 const paperSize = book.coverData.paperSize || 'A4';
                 const coverPdf = await this.generatePagePdf(browser, bookId, book.coverData.pageId, 'cover', paperSize, false);
                 pagePdfs.push(coverPdf);
             }
             if (book.introData) {
+                currentStep++;
+                this.updateGenerationStatus(bookId, 'Intro Page', totalPages, currentStep);
                 libs_1.logger.info('📄 Generating intro page...');
                 const paperSize = book.introData.paperSize || 'A4';
                 const introPdf = await this.generatePagePdf(browser, bookId, book.introData.pageId, 'intro', paperSize, paperSize === 'A3');
                 pagePdfs.push(introPdf);
             }
             if (book.tocData) {
-                libs_1.logger.info('📄 Generating TOC page...');
+                libs_1.logger.info('📄 Generating TOC pages...');
                 const paperSize = book.tocData.paperSize || 'A4';
-                const tocPdf = await this.generatePagePdf(browser, bookId, book.tocData.pageId, 'toc', paperSize, false);
-                pagePdfs.push(tocPdf);
+                const recipeCount = book.recipe?.length || 0;
+                let tocPageCount = 1;
+                if (recipeCount > 9) {
+                    const remainingRecipes = recipeCount - 9;
+                    const additionalPages = Math.ceil(remainingRecipes / 10);
+                    tocPageCount = 1 + additionalPages;
+                }
+                libs_1.logger.info(`📄 Generating ${tocPageCount} TOC page(s) for ${recipeCount} recipes...`);
+                for (let pageIndex = 0; pageIndex < tocPageCount; pageIndex++) {
+                    currentStep++;
+                    this.updateGenerationStatus(bookId, `Table of Contents (Page ${pageIndex + 1}/${tocPageCount})`, totalPages, currentStep);
+                    libs_1.logger.info(`📄 Generating TOC page ${pageIndex + 1}/${tocPageCount}...`);
+                    const tocPdf = await this.generatePagePdf(browser, bookId, book.tocData.pageId, `toc&pageIndex=${pageIndex}`, paperSize, paperSize === 'A3');
+                    pagePdfs.push(tocPdf);
+                }
             }
             const frontExtraPages = book.extraPageData?.filter((p) => p.section === 'front') || [];
             frontExtraPages.sort((a, b) => a.position - b.position);
             for (const extraPage of frontExtraPages) {
+                currentStep++;
+                this.updateGenerationStatus(bookId, `Extra Page: ${extraPage.title}`, totalPages, currentStep);
                 libs_1.logger.info(`📄 Generating front extra page: ${extraPage.title}...`);
                 const paperSize = extraPage.paperSize || 'A4';
                 const extraPdf = await this.generatePagePdf(browser, bookId, extraPage.pageId, 'extra', paperSize, paperSize === 'A3');
@@ -117,7 +155,10 @@ class PdfGenerationService {
             if (book.recipe && book.recipe.length > 0) {
                 const sortedRecipes = [...book.recipe].sort((a, b) => a.order - b.order);
                 for (const recipe of sortedRecipes) {
-                    libs_1.logger.info(`📄 Generating recipe page: ${recipe.basicInfo?.recipeName || 'Recipe'}...`);
+                    currentStep++;
+                    const recipeName = recipe.basicInfo?.recipeName || 'Recipe';
+                    this.updateGenerationStatus(bookId, `Recipe: ${recipeName}`, totalPages, currentStep);
+                    libs_1.logger.info(`📄 Generating recipe page: ${recipeName}...`);
                     const paperSize = recipe.paperSize || 'A3';
                     const recipePdf = await this.generatePagePdf(browser, bookId, recipe.pageId, 'recipe', paperSize, true);
                     pagePdfs.push(recipePdf);
@@ -126,12 +167,16 @@ class PdfGenerationService {
             const backExtraPages = book.extraPageData?.filter((p) => p.section === 'back') || [];
             backExtraPages.sort((a, b) => a.position - b.position);
             for (const extraPage of backExtraPages) {
+                currentStep++;
+                this.updateGenerationStatus(bookId, `Extra Page: ${extraPage.title}`, totalPages, currentStep);
                 libs_1.logger.info(`📄 Generating back extra page: ${extraPage.title}...`);
                 const paperSize = extraPage.paperSize || 'A4';
                 const extraPdf = await this.generatePagePdf(browser, bookId, extraPage.pageId, 'extra', paperSize, paperSize === 'A3');
                 pagePdfs.push(extraPdf);
             }
             if (book.backCoverData) {
+                currentStep++;
+                this.updateGenerationStatus(bookId, 'Back Cover', totalPages, currentStep);
                 libs_1.logger.info('📄 Generating back cover page...');
                 const paperSize = book.backCoverData.paperSize || 'A4';
                 const backCoverPdf = await this.generatePagePdf(browser, bookId, book.backCoverData.pageId, 'back-cover', paperSize, false);
@@ -140,6 +185,7 @@ class PdfGenerationService {
             if (pagePdfs.length === 0) {
                 throw libs_1.Errors.badRequest('No pages to generate PDF from');
             }
+            this.updateGenerationStatus(bookId, 'Merging pages...', totalPages, totalPages);
             libs_1.logger.info(`✅ PDF generation completed. Generated ${pagePdfs.length} pages`);
             libs_1.logger.info('📦 Merging all page PDFs into one document...');
             const mergedPdf = await pdf_lib_1.PDFDocument.create();
@@ -165,10 +211,24 @@ class PdfGenerationService {
             const bookUrl = await FileStorageService_1.default.savePdf(bookId, pdfBuffer);
             libs_1.logger.info('📝 Updating book with PDF URL...');
             await BookService_1.default.updateBookUrl(bookId, bookUrl);
+            await BookService_1.default.updateBook(bookId, userId, { status: 'completed' });
+            libs_1.logger.info('📊 Book status updated to completed', { bookId });
             libs_1.logger.info('✅ PDF generation completed successfully', { bookUrl });
+            this.clearGenerationStatus(bookId);
             return pdfBuffer;
         }
         catch (error) {
+            try {
+                await BookService_1.default.updateBook(bookId, userId, {
+                    status: 'failed',
+                    errorMessage: error.message || 'PDF generation failed'
+                });
+                libs_1.logger.info('📊 Book status updated to failed', { bookId });
+            }
+            catch (updateError) {
+                libs_1.logger.error('Failed to update book status to failed', { updateError });
+            }
+            this.clearGenerationStatus(bookId);
             libs_1.logger.error('❌ Error generating PDF', {
                 error: error.message || error,
                 stack: error.stack,

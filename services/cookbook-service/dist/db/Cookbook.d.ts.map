@@ -1,1 +1,1 @@
-{"version":3,"file":"Cookbook.d.ts","sourceRoot":"","sources":["../../src/db/Cookbook.ts"],"names":[],"mappings":"AAEA,OAAO,EAAiD,SAAS,EAAa,MAAM,yBAAyB,CAAC;AA2J9G,QAAA,MAAM,QAAQ;;;;OAA+C,CAAC;AAE9D,eAAe,QAAQ,CAAC"}
+{"version":3,"file":"Cookbook.d.ts","sourceRoot":"","sources":["../../src/db/Cookbook.ts"],"names":[],"mappings":"AAEA,OAAO,EAAiD,SAAS,EAAa,MAAM,yBAAyB,CAAC;AAyJ9G,QAAA,MAAM,QAAQ;;;;OAA+C,CAAC;AAE9D,eAAe,QAAQ,CAAC"}

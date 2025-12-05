@@ -4,7 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
-import { logger, Errors } from '@foodie/libs';
+import { logger } from '@foodie/libs';
 import routes from './routes';
 import { initializeWebSocket } from './socket';
 
@@ -54,7 +54,7 @@ app.use((req: Request, res: Response) => {
 });
 
 // Error handler
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   logger.error('Error:', err);
 
   // Handle operational errors

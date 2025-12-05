@@ -15,6 +15,7 @@ interface UpdateBookData {
     status?: BookStatus;
     isPublic?: boolean;
     layout?: string;
+    errorMessage?: string;
 }
 interface CreatePageData {
     pageType: PageType;

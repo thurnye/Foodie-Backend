@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changePassword = exports.resetPassword = exports.requestPasswordReset = exports.resendVerification = exports.verifyEmail = exports.me = exports.logout = exports.refresh = exports.login = exports.register = void 0;
+exports.changePassword = exports.resetPassword = exports.requestPasswordReset = exports.resendVerification = exports.verifyEmail = exports.logout = exports.refresh = exports.login = exports.register = void 0;
 const User_1 = __importDefault(require("../db/User"));
 const password_1 = require("../domain/password");
 const token_1 = require("../domain/token");
@@ -159,37 +159,6 @@ const logout = async (req, res, _next) => {
     }
 };
 exports.logout = logout;
-const me = async (req, res, _next) => {
-    try {
-        const userId = req.user?.userId;
-        if (!userId) {
-            (0, libs_1.fail)(res, 'Unauthorized', 401);
-            return;
-        }
-        const user = await User_1.default.findById(userId);
-        if (!user) {
-            (0, libs_1.fail)(res, 'User not found', 404);
-            return;
-        }
-        (0, libs_1.success)(res, {
-            userId: user._id,
-            email: user.email,
-            username: user.username,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            bio: user.bio,
-            avatar: user.avatar,
-            role: user.role,
-            reputation: user.reputation,
-            isEmailVerified: user.isEmailVerified,
-        });
-    }
-    catch (error) {
-        libs_1.logger.error('Get user error', { error });
-        _next(error);
-    }
-};
-exports.me = me;
 const verifyEmail = async (req, res, _next) => {
     try {
         const { token } = req.body;
@@ -298,8 +267,10 @@ const resetPassword = async (req, res, _next) => {
 exports.resetPassword = resetPassword;
 const changePassword = async (req, res, _next) => {
     try {
-        const userId = req.user?.userId;
+        const userId = req.headers['x-user-id'];
         const { oldPassword, newPassword } = req.body;
+        console.log("CHANGE PASSWORD BODY:::", req.body);
+        console.log("CHANGE PASSWORD BODY userId:::", userId);
         if (!userId) {
             (0, libs_1.fail)(res, 'Unauthorized', 401);
             return;
