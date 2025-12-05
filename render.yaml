@@ -1,0 +1,300 @@
+# Render Blueprint for Foodie Backend Microservices
+# Deploy all services with: render blueprint create
+
+services:
+  # ==========================================
+  # API GATEWAY - Main Entry Point
+  # ==========================================
+  - type: web
+    name: foodie-api-gateway
+    runtime: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install && npm run build:gateway
+    startCommand: cd api-gateway && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 8000
+      # Service URLs - Use Render internal URLs
+      - key: AUTH_SERVICE_URL
+        fromService:
+          type: web
+          name: foodie-auth-service
+          property: host
+      - key: USER_SERVICE_URL
+        fromService:
+          type: web
+          name: foodie-user-service
+          property: host
+      - key: RECIPE_SERVICE_URL
+        fromService:
+          type: web
+          name: foodie-recipe-service
+          property: host
+      - key: COOKBOOK_SERVICE_URL
+        fromService:
+          type: web
+          name: foodie-cookbook-service
+          property: host
+      - key: COMMUNITY_SERVICE_URL
+        fromService:
+          type: web
+          name: foodie-community-service
+          property: host
+      - key: EVENT_SERVICE_URL
+        fromService:
+          type: web
+          name: foodie-event-service
+          property: host
+      - key: CHAT_SERVICE_URL
+        fromService:
+          type: web
+          name: foodie-chat-service
+          property: host
+      - key: COMMUNICATION_SERVICE_URL
+        fromService:
+          type: web
+          name: foodie-communication-service
+          property: host
+      # MongoDB Connection
+      - key: MONGODB_URI
+        sync: false  # Set this in Render dashboard (use MongoDB Atlas)
+      # JWT Secrets
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRES_IN
+        value: 15m
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 7d
+      # CORS & Frontend
+      - key: FRONTEND_URL
+        sync: false  # Set to your frontend URL in dashboard
+      - key: CORS_ORIGIN
+        sync: false  # Set to your frontend URL in dashboard
+      - key: COOKIE_DOMAIN
+        sync: false  # Set to your domain
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: LOG_LEVEL
+        value: info
+
+  # ==========================================
+  # AUTH SERVICE
+  # ==========================================
+  - type: web
+    name: foodie-auth-service
+    runtime: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install && npm run build:auth
+    startCommand: cd services/auth-service && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: AUTH_PORT
+        value: 3001
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false  # Use same as gateway
+      - key: JWT_REFRESH_SECRET
+        sync: false  # Use same as gateway
+      - key: JWT_ACCESS_EXPIRES_IN
+        value: 15m
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 7d
+      - key: COOKIE_DOMAIN
+        sync: false
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: LOG_LEVEL
+        value: info
+
+  # ==========================================
+  # USER SERVICE
+  # ==========================================
+  - type: web
+    name: foodie-user-service
+    runtime: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install && npm run build:user
+    startCommand: cd services/user-service && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3002
+      - key: USER_PORT
+        value: 3002
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: LOG_LEVEL
+        value: info
+
+  # ==========================================
+  # RECIPE SERVICE
+  # ==========================================
+  - type: web
+    name: foodie-recipe-service
+    runtime: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install && npm run build:recipe
+    startCommand: cd services/recipe-service && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3003
+      - key: RECIPE_PORT
+        value: 3003
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: LOG_LEVEL
+        value: info
+
+  # ==========================================
+  # COOKBOOK SERVICE
+  # ==========================================
+  - type: web
+    name: foodie-cookbook-service
+    runtime: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install && npm run build:cookbook
+    startCommand: cd services/cookbook-service && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3004
+      - key: COOKBOOK_PORT
+        value: 3004
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: LOG_LEVEL
+        value: info
+
+  # ==========================================
+  # COMMUNITY SERVICE
+  # ==========================================
+  - type: web
+    name: foodie-community-service
+    runtime: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install && npm run build:community
+    startCommand: cd services/community-service && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3005
+      - key: COMMUNITY_PORT
+        value: 3005
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: LOG_LEVEL
+        value: info
+
+  # ==========================================
+  # EVENT SERVICE
+  # ==========================================
+  - type: web
+    name: foodie-event-service
+    runtime: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install && npm run build:event
+    startCommand: cd services/event-service && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3006
+      - key: EVENT_PORT
+        value: 3006
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: LOG_LEVEL
+        value: info
+
+  # ==========================================
+  # CHAT SERVICE
+  # ==========================================
+  - type: web
+    name: foodie-chat-service
+    runtime: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install && npm run build:chat
+    startCommand: cd services/chat-service && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3007
+      - key: CHAT_PORT
+        value: 3007
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: LOG_LEVEL
+        value: info
+
+  # ==========================================
+  # COMMUNICATION SERVICE
+  # ==========================================
+  - type: web
+    name: foodie-communication-service
+    runtime: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install && npm run build:communication
+    startCommand: cd services/communication-service && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3009
+      - key: COMMUNICATION_PORT
+        value: 3009
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: LOG_LEVEL
+        value: info
+
+# ==========================================
+# NOTES:
+# ==========================================
+# 1. All services are set to "starter" plan - adjust based on your needs
+# 2. Region is set to "oregon" - change to your preferred region
+# 3. Environment variables marked with "sync: false" must be set manually in Render dashboard:
+#    - MONGODB_URI: Your MongoDB Atlas connection string
+#    - JWT_ACCESS_SECRET: Same secret across all services
+#    - JWT_REFRESH_SECRET: Same secret across all services
+#    - FRONTEND_URL: Your deployed frontend URL
+#    - CORS_ORIGIN: Your deployed frontend URL
+#    - COOKIE_DOMAIN: Your domain (e.g., yourdomain.com)
+# 4. Services communicate internally using Render's service discovery
+# 5. Make sure your MongoDB Atlas allows connections from Render IPs (0.0.0.0/0 for simplicity)
