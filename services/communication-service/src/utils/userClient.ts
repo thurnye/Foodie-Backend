@@ -2,8 +2,7 @@ import axios from 'axios';
 import { logger } from '@foodie/libs';
 import { UserData } from '../types/communication.types';
 
-const USER_SERVICE_URL =
-  process.env.USER_SERVICE_URL || 'http://localhost:3002';
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL!;
 
 /**
  * Fetch user data from user-service by user ID

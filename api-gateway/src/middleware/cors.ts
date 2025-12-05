@@ -1,15 +1,11 @@
 import cors from 'cors';
 
 /**
- * CORS configuration - allows multiple origins
+ * CORS configuration - allows multiple origins from environment variables
  */
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:5000',
-  'http://localhost:8000',
-  'http://localhost:4000',
-  process.env.CORS_ORIGIN,
-].filter(Boolean);
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+  : [];
 
 export const corsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
@@ -19,7 +15,7 @@ export const corsOptions = {
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      callback(null, true); // Allow all origins in development
+      callback(new Error('Not allowed by CORS'), false);
     }
   },
   credentials: true,

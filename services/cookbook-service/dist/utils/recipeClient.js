@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.fetchRecipeData = fetchRecipeData;
 const axios_1 = __importDefault(require("axios"));
 const libs_1 = require("@foodie/libs");
-const RECIPE_SERVICE_URL = process.env.RECIPE_SERVICE_URL || 'http://localhost:3003/recipe';
+const RECIPE_SERVICE_URL = process.env.RECIPE_SERVICE_URL;
 async function fetchRecipeData(recipeId) {
     try {
         const response = await axios_1.default.get(`${RECIPE_SERVICE_URL}/${recipeId}`, {

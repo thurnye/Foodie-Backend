@@ -11,16 +11,16 @@ const configSchema = joi_1.default.object({
     NODE_ENV: joi_1.default.string()
         .valid('development', 'production', 'test')
         .default('development'),
-    AUTH_SERVICE_URL: joi_1.default.string().uri().default('http://localhost:3001'),
-    USER_SERVICE_URL: joi_1.default.string().uri().default('http://localhost:3002'),
-    RECIPE_SERVICE_URL: joi_1.default.string().uri().default('http://localhost:3003'),
-    EVENT_SERVICE_URL: joi_1.default.string().uri().default('http://localhost:3004'),
-    COMMUNITY_SERVICE_URL: joi_1.default.string().uri().default('http://localhost:3005'),
-    GROUP_SERVICE_URL: joi_1.default.string().uri().default('http://localhost:3006'),
-    CHAT_SERVICE_URL: joi_1.default.string().uri().default('http://localhost:3007'),
-    NEWS_SERVICE_URL: joi_1.default.string().uri().default('http://localhost:3008'),
+    AUTH_SERVICE_URL: joi_1.default.string().uri().required(),
+    USER_SERVICE_URL: joi_1.default.string().uri().required(),
+    RECIPE_SERVICE_URL: joi_1.default.string().uri().required(),
+    EVENT_SERVICE_URL: joi_1.default.string().uri().required(),
+    COMMUNITY_SERVICE_URL: joi_1.default.string().uri().required(),
+    GROUP_SERVICE_URL: joi_1.default.string().uri().required(),
+    CHAT_SERVICE_URL: joi_1.default.string().uri().required(),
+    NEWS_SERVICE_URL: joi_1.default.string().uri().required(),
     JWT_ACCESS_SECRET: joi_1.default.string().required(),
-    CORS_ORIGIN: joi_1.default.string().default('http://localhost:3000'),
+    CORS_ORIGIN: joi_1.default.string().required(),
     LOG_LEVEL: joi_1.default.string()
         .valid('error', 'warn', 'info', 'debug')
         .default('info'),

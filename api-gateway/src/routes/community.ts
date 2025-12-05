@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const router = Router();
-const COMMUNITY_SERVICE_URL = process.env.COMMUNITY_SERVICE_URL || 'http://localhost:3005';
+const COMMUNITY_SERVICE_URL = process.env.COMMUNITY_SERVICE_URL!;
 
 /**
  * Proxy all /api/community/* requests to community-service

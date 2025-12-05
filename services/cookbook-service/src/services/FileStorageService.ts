@@ -9,7 +9,7 @@ class FileStorageService {
   constructor() {
     // Create uploads directory if it doesn't exist
     this.uploadsDir = path.join(process.cwd(), 'uploads', 'pdfs');
-    this.baseUrl = process.env.BASE_URL || 'http://localhost:3004';
+    this.baseUrl = process.env.BASE_URL!;
 
     // Ensure uploads directory exists
     if (!fs.existsSync(this.uploadsDir)) {

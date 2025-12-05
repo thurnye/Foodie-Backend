@@ -13,13 +13,13 @@ const httpServer = http.createServer(app);
 
 // Environment variables
 const PORT = process.env.PORT || 3009;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/FoodieBlog';
+const MONGODB_URI = process.env.MONGODB_URI!;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: process.env.CORS_ORIGIN!,
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));

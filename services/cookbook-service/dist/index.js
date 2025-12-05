@@ -18,7 +18,7 @@ const userContext_1 = require("./middleware/userContext");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = Number(process.env.PORT) || 3004;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/FoodieBlog';
+const MONGODB_URI = process.env.MONGODB_URI;
 if (process.env.NODE_ENV !== 'production') {
     try {
         (0, child_process_1.execSync)(`lsof -ti:${PORT} | xargs kill -9`, { stdio: 'ignore' });
@@ -29,10 +29,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)({
-    origin: [
-        process.env.CORS_ORIGIN || 'http://localhost:3000',
-        'http://localhost:5173',
-    ],
+    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim()) : [],
     credentials: true,
 }));
 app.use(express_1.default.json({ limit: '10mb' }));

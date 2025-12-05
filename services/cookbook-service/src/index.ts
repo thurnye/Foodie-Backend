@@ -20,8 +20,7 @@ dotenv.config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3004;
-const MONGODB_URI =
-  process.env.MONGODB_URI || 'mongodb://localhost:27017/FoodieBlog';
+const MONGODB_URI = process.env.MONGODB_URI!;
 
 /* --------------------------------------------
     Kill existing process on same port (dev only)
@@ -41,10 +40,7 @@ if (process.env.NODE_ENV !== 'production') {
 app.use(helmet());
 app.use(
   cors({
-    origin: [
-      process.env.CORS_ORIGIN || 'http://localhost:3000',
-      'http://localhost:5173', // Vite dev server
-    ],
+    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim()) : [],
     credentials: true,
   })
 );

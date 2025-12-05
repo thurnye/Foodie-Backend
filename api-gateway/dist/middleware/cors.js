@@ -5,13 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.corsOptions = void 0;
 const cors_1 = __importDefault(require("cors"));
-const allowedOrigins = [
-    'http://localhost:3000',
-    'http://localhost:5000',
-    'http://localhost:8000',
-    'http://localhost:4000',
-    process.env.CORS_ORIGIN,
-].filter(Boolean);
+const allowedOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+    : [];
 exports.corsOptions = {
     origin: (origin, callback) => {
         if (!origin)
@@ -20,7 +16,7 @@ exports.corsOptions = {
             callback(null, true);
         }
         else {
-            callback(null, true);
+            callback(new Error('Not allowed by CORS'), false);
         }
     },
     credentials: true,

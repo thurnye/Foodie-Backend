@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const http_proxy_middleware_1 = require("http-proxy-middleware");
 const router = (0, express_1.Router)();
-const COMMUNICATION_SERVICE_URL = process.env.COMMUNICATION_SERVICE_URL || 'http://localhost:3009';
+const COMMUNICATION_SERVICE_URL = process.env.COMMUNICATION_SERVICE_URL;
 router.use('/', (0, http_proxy_middleware_1.createProxyMiddleware)({
     target: COMMUNICATION_SERVICE_URL,
     changeOrigin: true,

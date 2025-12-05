@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { logger } from '@foodie/libs';
 
-const USER_SERVICE_URL =
-  process.env.USER_SERVICE_URL || 'http://localhost:3002';
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL!;
 
 export interface UserData {
   _id?: string;

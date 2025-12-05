@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const router = Router();
-const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://localhost:3002';
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL!;
 
 /**
  * Proxy all /api/user/* requests to user-service

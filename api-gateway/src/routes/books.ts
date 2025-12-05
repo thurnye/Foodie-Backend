@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const router = Router();
-const COOKBOOK_SERVICE_URL = process.env.COOKBOOK_SERVICE_URL || 'http://localhost:3004';
+const COOKBOOK_SERVICE_URL = process.env.COOKBOOK_SERVICE_URL!;
 
 /**
  * Proxy all /api/books/* requests to cookbook-service

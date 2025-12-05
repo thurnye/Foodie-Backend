@@ -3,7 +3,7 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 import { authRateLimit } from '../middleware/rateLimit';
 
 const router = Router();
-const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:3001';
+const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL!;
 
 /**
  * Proxy all /api/auth/* requests to auth-service

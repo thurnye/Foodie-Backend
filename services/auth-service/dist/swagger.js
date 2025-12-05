@@ -10,8 +10,8 @@ exports.swaggerSpec = {
     },
     servers: [
         {
-            url: 'http://localhost:3001',
-            description: 'Development server',
+            url: process.env.AUTH_SERVICE_URL || 'https://api.example.com/auth',
+            description: 'Auth service',
         },
     ],
     paths: {

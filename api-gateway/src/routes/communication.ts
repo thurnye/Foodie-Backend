@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const router = Router();
-const COMMUNICATION_SERVICE_URL = process.env.COMMUNICATION_SERVICE_URL || 'http://localhost:3009';
+const COMMUNICATION_SERVICE_URL = process.env.COMMUNICATION_SERVICE_URL!;
 
 /**
  * Proxy all /api/communication/* requests to communication-service

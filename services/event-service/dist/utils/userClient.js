@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.fetchUserData = fetchUserData;
 const axios_1 = __importDefault(require("axios"));
 const libs_1 = require("@foodie/libs");
-const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://localhost:3002';
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL;
 async function fetchUserData(userId) {
     try {
         const response = await axios_1.default.get(`${USER_SERVICE_URL}/${userId}`, {

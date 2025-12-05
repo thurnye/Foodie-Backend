@@ -11,8 +11,8 @@ export const swaggerSpec = {
   },
   servers: [
     {
-      url: 'http://localhost:3004',
-      description: 'Development server',
+      url: process.env.COOKBOOK_SERVICE_URL || 'https://api.example.com/cookbook',
+      description: 'Cookbook service',
     },
   ],
   components: {

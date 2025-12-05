@@ -13,7 +13,7 @@ class PdfGenerationService {
     browser = null;
     generationStatus = new Map();
     constructor() {
-        this.frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+        this.frontendUrl = process.env.FRONTEND_URL;
     }
     getGenerationStatus(bookId) {
         return this.generationStatus.get(bookId) || null;

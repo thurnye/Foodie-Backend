@@ -10,8 +10,8 @@ class PdfGenerationService {
   private generationStatus: Map<string, { current: string; total: number; currentStep: number }> = new Map();
 
   constructor() {
-    // Get frontend URL from environment or use default
-    this.frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    // Get frontend URL from environment
+    this.frontendUrl = process.env.FRONTEND_URL!;
   }
 
   /**

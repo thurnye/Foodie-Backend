@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const router = Router();
-const EVENT_SERVICE_URL = process.env.EVENT_SERVICE_URL || 'http://localhost:3006';
+const EVENT_SERVICE_URL = process.env.EVENT_SERVICE_URL!;
 
 /**
  * Proxy all /api/event/* requests to community-service/events

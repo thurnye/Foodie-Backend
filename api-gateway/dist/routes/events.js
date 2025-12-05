@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const http_proxy_middleware_1 = require("http-proxy-middleware");
 const router = (0, express_1.Router)();
-const EVENT_SERVICE_URL = process.env.EVENT_SERVICE_URL || 'http://localhost:3006';
+const EVENT_SERVICE_URL = process.env.EVENT_SERVICE_URL;
 router.use('/', (0, http_proxy_middleware_1.createProxyMiddleware)({
     target: EVENT_SERVICE_URL,
     changeOrigin: true,

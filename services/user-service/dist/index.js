@@ -14,10 +14,10 @@ const profile_route_1 = __importDefault(require("./routes/profile.route"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3002;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/FoodieBlog';
+const MONGODB_URI = process.env.MONGODB_URI;
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: process.env.CORS_ORIGIN,
     credentials: true,
 }));
 app.use(express_1.default.json());

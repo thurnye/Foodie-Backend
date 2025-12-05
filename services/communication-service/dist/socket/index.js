@@ -9,7 +9,7 @@ const status_handler_1 = require("./handlers/status.handler");
 const initializeWebSocket = (httpServer) => {
     const io = new socket_io_1.Server(httpServer, {
         cors: {
-            origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+            origin: process.env.CORS_ORIGIN,
             credentials: true,
         },
     });

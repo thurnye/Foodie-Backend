@@ -14,20 +14,20 @@ const configSchema = Joi.object({
     .default('development'),
 
   // Service URLs
-  AUTH_SERVICE_URL: Joi.string().uri().default('http://localhost:3001'),
-  USER_SERVICE_URL: Joi.string().uri().default('http://localhost:3002'),
-  RECIPE_SERVICE_URL: Joi.string().uri().default('http://localhost:3003'),
-  EVENT_SERVICE_URL: Joi.string().uri().default('http://localhost:3004'),
-  COMMUNITY_SERVICE_URL: Joi.string().uri().default('http://localhost:3005'),
-  GROUP_SERVICE_URL: Joi.string().uri().default('http://localhost:3006'),
-  CHAT_SERVICE_URL: Joi.string().uri().default('http://localhost:3007'),
-  NEWS_SERVICE_URL: Joi.string().uri().default('http://localhost:3008'),
+  AUTH_SERVICE_URL: Joi.string().uri().required(),
+  USER_SERVICE_URL: Joi.string().uri().required(),
+  RECIPE_SERVICE_URL: Joi.string().uri().required(),
+  EVENT_SERVICE_URL: Joi.string().uri().required(),
+  COMMUNITY_SERVICE_URL: Joi.string().uri().required(),
+  GROUP_SERVICE_URL: Joi.string().uri().required(),
+  CHAT_SERVICE_URL: Joi.string().uri().required(),
+  NEWS_SERVICE_URL: Joi.string().uri().required(),
 
   // JWT
   JWT_ACCESS_SECRET: Joi.string().required(),
 
   // CORS
-  CORS_ORIGIN: Joi.string().default('http://localhost:3000'),
+  CORS_ORIGIN: Joi.string().required(),
 
   // Logging
   LOG_LEVEL: Joi.string()

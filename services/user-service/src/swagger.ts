@@ -12,8 +12,8 @@ export const swaggerSpec = {
   },
   servers: [
     {
-      url: 'http://localhost:3002',
-      description: 'Development server',
+      url: process.env.USER_SERVICE_URL || 'https://api.example.com/user',
+      description: 'User service',
     },
   ],
   paths: {

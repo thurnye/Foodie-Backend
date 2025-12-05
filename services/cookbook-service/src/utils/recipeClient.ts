@@ -2,8 +2,7 @@ import axios from 'axios';
 import { logger } from '@foodie/libs';
 import { IRecipePage } from '../Types/book.types';
 
-const RECIPE_SERVICE_URL =
-  process.env.RECIPE_SERVICE_URL || 'http://localhost:3003/recipe';
+const RECIPE_SERVICE_URL = process.env.RECIPE_SERVICE_URL!;
 
 /**
  * Fetch recipe data from recipe-service

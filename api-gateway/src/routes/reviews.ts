@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const router = Router();
-const RECIPE_SERVICE_URL = process.env.RECIPE_SERVICE_URL || 'http://localhost:3003';
+const RECIPE_SERVICE_URL = process.env.RECIPE_SERVICE_URL!;
 
 /**
  * Proxy all /api/review/* requests to recipe-service

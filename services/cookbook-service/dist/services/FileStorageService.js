@@ -11,7 +11,7 @@ class FileStorageService {
     baseUrl;
     constructor() {
         this.uploadsDir = path_1.default.join(process.cwd(), 'uploads', 'pdfs');
-        this.baseUrl = process.env.BASE_URL || 'http://localhost:3004';
+        this.baseUrl = process.env.BASE_URL;
         if (!fs_1.default.existsSync(this.uploadsDir)) {
             fs_1.default.mkdirSync(this.uploadsDir, { recursive: true });
             libs_1.logger.info('📁 Created uploads directory', { path: this.uploadsDir });

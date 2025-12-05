@@ -14,12 +14,12 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/FoodieBlog';
+const MONGODB_URI = process.env.MONGODB_URI!;
 
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: process.env.CORS_ORIGIN!,
   credentials: true,
 }));
 app.use(express.json());
