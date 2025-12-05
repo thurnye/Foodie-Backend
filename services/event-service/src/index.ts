@@ -69,8 +69,7 @@ app.use('/event', eventRoutes);
 /* --------------------------------------------
    Error Handler
 --------------------------------------------- */
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  void next;
+app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
   logger.error('Unhandled error', {
     error: err.message || err,
     stack: err.stack,
@@ -85,6 +84,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 });
+
 
 // 404 handler
 app.use((req: Request, res: Response) => {

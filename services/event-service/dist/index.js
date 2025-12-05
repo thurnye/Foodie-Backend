@@ -45,8 +45,7 @@ app.get('/health', (_req, res) => {
 });
 app.use('/api/event', event_routes_1.default);
 app.use('/event', event_routes_1.default);
-app.use((err, req, res, next) => {
-    void next;
+app.use((err, req, res, _next) => {
     libs_1.logger.error('Unhandled error', {
         error: err.message || err,
         stack: err.stack,

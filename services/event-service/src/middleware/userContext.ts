@@ -5,8 +5,7 @@ import { logger } from '@foodie/libs';
  * Middleware to extract user context from API Gateway headers
  * The API Gateway should set these headers after authentication
  */
-export const userContextMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  void res;
+export const userContextMiddleware = (req: Request, _res: Response, next: NextFunction) => {
   const userId = req.headers['x-user-id'] as string;
   const userEmail = req.headers['x-user-email'] as string;
 
@@ -21,3 +20,4 @@ export const userContextMiddleware = (req: Request, res: Response, next: NextFun
 
   next();
 };
+
