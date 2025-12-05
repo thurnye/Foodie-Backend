@@ -1,6 +1,6 @@
 import { Server, Socket } from 'socket.io';
 
-export const registerTypingHandlers = (io: Server, socket: Socket): void => {
+export const registerTypingHandlers = (_io: Server, socket: Socket): void => {
   // User started typing
   socket.on('typing:start', (data: {
     channelId?: string;

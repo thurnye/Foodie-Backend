@@ -16,10 +16,9 @@ export const registerMessageHandlers = (io: Server, socket: Socket): void => {
     try {
       const userId = (socket as any).userId;
       
-      const message = await MessageService.sendMessage({
+      const message = await MessageService.createMessage(userId, {
         channelId: data.channelId,
         conversationId: data.conversationId,
-        sender: userId,
         content: data.content,
         type: data.type || 'text',
         attachments: data.attachments,
@@ -54,7 +53,8 @@ export const registerMessageHandlers = (io: Server, socket: Socket): void => {
     content: string;
   }) => {
     try {
-      const message = await MessageService.editMessage(data.messageId, data.content);
+      const userId = (socket as any).userId;
+      const message = await MessageService.updateMessage(data.messageId, userId, { content: data.content });
       
       // Emit to channel or conversation room
       const room = message.channelId 
@@ -70,11 +70,15 @@ export const registerMessageHandlers = (io: Server, socket: Socket): void => {
   // Delete a message
   socket.on('message:delete', async (data: { messageId: string }) => {
     try {
-      const message = await MessageService.deleteMessage(data.messageId);
-      
+      const userId = (socket as any).userId;
+
+      // Get message before deleting to know which room to emit to
+      const message = await MessageService.getMessageById(data.messageId, userId);
+      await MessageService.deleteMessage(data.messageId, userId);
+
       // Emit to channel or conversation room
-      const room = message.channelId 
-        ? `channel:${message.channelId}` 
+      const room = message.channelId
+        ? `channel:${message.channelId}`
         : `conversation:${message.conversationId}`;
       io.to(room).emit('message:deleted', { messageId: data.messageId });
     } catch (error) {
@@ -113,7 +117,7 @@ export const registerMessageHandlers = (io: Server, socket: Socket): void => {
   }) => {
     try {
       const userId = (socket as any).userId;
-      const message = await MessageService.removeReaction(data.messageId, userId, data.emoji);
+      const message = await MessageService.addReaction(data.messageId, userId, data.emoji);
       
       // Emit to channel or conversation room
       const room = message.channelId 

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.registerTypingHandlers = void 0;
-const registerTypingHandlers = (io, socket) => {
+const registerTypingHandlers = (_io, socket) => {
     socket.on('typing:start', (data) => {
         const userId = socket.userId;
         const room = data.channelId ? `channel:${data.channelId}` : `conversation:${data.conversationId}`;

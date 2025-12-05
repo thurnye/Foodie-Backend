@@ -36,7 +36,7 @@ if (NODE_ENV === 'development') {
 app.use('/api/communication', routes);
 
 // Root health check
-app.get('/', (req: Request, res: Response) => {
+app.get('/', (_req: Request, res: Response) => {
   res.json({
     success: true,
     message: 'Communication Service API',
@@ -46,7 +46,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 // 404 handler
-app.use((req: Request, res: Response) => {
+app.use((_req: Request, res: Response) => {
   res.status(404).json({
     success: false,
     error: 'Route not found',
@@ -83,7 +83,7 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   }
 
   // Handle unknown errors
-  res.status(500).json({
+  return res.status(500).json({
     success: false,
     error: NODE_ENV === 'development' ? err.message : 'Internal server error',
   });

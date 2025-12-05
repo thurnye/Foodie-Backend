@@ -17,7 +17,7 @@ router.use('/meetings', meetingRoutes);
 router.use('/notifications', notificationRoutes);
 
 // Health check
-router.get('/health', (req, res) => {
+router.get('/health', (_req, res) => {
   res.json({ success: true, message: 'Communication service is running' });
 });
 

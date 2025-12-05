@@ -17,7 +17,7 @@ router.use('/messages', message_routes_1.default);
 router.use('/conversations', conversation_routes_1.default);
 router.use('/meetings', meeting_routes_1.default);
 router.use('/notifications', notification_routes_1.default);
-router.get('/health', (req, res) => {
+router.get('/health', (_req, res) => {
     res.json({ success: true, message: 'Communication service is running' });
 });
 exports.default = router;

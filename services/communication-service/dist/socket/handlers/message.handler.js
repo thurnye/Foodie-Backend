@@ -10,10 +10,9 @@ const registerMessageHandlers = (io, socket) => {
     socket.on('message:send', async (data) => {
         try {
             const userId = socket.userId;
-            const message = await message_service_1.default.sendMessage({
+            const message = await message_service_1.default.createMessage(userId, {
                 channelId: data.channelId,
                 conversationId: data.conversationId,
-                sender: userId,
                 content: data.content,
                 type: data.type || 'text',
                 attachments: data.attachments,
@@ -40,7 +39,8 @@ const registerMessageHandlers = (io, socket) => {
     });
     socket.on('message:edit', async (data) => {
         try {
-            const message = await message_service_1.default.editMessage(data.messageId, data.content);
+            const userId = socket.userId;
+            const message = await message_service_1.default.updateMessage(data.messageId, userId, { content: data.content });
             const room = message.channelId
                 ? `channel:${message.channelId}`
                 : `conversation:${message.conversationId}`;
@@ -53,7 +53,9 @@ const registerMessageHandlers = (io, socket) => {
     });
     socket.on('message:delete', async (data) => {
         try {
-            const message = await message_service_1.default.deleteMessage(data.messageId);
+            const userId = socket.userId;
+            const message = await message_service_1.default.getMessageById(data.messageId, userId);
+            await message_service_1.default.deleteMessage(data.messageId, userId);
             const room = message.channelId
                 ? `channel:${message.channelId}`
                 : `conversation:${message.conversationId}`;
@@ -84,7 +86,7 @@ const registerMessageHandlers = (io, socket) => {
     socket.on('message:reaction:remove', async (data) => {
         try {
             const userId = socket.userId;
-            const message = await message_service_1.default.removeReaction(data.messageId, userId, data.emoji);
+            const message = await message_service_1.default.addReaction(data.messageId, userId, data.emoji);
             const room = message.channelId
                 ? `channel:${message.channelId}`
                 : `conversation:${message.conversationId}`;

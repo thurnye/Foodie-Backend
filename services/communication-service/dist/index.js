@@ -31,7 +31,7 @@ else {
     app.use((0, morgan_1.default)('combined'));
 }
 app.use('/api/communication', routes_1.default);
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
     res.json({
         success: true,
         message: 'Communication Service API',
@@ -39,7 +39,7 @@ app.get('/', (req, res) => {
         status: 'running',
     });
 });
-app.use((req, res) => {
+app.use((_req, res) => {
     res.status(404).json({
         success: false,
         error: 'Route not found',
@@ -66,7 +66,7 @@ app.use((err, _req, res, _next) => {
             error: 'Invalid ID format',
         });
     }
-    res.status(500).json({
+    return res.status(500).json({
         success: false,
         error: NODE_ENV === 'development' ? err.message : 'Internal server error',
     });
