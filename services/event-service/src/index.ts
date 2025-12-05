@@ -69,7 +69,8 @@ app.use('/event', eventRoutes);
 /* --------------------------------------------
    Error Handler
 --------------------------------------------- */
-app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  void next;
   logger.error('Unhandled error', {
     error: err.message || err,
     stack: err.stack,
