@@ -164,10 +164,10 @@ class BookController {
       const userId = (req as any).user?.userId;
 
       // console.log('📥 UPDATE BOOK REQUEST:', {
-        bookId,
-        userId,
-        updates: req.body,
-      });
+      //   bookId,
+      //   userId,
+      //   updates: req.body,
+      // });
 
       if (!userId) {
         res.status(401).json({
@@ -182,9 +182,9 @@ class BookController {
       const book = await BookService.updateBook(bookId, userId, updates);
 
       // console.log('✅ BOOK UPDATED SUCCESSFULLY:', {
-        bookId,
-        updatedLayout: (book as any).layout,
-      });
+      //   bookId,
+      //   updatedLayout: (book as any).layout,
+      // });
 
       res.status(200).json({
         success: true,
@@ -286,14 +286,14 @@ class BookController {
       const userId = (req as any).user?.userId;
 
       // console.log('📥 UPDATE PAGE REQUEST:', {
-        bookId,
-        pageId,
-        userId,
-        updates: req.body,
-        layoutUpdate: req.body.layout,
-        requestUrl: req.originalUrl,
-        method: req.method,
-      });
+      //   bookId,
+      //   pageId,
+      //   userId,
+      //   updates: req.body,
+      //   layoutUpdate: req.body.layout,
+      //   requestUrl: req.originalUrl,
+      //   method: req.method,
+      // });
 
       if (!userId) {
         res.status(401).json({
@@ -308,21 +308,21 @@ class BookController {
       const book = await BookService.updatePage(bookId, pageId, userId, updates);
 
       // Find updated page in the new schema (could be in recipe array, coverData, introData, or extraPageData array)
-      const updatedRecipe = book.recipe?.find((r: any) => r.pageId === pageId);
-      const updatedExtraPage = book.extraPageData?.find((p: any) => p.pageId === pageId);
-      const updatedPage = updatedRecipe ||
-        (book.coverData?.pageId === pageId ? book.coverData : null) ||
-        (book.introData?.pageId === pageId ? book.introData : null) ||
-        updatedExtraPage;
+      // const updatedRecipe = book.recipe?.find((r: any) => r.pageId === pageId);
+      // const updatedExtraPage = book.extraPageData?.find((p: any) => p.pageId === pageId);
+      // const updatedPage = updatedRecipe ||
+      //   (book.coverData?.pageId === pageId ? book.coverData : null) ||
+      //   (book.introData?.pageId === pageId ? book.introData : null) ||
+      //   updatedExtraPage;
 
       // console.log('✅ PAGE UPDATED SUCCESSFULLY:', {
-        bookId,
-        pageId,
-        updatedLayout: updatedPage?.layout,
-        pageExists: !!updatedPage,
-        totalRecipes: book.recipe?.length || 0,
-        allRecipeLayouts: book.recipe?.map((r: any) => ({ pageId: r.pageId, layout: r.layout })) || [],
-      });
+      //   bookId,
+      //   pageId,
+      //   updatedLayout: updatedPage?.layout,
+      //   pageExists: !!updatedPage,
+      //   totalRecipes: book.recipe?.length || 0,
+      //   allRecipeLayouts: book.recipe?.map((r: any) => ({ pageId: r.pageId, layout: r.layout })) || [],
+      // });
 
       res.status(200).json({
         success: true,

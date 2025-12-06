@@ -70,10 +70,10 @@ class BookService {
   async createBook(userId: string, data: CreateBookData): Promise<IBook> {
     try {
       // console.log('📥 BookService.createBook called with:', {
-        bookId: data.bookId,
-        cookbookId: data.cookbookId,
-        recipeCount: data.recipeIds?.length
-      });
+      //   bookId: data.bookId,
+      //   cookbookId: data.cookbookId,
+      //   recipeCount: data.recipeIds?.length
+      // });
 
       // Check if we're updating an existing book
       let currentBook = null;
@@ -152,7 +152,7 @@ class BookService {
 
       // Add recipe pages if recipe IDs are provided
       if (data.recipeIds && data.recipeIds.length > 0) {
-        // console.log(`📥 Adding ${data.recipeIds.length} recipe(s) to book`);
+        console.log(`📥 Adding ${data.recipeIds.length} recipe(s) to book`);
 
         // Fetch all recipe data
         const recipeDataPromises = data.recipeIds.map((recipeId) =>
@@ -201,13 +201,13 @@ class BookService {
           currentBook.markModified('recipe');
           await currentBook.save();
 
-          // console.log(`✅ Updated book with ${recipesData.length} new recipe pages. Total recipes: ${currentBook.recipe?.length || 0}`);
+          // console.log(` Updated book with ${recipesData.length} new recipe pages. Total recipes: ${currentBook.recipe?.length || 0}`);
 
           return currentBook;
         }
 
         // For new books, create recipe array
-        // console.log('📘 Creating new book with recipe pages');
+        // console.log('Creating new book with recipe pages');
         recipesData.forEach((recipeData, index) => {
           if (recipeData) {
             recipeArray.push({
@@ -412,10 +412,10 @@ class BookService {
       // Fetch author data from user-service
       const cookbook = book.cookbook as any;
       // console.log('📚 Cookbook data before fetching author:', {
-        cookbookId: cookbook?._id,
-        authorId: cookbook?.author,
-        authorType: typeof cookbook?.author,
-      });
+      //   cookbookId: cookbook?._id,
+      //   authorId: cookbook?.author,
+      //   authorType: typeof cookbook?.author,
+      // });
 
       if (cookbook && cookbook.author) {
         const authorData = await fetchUserData(cookbook.author.toString());
@@ -555,17 +555,17 @@ class BookService {
       // Update layout (for backward compatibility with old schema)
       if (updates.layout !== undefined) {
         // console.log(
-          `📐 [OLD SCHEMA] Updating book layout: ${(book as any).layout} -> ${
-            updates.layout
-          }`
-        );
+        //   `📐 [OLD SCHEMA] Updating book layout: ${(book as any).layout} -> ${
+        //     updates.layout
+        //   }`
+        // );
         (book as any).layout = updates.layout;
       }
 
       // Update pages is not supported in new schema - pages are now individual fields
       // (coverData, introData, recipe[], extraPageData)
       if (updates.pages !== undefined) {
-        console.warn('⚠️  WARNING: Updating book.pages is deprecated. Use individual page update endpoints instead.');
+        // console.warn('⚠️  WARNING: Updating book.pages is deprecated. Use individual page update endpoints instead.');
       }
 
       // Update sections (for backward compatibility)
@@ -820,11 +820,11 @@ class BookService {
       await this.ensureRequiredPages(book);
 
       // console.log('🔧 BEFORE UPDATE:', {
-        bookId,
-        pageId,
-        pageType: updates.pageType,
-        incomingUpdates: updates,
-      });
+      //   bookId,
+      //   pageId,
+      //   pageType: updates.pageType,
+      //   incomingUpdates: updates,
+      // });
 
       let updated = false;
 

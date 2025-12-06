@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const dotenv_1 = __importDefault(require("dotenv"));
 const http_1 = __importDefault(require("http"));
 const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
@@ -12,6 +13,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const libs_1 = require("@foodie/libs");
 const routes_1 = __importDefault(require("./routes"));
 const socket_1 = require("./socket");
+dotenv_1.default.config();
 const app = (0, express_1.default)();
 const httpServer = http_1.default.createServer(app);
 const PORT = process.env.PORT || 3009;

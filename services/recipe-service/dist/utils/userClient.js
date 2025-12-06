@@ -21,7 +21,7 @@ async function fetchUserData(userId) {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 avatar: user.avatar,
-                slogan: user.slogan
+                slogan: user.slogan,
             };
         }
         return null;

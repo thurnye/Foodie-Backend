@@ -1,4 +1,5 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
+import dotenv from 'dotenv';
 import http from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -7,6 +8,9 @@ import mongoose from 'mongoose';
 import { logger } from '@foodie/libs';
 import routes from './routes';
 import { initializeWebSocket } from './socket';
+
+// Load environment variables
+dotenv.config();
 
 const app: Application = express();
 const httpServer = http.createServer(app);

@@ -18,7 +18,6 @@ class BookController {
                 return;
             }
             const { bookId, name, description, cookbookId, sections, recipeIds } = req.body;
-            // console.log('📥 CREATE/UPDATE BOOK REQUEST:', req.body);
             if (!cookbookId) {
                 res.status(400).json({
                     success: false,
@@ -26,7 +25,6 @@ class BookController {
                 });
                 return;
             }
-            // console.log('📘 Creating new book for cookbook:', cookbookId);
             const book = await BookService_1.default.createBook(userId, {
                 bookId,
                 name,
@@ -123,11 +121,6 @@ class BookController {
         try {
             const { bookId } = req.params;
             const userId = req.user?.userId;
-            // console.log('📥 UPDATE BOOK REQUEST:', {
-                bookId,
-                userId,
-                updates: req.body,
-            });
             if (!userId) {
                 res.status(401).json({
                     success: false,
@@ -137,10 +130,6 @@ class BookController {
             }
             const updates = req.body;
             const book = await BookService_1.default.updateBook(bookId, userId, updates);
-            // console.log('✅ BOOK UPDATED SUCCESSFULLY:', {
-                bookId,
-                updatedLayout: book.layout,
-            });
             res.status(200).json({
                 success: true,
                 data: book,
@@ -219,15 +208,6 @@ class BookController {
         try {
             const { bookId, pageId } = req.params;
             const userId = req.user?.userId;
-            // console.log('📥 UPDATE PAGE REQUEST:', {
-                bookId,
-                pageId,
-                userId,
-                updates: req.body,
-                layoutUpdate: req.body.layout,
-                requestUrl: req.originalUrl,
-                method: req.method,
-            });
             if (!userId) {
                 res.status(401).json({
                     success: false,
@@ -237,20 +217,6 @@ class BookController {
             }
             const updates = req.body;
             const book = await BookService_1.default.updatePage(bookId, pageId, userId, updates);
-            const updatedRecipe = book.recipe?.find((r) => r.pageId === pageId);
-            const updatedExtraPage = book.extraPageData?.find((p) => p.pageId === pageId);
-            const updatedPage = updatedRecipe ||
-                (book.coverData?.pageId === pageId ? book.coverData : null) ||
-                (book.introData?.pageId === pageId ? book.introData : null) ||
-                updatedExtraPage;
-            // console.log('✅ PAGE UPDATED SUCCESSFULLY:', {
-                bookId,
-                pageId,
-                updatedLayout: updatedPage?.layout,
-                pageExists: !!updatedPage,
-                totalRecipes: book.recipe?.length || 0,
-                allRecipeLayouts: book.recipe?.map((r) => ({ pageId: r.pageId, layout: r.layout })) || [],
-            });
             res.status(200).json({
                 success: true,
                 data: book,
