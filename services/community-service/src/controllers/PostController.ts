@@ -8,7 +8,16 @@ export class PostController {
    */
   async getAllPosts(req: Request, res: Response): Promise<void> {
     try {
-      const { groupId, authorId, search, tags, sort: _sort = 'newest', isPinned, page, limit } = req.query;
+      const {
+        groupId,
+        authorId,
+        search,
+        tags,
+        sort: _sort = 'newest',
+        isPinned,
+        page,
+        limit,
+      } = req.query;
 
       const posts = await PostService.getAllPosts({
         groupId: groupId as string,
@@ -16,7 +25,8 @@ export class PostController {
         search: search as string,
         tags: tags as string,
         // sort: sort as 'newest' | 'popular' | 'trending',
-        isPinned: isPinned === 'true' ? true : isPinned === 'false' ? false : undefined,
+        isPinned:
+          isPinned === 'true' ? true : isPinned === 'false' ? false : undefined,
         page: page ? parseInt(page as string) : 1,
         limit: limit ? parseInt(limit as string) : 10,
       });
@@ -24,7 +34,9 @@ export class PostController {
       res.json({ success: true, data: posts });
     } catch (error: any) {
       logger.error('Error fetching posts', { error: error.message });
-      res.status(500).json({ success: false, message: 'Failed to fetch posts' });
+      res
+        .status(500)
+        .json({ success: false, message: 'Failed to fetch posts' });
     }
   }
 
@@ -39,9 +51,14 @@ export class PostController {
 
       res.json({ success: true, data: post });
     } catch (error: any) {
-      logger.error('Error fetching post', { error: error.message, postId: req.params.postId });
+      logger.error('Error fetching post', {
+        error: error.message,
+        postId: req.params.postId,
+      });
       if (error.isOperational) {
-        res.status(error.statusCode).json({ success: false, message: error.message });
+        res
+          .status(error.statusCode)
+          .json({ success: false, message: error.message });
         return;
       }
       res.status(500).json({ success: false, message: 'Failed to fetch post' });
@@ -60,7 +77,7 @@ export class PostController {
 
       const { groupId, title, content, media, tags } = req.body;
 
-      console.log('POST::::', { groupId, title, content, media, tags })
+      // console.log('POST::::', { groupId, title, content, media, tags })
 
       const post = await PostService.createPost(userId, {
         groupId,
@@ -74,10 +91,14 @@ export class PostController {
     } catch (error: any) {
       logger.error('Error creating post', { error: error.message });
       if (error.isOperational) {
-        res.status(error.statusCode).json({ success: false, message: error.message });
+        res
+          .status(error.statusCode)
+          .json({ success: false, message: error.message });
         return;
       }
-      res.status(500).json({ success: false, message: 'Failed to create post' });
+      res
+        .status(500)
+        .json({ success: false, message: 'Failed to create post' });
     }
   }
 
@@ -86,8 +107,8 @@ export class PostController {
    */
   async updatePost(req: Request, res: Response): Promise<void> {
     try {
-      console.log('[PostController] All headers:', req.headers);
-      console.log('[PostController] x-user-id header:', req.headers['x-user-id']);
+      // console.log('[PostController] All headers:', req.headers);
+      // console.log('[PostController] x-user-id header:', req.headers['x-user-id']);
       const userId = req.headers['x-user-id'] as string;
       const { postId } = req.params;
       const { title, content, media, tags } = req.body;
@@ -101,12 +122,19 @@ export class PostController {
 
       res.json({ success: true, data: post });
     } catch (error: any) {
-      logger.error('Error updating post', { error: error.message, postId: req.params.postId });
+      logger.error('Error updating post', {
+        error: error.message,
+        postId: req.params.postId,
+      });
       if (error.isOperational) {
-        res.status(error.statusCode).json({ success: false, message: error.message });
+        res
+          .status(error.statusCode)
+          .json({ success: false, message: error.message });
         return;
       }
-      res.status(500).json({ success: false, message: 'Failed to update post' });
+      res
+        .status(500)
+        .json({ success: false, message: 'Failed to update post' });
     }
   }
 
@@ -122,12 +150,19 @@ export class PostController {
 
       res.json({ success: true, message: 'Post deleted successfully' });
     } catch (error: any) {
-      logger.error('Error deleting post', { error: error.message, postId: req.params.postId });
+      logger.error('Error deleting post', {
+        error: error.message,
+        postId: req.params.postId,
+      });
       if (error.isOperational) {
-        res.status(error.statusCode).json({ success: false, message: error.message });
+        res
+          .status(error.statusCode)
+          .json({ success: false, message: error.message });
         return;
       }
-      res.status(500).json({ success: false, message: 'Failed to delete post' });
+      res
+        .status(500)
+        .json({ success: false, message: 'Failed to delete post' });
     }
   }
 
@@ -144,12 +179,19 @@ export class PostController {
 
       res.json({ success: true, data: post });
     } catch (error: any) {
-      logger.error('Error voting on post', { error: error.message, postId: req.params.postId });
+      logger.error('Error voting on post', {
+        error: error.message,
+        postId: req.params.postId,
+      });
       if (error.isOperational) {
-        res.status(error.statusCode).json({ success: false, message: error.message });
+        res
+          .status(error.statusCode)
+          .json({ success: false, message: error.message });
         return;
       }
-      res.status(500).json({ success: false, message: 'Failed to vote on post' });
+      res
+        .status(500)
+        .json({ success: false, message: 'Failed to vote on post' });
     }
   }
 
@@ -165,12 +207,19 @@ export class PostController {
 
       res.json({ success: true, data: post });
     } catch (error: any) {
-      logger.error('Error removing vote from post', { error: error.message, postId: req.params.postId });
+      logger.error('Error removing vote from post', {
+        error: error.message,
+        postId: req.params.postId,
+      });
       if (error.isOperational) {
-        res.status(error.statusCode).json({ success: false, message: error.message });
+        res
+          .status(error.statusCode)
+          .json({ success: false, message: error.message });
         return;
       }
-      res.status(500).json({ success: false, message: 'Failed to remove vote' });
+      res
+        .status(500)
+        .json({ success: false, message: 'Failed to remove vote' });
     }
   }
 
@@ -187,12 +236,19 @@ export class PostController {
 
       res.json({ success: true, data: post });
     } catch (error: any) {
-      logger.error('Error reacting to post', { error: error.message, postId: req.params.postId });
+      logger.error('Error reacting to post', {
+        error: error.message,
+        postId: req.params.postId,
+      });
       if (error.isOperational) {
-        res.status(error.statusCode).json({ success: false, message: error.message });
+        res
+          .status(error.statusCode)
+          .json({ success: false, message: error.message });
         return;
       }
-      res.status(500).json({ success: false, message: 'Failed to react to post' });
+      res
+        .status(500)
+        .json({ success: false, message: 'Failed to react to post' });
     }
   }
 
@@ -208,12 +264,19 @@ export class PostController {
 
       res.json({ success: true, data: post });
     } catch (error: any) {
-      logger.error('Error removing reaction from post', { error: error.message, postId: req.params.postId });
+      logger.error('Error removing reaction from post', {
+        error: error.message,
+        postId: req.params.postId,
+      });
       if (error.isOperational) {
-        res.status(error.statusCode).json({ success: false, message: error.message });
+        res
+          .status(error.statusCode)
+          .json({ success: false, message: error.message });
         return;
       }
-      res.status(500).json({ success: false, message: 'Failed to remove reaction' });
+      res
+        .status(500)
+        .json({ success: false, message: 'Failed to remove reaction' });
     }
   }
 
@@ -228,9 +291,14 @@ export class PostController {
 
       res.json({ success: true, ...result });
     } catch (error: any) {
-      logger.error('Error sharing post', { error: error.message, postId: req.params.postId });
+      logger.error('Error sharing post', {
+        error: error.message,
+        postId: req.params.postId,
+      });
       if (error.isOperational) {
-        res.status(error.statusCode).json({ success: false, message: error.message });
+        res
+          .status(error.statusCode)
+          .json({ success: false, message: error.message });
         return;
       }
       res.status(500).json({ success: false, message: 'Failed to share post' });

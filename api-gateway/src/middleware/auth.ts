@@ -17,9 +17,9 @@ export const authenticate = (
       req.headers['authorization']?.replace('Bearer ', '') ||
       (req.headers['x-access-token'] as string);
 
-    console.log('TOKEN:::', token);
-    console.log('Authentication Token:::', req.headers['authorization']);
-    console.log('x-access-token:::', req.headers['x-access-token']);
+    // console.log('TOKEN:::', token);
+    // console.log('Authentication Token:::', req.headers['authorization']);
+    // console.log('x-access-token:::', req.headers['x-access-token']);
 
     if (!token) {
       fail(res, 'Access token required', 401);
@@ -52,23 +52,23 @@ export const optionalAuth = (
       req.headers['authorization']?.replace('Bearer ', '') ||
       (req.headers['x-access-token'] as string);
 
-      console.log(" req.headers:::", JSON.stringify(req.header))
+    // console.log(" req.headers:::", JSON.stringify(req.header))
 
-    console.log('TOKEN:::', token);
-    console.log('Authentication Token:::', req.headers['authorization']);
-    console.log('x-access-token:::', req.headers['x-access-token']);
+    // console.log('TOKEN:::', token);
+    // console.log('Authentication Token:::', req.headers['authorization']);
+    // console.log('x-access-token:::', req.headers['x-access-token']);
 
     if (token) {
       const payload = verifyAccessToken(token);
-      console.log('[OptionalAuth] Token verified, payload:', payload);
+      // console.log('[OptionalAuth] Token verified, payload:', payload);
       (req as any).user = payload;
     } else {
-      console.log('[OptionalAuth] No token found in request headers');
+      // console.log('[OptionalAuth] No token found in request headers');
     }
 
     next();
   } catch (error) {
-    console.log('[OptionalAuth] Token verification failed:', error);
+    // console.log('[OptionalAuth] Token verification failed:', error);
     // Token was provided but invalid - continue anyway for optional auth
     next();
   }

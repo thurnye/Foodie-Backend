@@ -52,7 +52,7 @@ export const getProfile = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-
+    // console.log('USERID:::', id)
     const user = await UserService.getUserById(id);
 
     success(res, {

@@ -17,7 +17,7 @@ router.use(
       '^/api/review': '/api/review',
     },
     onProxyReq: (proxyReq, req: any) => {
-      console.log('Forwarding===========================')
+      // console.log('Forwarding===========================')
 
       // Forward request ID for tracing
       if (req.requestId) {
@@ -31,17 +31,22 @@ router.use(
       }
 
       // Re-stream parsed body for POST/PUT/PATCH requests
-      if (req.body && (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH')) {
+      if (
+        req.body &&
+        (req.method === 'POST' ||
+          req.method === 'PUT' ||
+          req.method === 'PATCH')
+      ) {
         const bodyData = JSON.stringify(req.body);
         proxyReq.setHeader('Content-Type', 'application/json');
         proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
         proxyReq.write(bodyData);
       }
 
-      console.log('Forwarding ENDs===========================')
+      // console.log('Forwarding ENDs===========================')
     },
     onError: (_err, _req, res: any) => {
-      console.log("ERROR::::=======", _err)
+      // console.log("ERROR::::=======", _err)
       res.status(503).json({
         success: false,
         data: null,

@@ -3,7 +3,9 @@
 ## ✅ Completed Components (100%)
 
 ### Models (100% Complete)
+
 All Mongoose models have been created in `/src/models/`:
+
 - ✅ Team.ts - Team management with members, channels, owner
 - ✅ Channel.ts - Channels within teams (text/announcement, public/private)
 - ✅ Message.ts - Messages with attachments, reactions, mentions
@@ -13,7 +15,9 @@ All Mongoose models have been created in `/src/models/`:
 - ✅ index.ts - Export all models
 
 ### Services (100% Complete - Auto-generated)
+
 All business logic services created in `/src/services/`:
+
 - ✅ team.service.ts
 - ✅ channel.service.ts
 - ✅ message.service.ts
@@ -22,7 +26,9 @@ All business logic services created in `/src/services/`:
 - ✅ notification.service.ts
 
 ### Controllers (100% Complete - Auto-generated)
+
 All HTTP request handlers created in `/src/controllers/`:
+
 - ✅ team.controller.ts
 - ✅ channel.controller.ts
 - ✅ message.controller.ts
@@ -31,7 +37,9 @@ All HTTP request handlers created in `/src/controllers/`:
 - ✅ notification.controller.ts
 
 ### Routes (100% Complete)
+
 All route files created in `/src/routes/`:
+
 - ✅ team.routes.ts - Team management routes
 - ✅ channel.routes.ts - Channel management routes
 - ✅ message.routes.ts - Message CRUD and reactions
@@ -41,22 +49,27 @@ All route files created in `/src/routes/`:
 - ✅ index.ts - Aggregates all routes with health check
 
 ### Middleware (100% Complete)
+
 - ✅ userContext.ts - Extract user info from headers (x-user-id, x-user-email, x-user-name)
 - ✅ index.ts - Export middleware
 
 ### WebSocket (100% Complete)
+
 All WebSocket handlers created in `/src/socket/`:
+
 - ✅ socket/index.ts - WebSocket server setup with authentication
 - ✅ socket/handlers/message.handler.ts - Real-time messaging (send, edit, delete, reactions)
 - ✅ socket/handlers/typing.handler.ts - Typing indicators
 - ✅ socket/handlers/status.handler.ts - User status updates and room management
 
 ### Main Server (100% Complete)
+
 - ✅ index.ts - Express server with error handling, graceful shutdown
 - ✅ package.json - Updated with all dependencies (morgan, socket.io, etc.)
 - ✅ Dependencies installed successfully
 
 ### API Gateway Integration (100% Complete)
+
 - ✅ Created `/api-gateway/src/routes/communication.ts` proxy route
 - ✅ Updated API Gateway index.ts to include communication routes
 - ✅ Routes available at `/api/communication/*`
@@ -64,6 +77,7 @@ All WebSocket handlers created in `/src/socket/`:
 ## API Endpoints Planned
 
 ### Teams (`/api/teams`)
+
 - POST `/` - Create team
 - GET `/` - Get user's teams
 - GET `/:teamId` - Get team by ID
@@ -73,6 +87,7 @@ All WebSocket handlers created in `/src/socket/`:
 - DELETE `/:teamId/members/:userId` - Remove member
 
 ### Channels (`/api/channels`)
+
 - POST `/` - Create channel
 - GET `/team/:teamId` - Get team channels
 - GET `/:channelId` - Get channel by ID
@@ -82,6 +97,7 @@ All WebSocket handlers created in `/src/socket/`:
 - DELETE `/:channelId/members/:userId` - Remove member
 
 ### Messages (`/api/messages`)
+
 - POST `/` - Send message
 - GET `/channel/:channelId` - Get channel messages
 - GET `/conversation/:conversationId` - Get conversation messages
@@ -91,12 +107,14 @@ All WebSocket handlers created in `/src/socket/`:
 - DELETE `/:messageId/reactions/:emoji` - Remove reaction
 
 ### Conversations (`/api/conversations`)
+
 - POST `/` - Create/get conversation
 - GET `/` - Get user conversations
 - GET `/:conversationId` - Get conversation by ID
 - DELETE `/:conversationId` - Delete conversation
 
 ### Meetings (`/api/meetings`)
+
 - POST `/` - Create meeting
 - GET `/` - Get user meetings
 - GET `/:meetingId` - Get meeting by ID
@@ -104,6 +122,7 @@ All WebSocket handlers created in `/src/socket/`:
 - DELETE `/:meetingId` - Cancel meeting
 
 ### Notifications (`/api/notifications`)
+
 - GET `/` - Get user notifications
 - PUT `/:notificationId/read` - Mark as read
 - PUT `/read-all` - Mark all as read
@@ -112,7 +131,9 @@ All WebSocket handlers created in `/src/socket/`:
 ## Configuration Requirements
 
 ### Environment Variables
+
 Create a `.env` file with:
+
 ```
 PORT=3009
 MONGODB_URI=mongodb://localhost:27017/foodie-communication
@@ -122,6 +143,7 @@ COMMUNICATION_SERVICE_URL=http://localhost:3009
 ```
 
 ### Starting the Service
+
 ```bash
 # Install dependencies (already done)
 npm install
@@ -137,35 +159,38 @@ npm start
 ```
 
 ### Available Endpoints
+
 - Health Check: `http://localhost:3009/api/communication/health`
 - Root: `http://localhost:3009/`
 - All routes prefixed with `/api/communication/`
 
 ### WebSocket Connection
+
 ```javascript
 // Frontend connection example
 import io from 'socket.io-client';
 
 const socket = io('http://localhost:3009', {
   auth: {
-    userId: currentUser.id
-  }
+    userId: currentUser.id,
+  },
 });
 
 // Listen for new messages
 socket.on('message:new', (message) => {
-  console.log('New message:', message);
+  // console.log('New message:', message);
 });
 
 // Send a message
 socket.emit('message:send', {
   channelId: 'channel-123',
   content: 'Hello World!',
-  type: 'text'
+  type: 'text',
 });
 ```
 
 ## Next Steps
+
 1. ✅ **COMPLETED** - All backend components implemented
 2. Start MongoDB and the communication service
 3. Test API endpoints using Postman or similar

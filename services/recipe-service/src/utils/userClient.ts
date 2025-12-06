@@ -2,6 +2,7 @@ import axios from 'axios';
 import { logger } from '@foodie/libs';
 
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL!;
+// console.log("USER_SERVICE_URL",USER_SERVICE_URL)
 
 export interface UserData {
   userId: string;
@@ -29,7 +30,7 @@ export async function fetchUserData(userId: string): Promise<UserData | null> {
         firstName: user.firstName,
         lastName: user.lastName,
         avatar: user.avatar,
-        slogan: user.slogan
+        slogan: user.slogan,
       };
     }
 

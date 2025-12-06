@@ -22,7 +22,7 @@ class BookController {
 
       const { bookId, name, description, cookbookId, sections, recipeIds } = req.body;
 
-      console.log('📥 CREATE/UPDATE BOOK REQUEST:', req.body);
+      // console.log('📥 CREATE/UPDATE BOOK REQUEST:', req.body);
 
       // Otherwise, create new book
       if (!cookbookId) {
@@ -33,7 +33,7 @@ class BookController {
         return;
       }
 
-      console.log('📘 Creating new book for cookbook:', cookbookId);
+      // console.log('📘 Creating new book for cookbook:', cookbookId);
 
       const book = await BookService.createBook(
         userId,
@@ -163,7 +163,7 @@ class BookController {
       const { bookId } = req.params;
       const userId = (req as any).user?.userId;
 
-      console.log('📥 UPDATE BOOK REQUEST:', {
+      // console.log('📥 UPDATE BOOK REQUEST:', {
         bookId,
         userId,
         updates: req.body,
@@ -181,7 +181,7 @@ class BookController {
 
       const book = await BookService.updateBook(bookId, userId, updates);
 
-      console.log('✅ BOOK UPDATED SUCCESSFULLY:', {
+      // console.log('✅ BOOK UPDATED SUCCESSFULLY:', {
         bookId,
         updatedLayout: (book as any).layout,
       });
@@ -285,7 +285,7 @@ class BookController {
       const { bookId, pageId } = req.params;
       const userId = (req as any).user?.userId;
 
-      console.log('📥 UPDATE PAGE REQUEST:', {
+      // console.log('📥 UPDATE PAGE REQUEST:', {
         bookId,
         pageId,
         userId,
@@ -315,7 +315,7 @@ class BookController {
         (book.introData?.pageId === pageId ? book.introData : null) ||
         updatedExtraPage;
 
-      console.log('✅ PAGE UPDATED SUCCESSFULLY:', {
+      // console.log('✅ PAGE UPDATED SUCCESSFULLY:', {
         bookId,
         pageId,
         updatedLayout: updatedPage?.layout,

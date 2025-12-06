@@ -27,7 +27,7 @@ router.use(
         proxyReq.setHeader('x-user-id', req.user.userId);
         proxyReq.setHeader('x-user-email', req.user.email);
       } else {
-        console.log('[Community Proxy] No req.user found for request:', req.method, req.path);
+        // console.log('[Community Proxy] No req.user found for request:', req.method, req.path);
       }
 
       // Re-stream the body if it was parsed by body-parser

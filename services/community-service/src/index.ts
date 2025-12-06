@@ -21,7 +21,7 @@ const MONGODB_URI = process.env.MONGODB_URI!;
 if (process.env.NODE_ENV !== 'production') {
   try {
     execSync(`lsof -ti:${PORT} | xargs kill -9`, { stdio: 'ignore' });
-    console.log(` Cleared port ${PORT} before starting server`);
+    // console.log(` Cleared port ${PORT} before starting server`);
   } catch {
     // ignore if port is free
   }

@@ -22,12 +22,12 @@ router.use(
       }
       // Forward user info from auth middleware
       if (req.user) {
-        console.log('[Event Proxy] req.user:', req.user);
-        console.log('[Event Proxy] Setting x-user-id:', req.user.userId);
+        // console.log('[Event Proxy] req.user:', req.user);
+        // console.log('[Event Proxy] Setting x-user-id:', req.user.userId);
         proxyReq.setHeader('x-user-id', req.user.userId);
         proxyReq.setHeader('x-user-email', req.user.email);
       } else {
-        console.log('[Event Proxy] No req.user found for request:', req.method, req.path);
+        // console.log('[Event Proxy] No req.user found for request:', req.method, req.path);
       }
 
       // Re-stream the body if it was parsed by body-parser
@@ -39,7 +39,7 @@ router.use(
       }
     },
     onError: (_err, _req, res: any) => {
-      console.log("ERROR::::=======", _err)
+      // console.log("ERROR::::=======", _err)
       res.status(503).json({
         success: false,
         data: null,

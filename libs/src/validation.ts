@@ -16,7 +16,7 @@ export const validate = (schema: Joi.ObjectSchema) => {
       const errorMessage = error.details
         .map((detail) => detail.message)
         .join(', ');
-      console.log('Validation error:', errorMessage);
+      // console.log('Validation error:', errorMessage);
       fail(res, errorMessage, 422);
       return;
     }

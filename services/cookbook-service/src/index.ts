@@ -28,7 +28,7 @@ const MONGODB_URI = process.env.MONGODB_URI!;
 if (process.env.NODE_ENV !== 'production') {
   try {
     execSync(`lsof -ti:${PORT} | xargs kill -9`, { stdio: 'ignore' });
-    console.log(` Cleared port ${PORT} before starting server`);
+    // console.log(` Cleared port ${PORT} before starting server`);
   } catch {
     // ignore if port is free
   }
@@ -40,7 +40,9 @@ if (process.env.NODE_ENV !== 'production') {
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim()) : [],
+    origin: process.env.CORS_ORIGIN
+      ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim())
+      : [],
     credentials: true,
   })
 );
@@ -66,16 +68,23 @@ app.get('/health', (_req: Request, res: Response) => {
 });
 
 // Serve static files (PDF uploads) with proper headers for download
-app.use('/uploads', (req: Request, res: Response, next: NextFunction) => {
-  // Set headers for PDF files to enable download
-  if (req.path.endsWith('.pdf')) {
-    const filename = path.basename(req.path);
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
-  }
-  next();
-}, express.static(path.join(process.cwd(), 'uploads')));
+app.use(
+  '/uploads',
+  (req: Request, res: Response, next: NextFunction) => {
+    // Set headers for PDF files to enable download
+    if (req.path.endsWith('.pdf')) {
+      const filename = path.basename(req.path);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${filename}"`
+      );
+      res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
+    }
+    next();
+  },
+  express.static(path.join(process.cwd(), 'uploads'))
+);
 
 /* --------------------------------------------
    Routes

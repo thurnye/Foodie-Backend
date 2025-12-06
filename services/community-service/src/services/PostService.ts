@@ -57,7 +57,16 @@ class PostService {
    */
   async getAllPosts(filters: GetPostsFilters = {}): Promise<PostWithUser[]> {
     try {
-      const { groupId, authorId, search, tags, sort = 'newest', isPinned, page = 1, limit = 10 } = filters;
+      const {
+        groupId,
+        authorId,
+        search,
+        tags,
+        sort = 'newest',
+        isPinned,
+        page = 1,
+        limit = 10,
+      } = filters;
 
       let query: any = {};
 
@@ -110,7 +119,7 @@ class PostService {
         .limit(limit)
         .lean();
 
-        console.log('POST::', posts)
+      // console.log('POST::', posts)
 
       // Fetch user data for authors
       const postsWithUsers = await Promise.all(
@@ -162,7 +171,10 @@ class PostService {
   /**
    * Create a new post
    */
-  async createPost(userId: string, data: CreatePostData): Promise<PostWithUser> {
+  async createPost(
+    userId: string,
+    data: CreatePostData
+  ): Promise<PostWithUser> {
     try {
       const { groupId, title, content, media, tags } = data;
 
@@ -172,12 +184,12 @@ class PostService {
         throw Errors.notFound('Group not found');
       }
 
-      const isMember = group.members.some(m => m.user.toString() === userId);
+      const isMember = group.members.some((m) => m.user.toString() === userId);
       if (!isMember) {
         throw Errors.forbidden('You must be a member of the group to post');
       }
 
-      console.log(media)
+      // console.log(media)
 
       const post = await Post.create({
         group: groupId,
@@ -198,7 +210,7 @@ class PostService {
       const author = await fetchUserData(userId);
       const postWithUser = {
         ...createdPost!,
-        author: author || userId as any,
+        author: author || (userId as any),
       } as any as PostWithUser;
 
       logger.info('Post created', { postId: post._id, userId, groupId });
@@ -213,14 +225,18 @@ class PostService {
   /**
    * Update a post
    */
-  async updatePost(postId: string, userId: string, updates: UpdatePostData): Promise<PostWithUser> {
+  async updatePost(
+    postId: string,
+    userId: string,
+    updates: UpdatePostData
+  ): Promise<PostWithUser> {
     try {
       const post = await Post.findById(postId);
       if (!post) {
         throw Errors.notFound('Post not found');
       }
 
-      console.log('author:::', userId)
+      // console.log('author:::', userId)
 
       // Check if user is the author
       if (post.author.toString() !== userId) {
@@ -269,12 +285,14 @@ class PostService {
 
       // Check if user is the author or group admin
       const group = await Group.findById(post.group);
-      const member = group?.members.find(m => m.user.toString() === userId);
+      const member = group?.members.find((m) => m.user.toString() === userId);
       const isAuthor = post.author.toString() === userId;
       const isAdmin = member?.role === 'admin';
 
       if (!isAuthor && !isAdmin) {
-        throw Errors.forbidden('Only the post author or group admin can delete the post');
+        throw Errors.forbidden(
+          'Only the post author or group admin can delete the post'
+        );
       }
 
       // Delete all comments for this post
@@ -298,7 +316,11 @@ class PostService {
   /**
    * Vote on a post (upvote or downvote)
    */
-  async votePost(postId: string, userId: string, value: number): Promise<PostWithUser> {
+  async votePost(
+    postId: string,
+    userId: string,
+    value: number
+  ): Promise<PostWithUser> {
     try {
       if (value !== 1 && value !== -1) {
         throw Errors.badRequest('Vote value must be 1 or -1');
@@ -310,7 +332,9 @@ class PostService {
       }
 
       // Check if user already voted
-      const existingVoteIndex = post.votes.findIndex(v => v.user.toString() === userId);
+      const existingVoteIndex = post.votes.findIndex(
+        (v) => v.user.toString() === userId
+      );
 
       if (existingVoteIndex > -1) {
         // Update existing vote
@@ -325,7 +349,10 @@ class PostService {
       }
 
       // Recalculate vote count
-      post.voteCount = post.votes.reduce((sum: number, vote: any) => sum + vote.value, 0);
+      post.voteCount = post.votes.reduce(
+        (sum: number, vote: any) => sum + vote.value,
+        0
+      );
       await post.save();
 
       const updatedPost = await Post.findById(postId).lean();
@@ -356,10 +383,15 @@ class PostService {
         throw Errors.notFound('Post not found');
       }
 
-      const voteIndex = post.votes.findIndex(v => v.user.toString() === userId);
+      const voteIndex = post.votes.findIndex(
+        (v) => v.user.toString() === userId
+      );
       if (voteIndex > -1) {
         post.votes.splice(voteIndex, 1);
-        post.voteCount = post.votes.reduce((sum: number, vote: any) => sum + vote.value, 0);
+        post.voteCount = post.votes.reduce(
+          (sum: number, vote: any) => sum + vote.value,
+          0
+        );
         await post.save();
       }
 
@@ -384,9 +416,20 @@ class PostService {
   /**
    * React to a post
    */
-  async reactToPost(postId: string, userId: string, type: string): Promise<PostWithUser> {
+  async reactToPost(
+    postId: string,
+    userId: string,
+    type: string
+  ): Promise<PostWithUser> {
     try {
-      const validReactions: ReactionType[] = ['like', 'love', 'fire', 'laugh', 'sad', 'wow'];
+      const validReactions: ReactionType[] = [
+        'like',
+        'love',
+        'fire',
+        'laugh',
+        'sad',
+        'wow',
+      ];
       if (!validReactions.includes(type as ReactionType)) {
         throw Errors.badRequest('Invalid reaction type');
       }
@@ -397,7 +440,9 @@ class PostService {
       }
 
       // Check if user already reacted
-      const existingReactionIndex = post.reactions.findIndex(r => r.user.toString() === userId);
+      const existingReactionIndex = post.reactions.findIndex(
+        (r) => r.user.toString() === userId
+      );
 
       if (existingReactionIndex > -1) {
         // Update existing reaction
@@ -442,7 +487,9 @@ class PostService {
         throw Errors.notFound('Post not found');
       }
 
-      const reactionIndex = post.reactions.findIndex(r => r.user.toString() === userId);
+      const reactionIndex = post.reactions.findIndex(
+        (r) => r.user.toString() === userId
+      );
       if (reactionIndex > -1) {
         post.reactions.splice(reactionIndex, 1);
         post.reactionCount = post.reactions.length;
@@ -470,7 +517,9 @@ class PostService {
   /**
    * Share a post
    */
-  async sharePost(postId: string): Promise<{ message: string; shareCount: number }> {
+  async sharePost(
+    postId: string
+  ): Promise<{ message: string; shareCount: number }> {
     try {
       const post = await Post.findById(postId);
       if (!post) {
@@ -482,7 +531,10 @@ class PostService {
 
       logger.info('Post shared', { postId, shareCount: post.shareCount });
 
-      return { message: 'Post shared successfully', shareCount: post.shareCount };
+      return {
+        message: 'Post shared successfully',
+        shareCount: post.shareCount,
+      };
     } catch (error) {
       logger.error('Error sharing post', { error, postId });
       throw error;

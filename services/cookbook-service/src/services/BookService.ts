@@ -69,7 +69,7 @@ class BookService {
    */
   async createBook(userId: string, data: CreateBookData): Promise<IBook> {
     try {
-      console.log('📥 BookService.createBook called with:', {
+      // console.log('📥 BookService.createBook called with:', {
         bookId: data.bookId,
         cookbookId: data.cookbookId,
         recipeCount: data.recipeIds?.length
@@ -83,7 +83,7 @@ class BookService {
           isActive: true,
         });
 
-        console.log('🔍 Found existing book:', currentBook ? 'YES' : 'NO');
+        // console.log('🔍 Found existing book:', currentBook ? 'YES' : 'NO');
 
         // Verify the book belongs to the specified cookbook
         if (currentBook && currentBook.cookbook.toString() !== data.cookbookId) {
@@ -152,7 +152,7 @@ class BookService {
 
       // Add recipe pages if recipe IDs are provided
       if (data.recipeIds && data.recipeIds.length > 0) {
-        console.log(`📥 Adding ${data.recipeIds.length} recipe(s) to book`);
+        // console.log(`📥 Adding ${data.recipeIds.length} recipe(s) to book`);
 
         // Fetch all recipe data
         const recipeDataPromises = data.recipeIds.map((recipeId) =>
@@ -160,11 +160,11 @@ class BookService {
         );
         const recipesData = await Promise.all(recipeDataPromises);
 
-        console.log('📋 Fetched recipe data:', recipesData);
+        // console.log('📋 Fetched recipe data:', recipesData);
 
         // If updating existing book, append to existing recipes
         if (currentBook) {
-          console.log('📝 Updating existing book with new recipes');
+          // console.log('📝 Updating existing book with new recipes');
 
           // Get the highest position number from existing recipes
           const maxPosition = currentBook.recipe && currentBook.recipe.length > 0
@@ -201,13 +201,13 @@ class BookService {
           currentBook.markModified('recipe');
           await currentBook.save();
 
-          console.log(`✅ Updated book with ${recipesData.length} new recipe pages. Total recipes: ${currentBook.recipe?.length || 0}`);
+          // console.log(`✅ Updated book with ${recipesData.length} new recipe pages. Total recipes: ${currentBook.recipe?.length || 0}`);
 
           return currentBook;
         }
 
         // For new books, create recipe array
-        console.log('📘 Creating new book with recipe pages');
+        // console.log('📘 Creating new book with recipe pages');
         recipesData.forEach((recipeData, index) => {
           if (recipeData) {
             recipeArray.push({
@@ -411,7 +411,7 @@ class BookService {
 
       // Fetch author data from user-service
       const cookbook = book.cookbook as any;
-      console.log('📚 Cookbook data before fetching author:', {
+      // console.log('📚 Cookbook data before fetching author:', {
         cookbookId: cookbook?._id,
         authorId: cookbook?.author,
         authorType: typeof cookbook?.author,
@@ -419,7 +419,7 @@ class BookService {
 
       if (cookbook && cookbook.author) {
         const authorData = await fetchUserData(cookbook.author.toString());
-        console.log('👤 Author data fetched from user-service:', authorData);
+        // console.log('👤 Author data fetched from user-service:', authorData);
 
         if (authorData) {
           // Convert the cookbook to a plain object to allow modification
@@ -427,13 +427,13 @@ class BookService {
           if (bookObj.cookbook && typeof bookObj.cookbook === 'object') {
             (bookObj.cookbook as any).author = authorData;
           }
-          console.log('✅ Author data attached to cookbook:', (bookObj.cookbook as any)?.author);
+          // console.log('✅ Author data attached to cookbook:', (bookObj.cookbook as any)?.author);
           return bookObj as IBook;
         } else {
-          console.log('❌ No author data returned from user-service');
+          // console.log('❌ No author data returned from user-service');
         }
       } else {
-        console.log('❌ No cookbook or author found in book');
+        // console.log('❌ No cookbook or author found in book');
       }
 
       return book;
@@ -554,7 +554,7 @@ class BookService {
 
       // Update layout (for backward compatibility with old schema)
       if (updates.layout !== undefined) {
-        console.log(
+        // console.log(
           `📐 [OLD SCHEMA] Updating book layout: ${(book as any).layout} -> ${
             updates.layout
           }`
@@ -819,7 +819,7 @@ class BookService {
       // Ensure all required pages exist (for backward compatibility)
       await this.ensureRequiredPages(book);
 
-      console.log('🔧 BEFORE UPDATE:', {
+      // console.log('🔧 BEFORE UPDATE:', {
         bookId,
         pageId,
         pageType: updates.pageType,
@@ -833,11 +833,11 @@ class BookService {
 
       // Update recipe page
       if (!pageType || pageType === PageType.RECIPE) {
-        console.log("Book's recipe pages:", book.recipe);
+        // console.log("Book's recipe pages:", book.recipe);
 
         // Search by pageId (e.g., "recipe-691f74d1fda9fce27b9f1e66")
         const recipePage = book.recipe?.find((r:any) => r.pageId === pageId);
-        console.log('🔍 Recipe page found:', recipePage);
+        // console.log('🔍 Recipe page found:', recipePage);
 
         if (recipePage) {
           if (updates.position !== undefined) recipePage.position = updates.position;

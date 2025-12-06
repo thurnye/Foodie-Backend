@@ -36,7 +36,7 @@ class TeamService {
    */
   async getUserTeams(userId: string): Promise<any[]> {
     try {
-      console.log("userId:::", userId)
+      // console.log("userId:::", userId)
       const teams = await Team.find({ members: userId })
         .populate('channels')
         .sort({ createdAt: -1 })
@@ -59,9 +59,7 @@ class TeamService {
    */
   async getTeamById(teamId: string, userId: string): Promise<any> {
     try {
-      const team = await Team.findById(teamId)
-        .populate('channels')
-        .lean();
+      const team = await Team.findById(teamId).populate('channels').lean();
 
       if (!team) throw Errors.notFound('Team not found');
 
@@ -69,7 +67,8 @@ class TeamService {
       const isMember = team.members.some(
         (member: any) => member.toString() === userId
       );
-      if (!isMember) throw Errors.forbidden('You are not a member of this team');
+      if (!isMember)
+        throw Errors.forbidden('You are not a member of this team');
 
       // Populate user data
       const teamWithUserData = await this.populateTeamUserData(team);
@@ -244,9 +243,7 @@ class TeamService {
         throw Errors.badRequest('Cannot remove the team owner');
       }
 
-      team.members = team.members.filter(
-        (m) => m.toString() !== memberUserId
-      );
+      team.members = team.members.filter((m) => m.toString() !== memberUserId);
       await team.save();
 
       // Remove the member from all channels in the team
@@ -286,7 +283,7 @@ class TeamService {
 
       // Fetch user by email from User Service
       const user = await fetchUserByEmail(email);
-      console.log('USER:::', user)
+      // console.log('USER:::', user)
       if (!user) {
         throw Errors.notFound(`User with email ${email} not found`);
       }

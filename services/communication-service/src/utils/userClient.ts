@@ -39,7 +39,9 @@ export async function fetchUserData(userId: string): Promise<UserData | null> {
 /**
  * Fetch user data from user-service by email
  */
-export async function fetchUserByEmail(email: string): Promise<UserData | null> {
+export async function fetchUserByEmail(
+  email: string
+): Promise<UserData | null> {
   try {
     const response = await axios.get(`${USER_SERVICE_URL}/email/${email}`, {
       timeout: 5000,

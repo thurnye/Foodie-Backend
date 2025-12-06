@@ -13,7 +13,7 @@ const book_types_1 = require("../Types/book.types");
 class BookService {
     async createBook(userId, data) {
         try {
-            console.log('📥 BookService.createBook called with:', {
+            // console.log('📥 BookService.createBook called with:', {
                 bookId: data.bookId,
                 cookbookId: data.cookbookId,
                 recipeCount: data.recipeIds?.length
@@ -24,7 +24,7 @@ class BookService {
                     _id: data.bookId,
                     isActive: true,
                 });
-                console.log('🔍 Found existing book:', currentBook ? 'YES' : 'NO');
+                // console.log('🔍 Found existing book:', currentBook ? 'YES' : 'NO');
                 if (currentBook && currentBook.cookbook.toString() !== data.cookbookId) {
                     throw libs_1.Errors.badRequest('Book does not belong to the specified cookbook');
                 }
@@ -75,12 +75,12 @@ class BookService {
             };
             let recipeArray = [];
             if (data.recipeIds && data.recipeIds.length > 0) {
-                console.log(`📥 Adding ${data.recipeIds.length} recipe(s) to book`);
+                // console.log(`📥 Adding ${data.recipeIds.length} recipe(s) to book`);
                 const recipeDataPromises = data.recipeIds.map((recipeId) => (0, recipeClient_1.fetchRecipeData)(recipeId));
                 const recipesData = await Promise.all(recipeDataPromises);
-                console.log('📋 Fetched recipe data:', recipesData);
+                // console.log('📋 Fetched recipe data:', recipesData);
                 if (currentBook) {
-                    console.log('📝 Updating existing book with new recipes');
+                    // console.log('📝 Updating existing book with new recipes');
                     const maxPosition = currentBook.recipe && currentBook.recipe.length > 0
                         ? Math.max(...currentBook.recipe.map((r) => r.position))
                         : 3;
@@ -108,10 +108,10 @@ class BookService {
                     }
                     currentBook.markModified('recipe');
                     await currentBook.save();
-                    console.log(`✅ Updated book with ${recipesData.length} new recipe pages. Total recipes: ${currentBook.recipe?.length || 0}`);
+                    // console.log(`✅ Updated book with ${recipesData.length} new recipe pages. Total recipes: ${currentBook.recipe?.length || 0}`);
                     return currentBook;
                 }
-                console.log('📘 Creating new book with recipe pages');
+                // console.log('📘 Creating new book with recipe pages');
                 recipesData.forEach((recipeData, index) => {
                     if (recipeData) {
                         recipeArray.push({
@@ -270,28 +270,28 @@ class BookService {
             }
             await this.ensureRequiredPages(book);
             const cookbook = book.cookbook;
-            console.log('📚 Cookbook data before fetching author:', {
+            // console.log('📚 Cookbook data before fetching author:', {
                 cookbookId: cookbook?._id,
                 authorId: cookbook?.author,
                 authorType: typeof cookbook?.author,
             });
             if (cookbook && cookbook.author) {
                 const authorData = await (0, userClient_1.fetchUserData)(cookbook.author.toString());
-                console.log('👤 Author data fetched from user-service:', authorData);
+                // console.log('👤 Author data fetched from user-service:', authorData);
                 if (authorData) {
                     const bookObj = book.toObject();
                     if (bookObj.cookbook && typeof bookObj.cookbook === 'object') {
                         bookObj.cookbook.author = authorData;
                     }
-                    console.log('✅ Author data attached to cookbook:', bookObj.cookbook?.author);
+                    // console.log('✅ Author data attached to cookbook:', bookObj.cookbook?.author);
                     return bookObj;
                 }
                 else {
-                    console.log('❌ No author data returned from user-service');
+                    // console.log('❌ No author data returned from user-service');
                 }
             }
             else {
-                console.log('❌ No cookbook or author found in book');
+                // console.log('❌ No cookbook or author found in book');
             }
             return book;
         }
@@ -366,7 +366,7 @@ class BookService {
             if (updates.isPublic !== undefined)
                 book.isPublic = updates.isPublic;
             if (updates.layout !== undefined) {
-                console.log(`📐 [OLD SCHEMA] Updating book layout: ${book.layout} -> ${updates.layout}`);
+                // console.log(`📐 [OLD SCHEMA] Updating book layout: ${book.layout} -> ${updates.layout}`);
                 book.layout = updates.layout;
             }
             if (updates.pages !== undefined) {
@@ -555,7 +555,7 @@ class BookService {
                 throw libs_1.Errors.forbidden('You can only update pages in your own books');
             }
             await this.ensureRequiredPages(book);
-            console.log('🔧 BEFORE UPDATE:', {
+            // console.log('🔧 BEFORE UPDATE:', {
                 bookId,
                 pageId,
                 pageType: updates.pageType,
@@ -564,9 +564,9 @@ class BookService {
             let updated = false;
             const pageType = updates.pageType;
             if (!pageType || pageType === book_types_1.PageType.RECIPE) {
-                console.log("Book's recipe pages:", book.recipe);
+                // console.log("Book's recipe pages:", book.recipe);
                 const recipePage = book.recipe?.find((r) => r.pageId === pageId);
-                console.log('🔍 Recipe page found:', recipePage);
+                // console.log('🔍 Recipe page found:', recipePage);
                 if (recipePage) {
                     if (updates.position !== undefined)
                         recipePage.position = updates.position;

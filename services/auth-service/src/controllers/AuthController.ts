@@ -53,14 +53,18 @@ export const register = async (
       emailVerificationExpires,
     });
 
-    logger.info('User registered', { userId: user._id, email: user.email, _id: user._id });
+    logger.info('User registered', {
+      userId: user._id,
+      email: user.email,
+      _id: user._id,
+    });
 
     // TODO: Send verification email
 
     success(
       res,
       {
-         id: user._id,
+        id: user._id,
         email: user.email,
         username: user.username,
         firstName: user.firstName,
@@ -88,7 +92,7 @@ export const login = async (
 ): Promise<void> => {
   try {
     const { email, password } = req.body;
-    console.log('Login attempt for email:', { email, password });
+    // console.log('Login attempt for email:', { email, password });
 
     // Find user with password field
     const user = await User.findOne({ email }).select(
@@ -205,7 +209,9 @@ export const refresh = async (
 
     logger.info('Token refreshed', { userId: user._id });
 
-    success(res, {
+    success(
+      res,
+      {
         id: user._id,
         email: user.email,
         username: user.username,
@@ -215,7 +221,9 @@ export const refresh = async (
         avatar: user.avatar,
         role: user.role,
         accessToken,
-      }, 'Token refreshed successfully');
+      },
+      'Token refreshed successfully'
+    );
   } catch (error) {
     logger.error('Token refresh error', { error });
     fail(res, 'Invalid or expired refresh token', 401);
@@ -258,8 +266,6 @@ export const logout = async (
     success(res, null, 'Logout successful');
   }
 };
-
-
 
 /**
  * Verify email
@@ -446,8 +452,8 @@ export const changePassword = async (
     const userId = req.headers['x-user-id'] as string;
     const { oldPassword, newPassword } = req.body;
 
-    console.log("CHANGE PASSWORD BODY:::", req.body)
-    console.log("CHANGE PASSWORD BODY userId:::", userId)
+    // console.log("CHANGE PASSWORD BODY:::", req.body)
+    // console.log("CHANGE PASSWORD BODY userId:::", userId)
 
     if (!userId) {
       fail(res, 'Unauthorized', 401);

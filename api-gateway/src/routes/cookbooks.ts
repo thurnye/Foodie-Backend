@@ -26,10 +26,13 @@ router.use(
         proxyReq.setHeader('x-user-email', req.user.email);
       }
 
-
-
       // Re-stream parsed body for POST/PUT/PATCH requests
-      if (req.body && (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH')) {
+      if (
+        req.body &&
+        (req.method === 'POST' ||
+          req.method === 'PUT' ||
+          req.method === 'PATCH')
+      ) {
         const bodyData = JSON.stringify(req.body);
         proxyReq.setHeader('Content-Type', 'application/json');
         proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
@@ -37,7 +40,7 @@ router.use(
       }
     },
     onError: (_err, _req, res: any) => {
-      console.log('ERROR:::', _err)
+      // console.log('ERROR:::', _err)
       res.status(503).json({
         success: false,
         data: null,

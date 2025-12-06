@@ -9,14 +9,22 @@ import { getPaginationMeta } from '../utils/filters';
  * If _id is provided in body, updates existing recipe
  * If _id is not provided, creates new recipe
  */
-export const addRecipe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const addRecipe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const recipeData = req.body;
 
     // Get userId from authenticated user (JWT token)
     const userId = (req as any).user?.userId;
     if (!userId) {
-      fail(res, 'Authentication required. Please log in to create or update a recipe.', 401);
+      fail(
+        res,
+        'Authentication required. Please log in to create or update a recipe.',
+        401
+      );
       return;
     }
 
@@ -28,7 +36,11 @@ export const addRecipe = async (req: Request, res: Response, next: NextFunction)
       const recipeId = recipeData._id;
       const { _id, ...updates } = recipeData; // Remove _id from updates
 
-      const recipe = await RecipeService.updateRecipe(recipeId, userId, updates);
+      const recipe = await RecipeService.updateRecipe(
+        recipeId,
+        userId,
+        updates
+      );
 
       logger.info('Recipe updated', { recipeId: recipe._id, userId });
 
@@ -68,12 +80,16 @@ export const addRecipe = async (req: Request, res: Response, next: NextFunction)
 /**
  * List recipes with filters and pagination
  */
-export const listRecipes = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const listRecipes = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const queryParams = req.body; // POST body for filters
-    console.log('Query Params:', queryParams);
+    // console.log('Query Params:', queryParams);
 
-    console.log('GETTING RECIPES:========================')
+    // console.log('GETTING RECIPES:========================')
 
     const { recipes, total } = await RecipeService.getRecipes(queryParams);
 
@@ -91,7 +107,11 @@ export const listRecipes = async (req: Request, res: Response, next: NextFunctio
 /**
  * Query recipes (advanced search)
  */
-export const queryRecipes = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const queryRecipes = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const searchParams = req.body;
 
@@ -111,13 +131,23 @@ export const queryRecipes = async (req: Request, res: Response, next: NextFuncti
 /**
  * Get recipes by user
  */
-export const getRecipesByUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getRecipesByUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { userId } = req.params;
-    const page = parseInt(req.body.page) || parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.body.limit) || parseInt(req.query.limit as string) || 12;
+    const page =
+      parseInt(req.body.page) || parseInt(req.query.page as string) || 1;
+    const limit =
+      parseInt(req.body.limit) || parseInt(req.query.limit as string) || 12;
 
-    const { recipes, total } = await RecipeService.getRecipesByUser(userId, page, limit);
+    const { recipes, total } = await RecipeService.getRecipesByUser(
+      userId,
+      page,
+      limit
+    );
 
     const meta = getPaginationMeta(page, limit, total);
 
@@ -132,7 +162,11 @@ export const getRecipesByUser = async (req: Request, res: Response, next: NextFu
  * Get current user's recipes (authenticated)
  * Extracts user ID from JWT token
  */
-export const getMyRecipes = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getMyRecipes = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const userId = (req as any).user?.userId;
 
@@ -154,7 +188,11 @@ export const getMyRecipes = async (req: Request, res: Response, next: NextFuncti
 /**
  * Get recipe by ID
  */
-export const getRecipeById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getRecipeById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -170,7 +208,11 @@ export const getRecipeById = async (req: Request, res: Response, next: NextFunct
 /**
  * Update recipe
  */
-export const updateRecipe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const updateRecipe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { id } = req.params;
     const userId = (req as any).user?.userId;
@@ -195,7 +237,11 @@ export const updateRecipe = async (req: Request, res: Response, next: NextFuncti
 /**
  * Delete recipe
  */
-export const deleteRecipe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const deleteRecipe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { id } = req.params;
     const userId = (req as any).user?.userId;

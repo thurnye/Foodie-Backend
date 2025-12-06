@@ -15,14 +15,14 @@ export class RecipeService {
 
     // Extract unique author IDs
     const authorIds = recipes
-      .map(recipe => recipe.author?.toString())
+      .map((recipe) => recipe.author?.toString())
       .filter((id): id is string => !!id);
 
     // Fetch all author data in batch
     const authorsMap = await fetchUsersData(authorIds);
 
     // Add author data to recipes
-    return recipes.map(recipe => ({
+    return recipes.map((recipe) => ({
       ...recipe,
       author: authorsMap.get(recipe.author?.toString()) || recipe.author,
     }));
@@ -30,7 +30,10 @@ export class RecipeService {
   /**
    * Create a new recipe
    */
-  async createRecipe(userId: string, recipeData: Partial<IRecipe>): Promise<IRecipe> {
+  async createRecipe(
+    userId: string,
+    recipeData: Partial<IRecipe>
+  ): Promise<IRecipe> {
     const recipe = await Recipe.create({
       ...recipeData,
       author: userId,
@@ -42,7 +45,10 @@ export class RecipeService {
    * Get recipe by ID
    */
   async getRecipeById(recipeId: string): Promise<IRecipe> {
-    const recipe = await Recipe.findOne({ _id: recipeId, isActive: true }).lean();
+    const recipe = await Recipe.findOne({
+      _id: recipeId,
+      isActive: true,
+    }).lean();
 
     if (!recipe) {
       throw Errors.notFound('Recipe not found');
@@ -57,22 +63,26 @@ export class RecipeService {
   /**
    * Get recipes with filters and pagination
    */
-  async getRecipes(queryParams: any): Promise<{ recipes: IRecipe[]; total: number }> {
+  async getRecipes(
+    queryParams: any
+  ): Promise<{ recipes: IRecipe[]; total: number }> {
     logger.info('Query Params:', queryParams);
 
     const page = parseInt(queryParams.page) || 1;
     const limit = parseInt(queryParams.limit) || 12;
     const skip = (page - 1) * limit;
-    
-    console.log('♦️ Pagination - Page:', page, 'Limit:', limit, 'Skip:', skip);
+
+    // console.log('♦️ Pagination - Page:', page, 'Limit:', limit, 'Skip:', skip);
 
     const filter = { ...buildRecipeFilter(queryParams), isActive: true };
     const sort = buildSortOptions(queryParams.sortBy, queryParams.sortOrder);
-    console.log('♦️ Filter:', filter);
+    // console.log('♦️ Filter:', filter);
 
     const [recipes, total] = await Promise.all([
       Recipe.find(filter)
-        .select('_id details.thumbnail basicInfo.recipeName basicInfo.level basicInfo.duration author averageRating totalReviews')
+        .select(
+          '_id details.thumbnail basicInfo.recipeName basicInfo.level basicInfo.duration author averageRating totalReviews'
+        )
         .sort(sort)
         .skip(skip)
         .limit(limit)
@@ -80,13 +90,14 @@ export class RecipeService {
       Recipe.countDocuments(filter),
     ]);
 
+    // const totalDoc =
 
-    // const totalDoc = 
-
-    console.log('Recipes fetched:',  total);
+    // console.log('Recipes fetched:',  total);
 
     // Populate author data
     const populatedRecipes = await this.populateAuthors(recipes);
+
+    // console.log("AUTHORS:::", populatedRecipes[0])
 
     return { recipes: populatedRecipes as unknown as IRecipe[], total };
   }
@@ -94,7 +105,11 @@ export class RecipeService {
   /**
    * Get recipes by user ID
    */
-  async getRecipesByUser(userId: string, page = 1, limit = 12): Promise<{ recipes: IRecipe[]; total: number }> {
+  async getRecipesByUser(
+    userId: string,
+    page = 1,
+    limit = 12
+  ): Promise<{ recipes: IRecipe[]; total: number }> {
     const skip = (page - 1) * limit;
 
     const [recipes, total] = await Promise.all([
@@ -115,7 +130,11 @@ export class RecipeService {
   /**
    * Update recipe
    */
-  async updateRecipe(recipeId: string, userId: string, updates: Partial<IRecipe>): Promise<IRecipe> {
+  async updateRecipe(
+    recipeId: string,
+    userId: string,
+    updates: Partial<IRecipe>
+  ): Promise<IRecipe> {
     const recipe = await Recipe.findOne({ _id: recipeId, isActive: true });
 
     if (!recipe) {
@@ -167,7 +186,11 @@ export class RecipeService {
   /**
    * Update recipe average rating
    */
-  async updateRecipeRating(recipeId: string, averageRating: number, totalReviews: number): Promise<void> {
+  async updateRecipeRating(
+    recipeId: string,
+    averageRating: number,
+    totalReviews: number
+  ): Promise<void> {
     await Recipe.findOneAndUpdate(
       { _id: recipeId, isActive: true },
       { averageRating, totalReviews }
@@ -177,7 +200,9 @@ export class RecipeService {
   /**
    * Search recipes (advanced query)
    */
-  async searchRecipes(searchParams: any): Promise<{ recipes: IRecipe[]; total: number }> {
+  async searchRecipes(
+    searchParams: any
+  ): Promise<{ recipes: IRecipe[]; total: number }> {
     return this.getRecipes(searchParams);
   }
 }
