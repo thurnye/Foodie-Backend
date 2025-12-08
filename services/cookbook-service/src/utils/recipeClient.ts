@@ -12,12 +12,12 @@ export async function fetchRecipeData(
 ): Promise<IRecipePage | null> {
   try {
     console.log('RECIPE_SERVICE_URL:::', RECIPE_SERVICE_URL)
-    const response = await axios.get(`${RECIPE_SERVICE_URL}/${recipeId}`, {
+    const response = await axios.get(`${RECIPE_SERVICE_URL}/api/recipe/${recipeId}`, {
       timeout: 5000,
     });
 
     if (response.data.success && response.data.data) {
-      console.log('Fetching RECIPE data from recipe-service...', response.data.data?.BasicInfo.recipeName);
+      console.log('Fetching RECIPE data from recipe-service...', response.data.data);
       const recipe = response.data.data;
       console.log('Fetched RECIPE data Ends====================:');
       return recipe;

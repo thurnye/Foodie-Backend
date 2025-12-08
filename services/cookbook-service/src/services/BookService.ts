@@ -69,13 +69,14 @@ class BookService {
    */
   async createBook(userId: string, data: CreateBookData): Promise<IBook> {
     try {
-      // console.log('📥 BookService.createBook called with:', {
-      //   bookId: data.bookId,
-      //   cookbookId: data.cookbookId,
-      //   recipeCount: data.recipeIds?.length
-      // });
+      console.log('📥 BookService.createBook called with:', {
+        bookId: data.bookId,
+        cookbookId: data.cookbookId,
+        recipeCount: data.recipeIds
+      });
 
       // Check if we're updating an existing book
+      
       let currentBook = null;
       if (data.bookId) {
         currentBook = await Book.findOne({
