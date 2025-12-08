@@ -6,19 +6,20 @@ const RECIPE_SERVICE_URL = process.env.RECIPE_SERVICE_URL!;
 
 /**
  * Fetch recipe data from recipe-service
- */
+*/
 export async function fetchRecipeData(
   recipeId: string
 ): Promise<IRecipePage | null> {
   try {
+    console.log('RECIPE_SERVICE_URL:::', RECIPE_SERVICE_URL)
     const response = await axios.get(`${RECIPE_SERVICE_URL}/${recipeId}`, {
       timeout: 5000,
     });
 
     if (response.data.success && response.data.data) {
-      // console.log('Fetching RECIPE data from recipe-service...', response.data.data);
+      console.log('Fetching RECIPE data from recipe-service...', response.data.data?.BasicInfo.recipeName);
       const recipe = response.data.data;
-      // console.log('Fetched RECIPE data====================:', recipe);
+      console.log('Fetched RECIPE data Ends====================:');
       return recipe;
     }
 

@@ -6,11 +6,12 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { logger, mapErrorToResponse } from '@foodie/libs';
 
+// Load environment variables
+dotenv.config();
+
 // Import routes
 import authRouter from './routes/auth';
 
-// Load environment variables
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;

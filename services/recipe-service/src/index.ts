@@ -1,8 +1,12 @@
+import dotenv from 'dotenv';
+
+// Load environment variables FIRST, before any other imports
+dotenv.config();
+
 import express, { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import helmet from 'helmet';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { execSync } from 'child_process';
 import { logger, mapErrorToResponse } from '@foodie/libs';
 import { healthCheck } from './health';
@@ -13,9 +17,6 @@ import reviewRoutes from './routes/review.routes';
 
 // Import middleware
 import { userContextMiddleware } from './middleware/userContext';
-
-// Load environment variables
-dotenv.config();
 // console.log('RECIPE HIT=======================')
 
 const app = express();

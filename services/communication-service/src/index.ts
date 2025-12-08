@@ -6,11 +6,13 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
 import { logger } from '@foodie/libs';
-import routes from './routes';
-import { initializeWebSocket } from './socket';
 
 // Load environment variables
 dotenv.config();
+
+import routes from './routes';
+import { initializeWebSocket } from './socket';
+
 
 const app: Application = express();
 const httpServer = http.createServer(app);

@@ -5,11 +5,12 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { execSync } from 'child_process';
 import { logger, mapErrorToResponse } from '@foodie/libs';
-import eventRoutes from './routes/event.routes';
 import { userContextMiddleware } from './middleware/userContext';
 
 // Load environment variables
 dotenv.config();
+
+import eventRoutes from './routes/event.routes';
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3006;

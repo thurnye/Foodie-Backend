@@ -160,7 +160,7 @@ class BookService {
         );
         const recipesData = await Promise.all(recipeDataPromises);
 
-        // console.log('📋 Fetched recipe data:', recipesData);
+        console.log('📋 Fetched recipe data:', recipesData);
 
         // If updating existing book, append to existing recipes
         if (currentBook) {

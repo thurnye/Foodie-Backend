@@ -5,10 +5,11 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { logger, mapErrorToResponse } from '@foodie/libs';
 import { healthCheck } from './health';
-import profileRoutes from './routes/profile.route';
 
 // Load environment variables
 dotenv.config();
+
+import profileRoutes from './routes/profile.route';
 
 const app = express();
 const PORT = process.env.PORT || 3002;

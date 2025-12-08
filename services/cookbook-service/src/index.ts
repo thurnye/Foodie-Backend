@@ -7,6 +7,9 @@ import path from 'path';
 import { execSync } from 'child_process';
 import { logger, mapErrorToResponse } from '@foodie/libs';
 
+// Load environment variables
+dotenv.config();
+
 // Import routes
 import cookbookRoutes from './routes/cookbook.routes';
 import bookRoutes from './routes/book.routes';
@@ -15,8 +18,6 @@ import pdfRoutes from './routes/pdf.routes';
 // Import middleware
 import { userContextMiddleware } from './middleware/userContext';
 
-// Load environment variables
-dotenv.config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3004;
